@@ -1,0 +1,561 @@
+import { useState } from "react";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import AuthGateway from "./components/Component01_AuthGateway";
+import KineticPricingMatrix from "./components/Component02_PricingMatrix";
+import WaitlistTeaser from "./components/Component03_WaitlistTeaser";
+import BentoProfile from "./components/Component04_BentoProfile";
+import StepConfigurator from "./components/Component05_StepConfigurator";
+
+// Raw code imports for previewer
+import AuthGatewayCode from "./components/Component01_AuthGateway/AuthGateway.jsx?raw";
+import KineticPricingMatrixCode from "./components/Component02_PricingMatrix/PricingMatrix.jsx?raw";
+import WaitlistTeaserCode from "./components/Component03_WaitlistTeaser/WaitlistTeaser.jsx?raw";
+import BentoProfileCode from "./components/Component04_BentoProfile/BentoProfile.jsx?raw";
+import StepConfiguratorCode from "./components/Component05_StepConfigurator/StepConfigurator.jsx?raw";
+
+/* ═══════════════════════════════════════════════════════════
+   LIGHTWEIGHT JSX REGEX SYNTAX HIGHLIGHTER
+   Colorizes JS, JSX tags, classes, and strings safely.
+═══════════════════════════════════════════════════════════ */
+function highlightJSX(src) {
+  if (!src) return "";
+  
+  // Escape HTML tags to prevent rendering glitches
+  let html = src
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+    
+  const comments = [];
+  const strings = [];
+  
+  // 1. Extract block comments
+  html = html.replace(/\/\*[\s\S]*?\*\//g, (m) => {
+    comments.push(`<span style="color: rgba(255,255,255,0.3)">${m}</span>`);
+    return `__COMMENT_PLACEHOLDER_${comments.length - 1}__`;
+  });
+  
+  // 2. Extract line comments
+  html = html.replace(/\/\/.*/g, (m) => {
+    comments.push(`<span style="color: rgba(255,255,255,0.3)">${m}</span>`);
+    return `__COMMENT_PLACEHOLDER_${comments.length - 1}__`;
+  });
+
+  // 3. Extract template literals, double quotes, and single quotes
+  html = html.replace(/("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`[\s\S]*?`)/g, (m) => {
+    strings.push(`<span style="color: #a5d6ff">${m}</span>`);
+    return `__STRING_PLACEHOLDER_${strings.length - 1}__`;
+  });
+
+  // 4. Keywords
+  html = html.replace(/\b(import|export|default|from|const|let|var|function|return|if|else|for|while|do|switch|case|break|continue|try|catch|finally|throw|new|this|typeof|instanceof|class|extends|await|async|yield|import|export|default|null|undefined|true|false)\b/g, '<span style="color: #ff7b72">$1</span>');
+
+  // 5. Functions/Methods definition or call
+  html = html.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)(?=\s*\()/g, '<span style="color: #d2a6ff">$1</span>');
+
+  // 6. HTML/JSX custom components (starts with uppercase)
+  html = html.replace(/(&lt;\/?[A-Z][a-zA-Z0-9_]*|&lt;[A-Z][a-zA-Z0-9_]*)/g, '<span style="color: #ff7b72; font-weight: bold;">$1</span>');
+  
+  // 7. HTML/JSX standard elements (lowercase)
+  html = html.replace(/(&lt;\/?[a-z][a-zA-Z0-9_]*|&lt;[a-z][a-zA-Z0-9_]*)/g, '<span style="color: #7ee787">$1</span>');
+
+  // 8. JSX props/attributes
+  html = html.replace(/([a-zA-Z0-9_-]+)(?=\s*=\s*\{|(?:\s*=\s*(?:__STRING_PLACEHOLDER|\b)))/g, '<span style="color: #ffb86c; font-style: italic;">$1</span>');
+
+  // 9. Re-inject strings
+  strings.forEach((str, idx) => {
+    html = html.replace(`__STRING_PLACEHOLDER_${idx}__`, str);
+  });
+
+  // 10. Re-inject comments
+  comments.forEach((com, idx) => {
+    html = html.replace(`__COMMENT_PLACEHOLDER_${idx}__`, com);
+  });
+
+  return html;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   COMPONENT REGISTRY
+   → Add each new component here as we build them.
+   → Access individually: http://localhost:5173/preview/01
+   → Access showcase:     http://localhost:5173/
+═══════════════════════════════════════════════════════════ */
+export const COMPONENTS = [
+  {
+    id: "01",
+    slug: "01",
+    name: "Floating Auth Gateway",
+    description: "Login & Signup — glassmorphic 2.5D card, subtle parallax tilt, 3D flip",
+    tags: ["Auth", "Forms", "Glassmorphism"],
+    component: AuthGateway,
+    code: AuthGatewayCode,
+  },
+  {
+    id: "02",
+    slug: "02",
+    name: "Kinetic Pricing Matrix",
+    description: "3-tier pricing — 2.5D depth cards, cascade mount, hover lift, shimmer CTA",
+    tags: ["Pricing", "Cards", "E-commerce"],
+    component: KineticPricingMatrix,
+    code: KineticPricingMatrixCode,
+  },
+  {
+    id: "03",
+    slug: "03",
+    name: "Layered Waitlist Teaser",
+    description: "Coming Soon waitlist — 1px crisp layered card, drifting blurred 2D color orbs, 5-theme accent palette",
+    tags: ["Waitlist", "Teaser", "Glow Orbs"],
+    component: WaitlistTeaser,
+    code: WaitlistTeaserCode,
+  },
+  {
+    id: "04",
+    slug: "04",
+    name: "Crisp Bento User Profile",
+    description: "Dashboard layout — asymmetric bento grid, 2.5D separation borders, Appearance customizer, active states calibration",
+    tags: ["Dashboard", "Bento Grid", "Profile"],
+    component: BentoProfile,
+    code: BentoProfileCode,
+  },
+  {
+    id: "05",
+    slug: "05",
+    name: "Sliding Configurator",
+    description: "Checkout form — 2D/2.5D overlapping cards, header theme switcher, horizontal sliding scale transitions",
+    tags: ["Configurator", "Multi-Step", "AnimatePresence"],
+    component: StepConfigurator,
+    code: StepConfiguratorCode,
+  },
+];
+
+/* ═══════════════════════════════════════════════════════════
+   PREVIEW ROUTE — single component, full screen, no chrome
+   URL: /preview/01  /preview/02  …
+   
+   This is how you test each component individually!
+═══════════════════════════════════════════════════════════ */
+function PreviewRoute() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const slug = location.pathname.replace("/preview/", "").trim();
+  const entry = COMPONENTS.find((c) => c.slug === slug);
+  const [codeOpen, setCodeOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  if (!entry) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center"
+        style={{ background: "#060810" }}>
+        <p className="text-2xl font-black text-white mb-2">Component not found</p>
+        <p className="text-sm mb-6" style={{ color: "rgba(200,215,255,0.4)" }}>
+          No component with slug "{slug}"
+        </p>
+        <button onClick={() => navigate("/")}
+          className="px-5 py-2.5 rounded-xl text-sm font-bold cursor-pointer"
+          style={{ background: "rgba(0,229,255,0.15)", border: "1px solid rgba(0,229,255,0.3)", color: "#00E5FF" }}>
+          ← Back to Showcase
+        </button>
+      </div>
+    );
+  }
+
+  const Comp = entry.component;
+
+  const handleCopy = () => {
+    if (entry.code) {
+      navigator.clipboard.writeText(entry.code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <div className="relative min-h-screen overflow-x-hidden">
+      {/* Floating back button */}
+      <motion.button
+        initial={{ opacity: 0, x: -16 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.4, duration: 0.4 }}
+        onClick={() => navigate("/")}
+        whileHover={{ x: -3, scale: 1.03 }}
+        whileTap={{ scale: 0.97 }}
+        className="fixed top-4 left-4 z-[999] flex items-center gap-2 px-3.5 py-2 rounded-xl
+          text-[11px] font-bold tracking-wide cursor-pointer"
+        style={{
+          background: "rgba(8,10,22,0.9)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          color: "rgba(200,215,255,0.7)",
+          backdropFilter: "blur(16px)",
+        }}
+      >
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Showcase
+      </motion.button>
+
+      {/* Controls row */}
+      <div className="fixed top-4 right-4 z-[999] flex items-center gap-2">
+        {/* View Code Button */}
+        {entry.code && (
+          <motion.button
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4, duration: 0.4 }}
+            onClick={() => setCodeOpen((v) => !v)}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[11px] font-bold cursor-pointer"
+            style={{
+              background: "rgba(8,10,22,0.9)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: codeOpen ? "#00E5FF" : "rgba(200,215,255,0.7)",
+              backdropFilter: "blur(16px)",
+            }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <polyline points="16 18 22 12 16 6"/>
+              <polyline points="8 6 2 12 8 18"/>
+            </svg>
+            {codeOpen ? "Hide Code" : "View Code"}
+          </motion.button>
+        )}
+
+        {/* Component ID badge */}
+        <motion.div
+          initial={{ opacity: 0, x: 16 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.4, duration: 0.4 }}
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-[11px] font-bold"
+          style={{
+            background: "rgba(8,10,22,0.9)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            color: "rgba(200,215,255,0.5)",
+            backdropFilter: "blur(16px)",
+          }}
+        >
+          <span className="font-mono" style={{ color: "#00E5FF" }}>#{entry.id}</span>
+          {entry.name}
+        </motion.div>
+      </div>
+
+      {/* Full-screen component render */}
+      <div className="transition-all duration-300" style={{ marginRight: codeOpen ? "640px" : "0px" }}>
+        <Comp />
+      </div>
+
+      {/* Sliding Code Panel Drawer */}
+      <AnimatePresence>
+        {codeOpen && entry.code && (
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", stiffness: 260, damping: 28 }}
+            className="fixed top-0 bottom-0 right-0 z-[990] flex flex-col border-l"
+            style={{
+              width: "640px",
+              background: "rgba(6, 8, 16, 0.98)",
+              borderColor: "rgba(255,255,255,0.08)",
+              backdropFilter: "blur(24px)",
+            }}
+          >
+            {/* Header / Info bar */}
+            <div className="pt-20 px-6 pb-4 border-b border-white/5 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-extrabold text-white font-mono">{entry.name}</h3>
+                <span className="text-[10px] text-white/40 font-mono">Source code component file</span>
+              </div>
+
+              {/* Copy Button */}
+              <button
+                onClick={handleCopy}
+                className="px-3.5 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider font-mono border cursor-pointer transition-all flex items-center gap-1.5"
+                style={{
+                  background: copied ? "rgba(0,255,136,0.12)" : "rgba(255,255,255,0.04)",
+                  borderColor: copied ? "#00FF88" : "rgba(255,255,255,0.08)",
+                  color: copied ? "#00FF88" : "rgba(200,215,255,0.6)",
+                }}
+              >
+                {copied ? (
+                  <>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                    Copy Code
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Code Block Container */}
+            <div className="flex-1 overflow-auto p-6 font-mono text-[11px] leading-relaxed select-text">
+              <pre className="whitespace-pre overflow-x-auto select-text selection:bg-cyan-500/35">
+                <code
+                  dangerouslySetInnerHTML={{
+                    __html: highlightJSX(entry.code),
+                  }}
+                />
+              </pre>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SHOWCASE — sidebar + grid of component cards
+   URL: /
+═══════════════════════════════════════════════════════════ */
+function ShowcasePage() {
+  const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  return (
+    <div className="flex min-h-screen" style={{ background: "#060810" }}>
+
+      {/* ── Sidebar ── */}
+      <AnimatePresence initial={false}>
+        {sidebarOpen && (
+          <motion.aside
+            initial={{ x: -264, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -264, opacity: 0 }}
+            transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
+            className="fixed left-0 top-0 bottom-0 z-50 flex flex-col overflow-hidden"
+            style={{
+              width: 264,
+              background: "linear-gradient(180deg,rgba(10,14,30,0.99) 0%,rgba(6,8,16,0.99) 100%)",
+              borderRight: "1px solid rgba(255,255,255,0.07)",
+            }}
+          >
+            {/* Brand */}
+            <div className="px-5 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: "rgba(0,229,255,0.12)", border: "1px solid rgba(0,229,255,0.28)" }}>
+                  <span className="text-xs font-black" style={{ color: "#00E5FF" }}>50</span>
+                </div>
+                <div>
+                  <div className="text-sm font-black text-white">2.5D Web UI</div>
+                  <div className="text-[9px]" style={{ color: "rgba(200,215,255,0.28)" }}>
+                    Component Library
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Nav list */}
+            <div className="flex-1 overflow-y-auto px-3 py-3">
+              <div className="text-[9px] font-black tracking-widest uppercase px-2 mb-2"
+                style={{ color: "rgba(200,215,255,0.2)" }}>
+                Built ({COMPONENTS.length} / 50)
+              </div>
+              <div className="flex flex-col gap-1">
+                {COMPONENTS.map((item) => (
+                  <motion.button key={item.id}
+                    onClick={() => navigate(`/preview/${item.slug}`)}
+                    whileHover={{ x: 3 }} whileTap={{ scale: 0.97 }}
+                    className="w-full text-left px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200"
+                    style={{
+                      background: "rgba(0,229,255,0.06)",
+                      border: "1px solid rgba(0,229,255,0.15)",
+                    }}>
+                    <div className="flex items-start gap-2.5">
+                      <span className="text-[10px] font-black font-mono mt-0.5 flex-shrink-0"
+                        style={{ color: "#00E5FF" }}>
+                        {item.id}
+                      </span>
+                      <div>
+                        <div className="text-xs font-semibold text-white leading-tight">{item.name}</div>
+                        <div className="text-[9px] mt-0.5 leading-snug" style={{ color: "rgba(200,215,255,0.28)" }}>
+                          {item.description}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.button>
+                ))}
+
+                {/* Empty slots */}
+                <div className="text-[9px] font-black tracking-widest uppercase px-2 mt-3 mb-1.5"
+                  style={{ color: "rgba(200,215,255,0.12)" }}>
+                  Coming soon (45)
+                </div>
+                {Array.from({ length: 45 }, (_, i) => i + 6).map((n) => (
+                  <div key={n} className="px-3 py-2 rounded-xl opacity-20 select-none"
+                    style={{ border: "1px dashed rgba(255,255,255,0.07)" }}>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black font-mono"
+                        style={{ color: "rgba(200,215,255,0.3)" }}>
+                        {String(n).padStart(2, "0")}
+                      </span>
+                      <div className="text-[10px]" style={{ color: "rgba(200,215,255,0.18)" }}>
+                        Upcoming component
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="px-4 py-3 border-t" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+              <div className="text-[9px]" style={{ color: "rgba(200,215,255,0.18)" }}>
+                React · Tailwind CSS · Framer Motion
+              </div>
+            </div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar toggle */}
+      <motion.button
+        onClick={() => setSidebarOpen((v) => !v)}
+        whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }}
+        className="fixed top-4 z-[60] w-8 h-8 flex items-center justify-center rounded-xl cursor-pointer"
+        style={{
+          left: sidebarOpen ? 272 : 12,
+          background: "rgba(10,14,30,0.95)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          color: "rgba(200,215,255,0.6)",
+          backdropFilter: "blur(12px)",
+          transition: "left 0.32s cubic-bezier(0.4,0,0.2,1)",
+        }}
+      >
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          {sidebarOpen
+            ? <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>
+            : <><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>
+          }
+        </svg>
+      </motion.button>
+
+      {/* ── Main area ── */}
+      <main className="flex-1 overflow-y-auto transition-all duration-300"
+        style={{ marginLeft: sidebarOpen ? 264 : 0, minHeight: "100vh" }}>
+        <div className="p-8 pt-16 sm:pt-8 max-w-5xl mx-auto">
+
+          {/* Page header */}
+          <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }} className="mb-10">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="text-[10px] font-black tracking-widest uppercase px-2.5 py-1 rounded-full"
+                style={{ background: "rgba(0,229,255,0.1)", border: "1px solid rgba(0,229,255,0.2)", color: "#00E5FF" }}>
+                Library
+              </div>
+              <span className="text-[11px]" style={{ color: "rgba(200,215,255,0.3)" }}>
+                {COMPONENTS.length} / 50 built
+              </span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-black text-white mb-2">50 × 2.5D Components</h1>
+            <p className="text-sm" style={{ color: "rgba(200,215,255,0.4)" }}>
+              Click any card to preview it full-screen, or navigate directly via{" "}
+              <code className="px-1.5 py-0.5 rounded text-[11px]"
+                style={{ background: "rgba(0,229,255,0.1)", color: "#00E5FF" }}>
+                /preview/01
+              </code>
+            </p>
+          </motion.div>
+
+          {/* Component cards grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {COMPONENTS.map((item, i) => (
+              <motion.div key={item.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                onClick={() => navigate(`/preview/${item.slug}`)}
+                whileHover={{ y: -4, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="relative rounded-2xl overflow-hidden cursor-pointer group"
+                style={{
+                  background: "linear-gradient(145deg,rgba(16,20,44,0.95) 0%,rgba(8,10,22,0.97) 100%)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+                }}
+              >
+                {/* Hover glow */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ background: "linear-gradient(135deg,rgba(0,229,255,0.05) 0%,transparent 100%)" }} />
+
+                <div className="relative p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] font-black font-mono px-2 py-1 rounded-lg"
+                      style={{ background: "rgba(0,229,255,0.1)", color: "#00E5FF" }}>
+                      #{item.id}
+                    </span>
+                    <svg className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" strokeWidth="2.5">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                      <polyline points="15 3 21 3 21 9"/>
+                      <line x1="10" y1="14" x2="21" y2="3"/>
+                    </svg>
+                  </div>
+                  <h3 className="font-black text-white text-sm mb-1">{item.name}</h3>
+                  <p className="text-[11px] leading-snug mb-3" style={{ color: "rgba(200,215,255,0.38)" }}>
+                    {item.description}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {item.tags.map((tag) => (
+                      <span key={tag} className="text-[9px] font-bold px-2 py-0.5 rounded-full"
+                        style={{ background: "rgba(255,255,255,0.05)", color: "rgba(200,215,255,0.4)" }}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Bottom accent */}
+                <div className="h-px opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ background: "linear-gradient(90deg,transparent,rgba(0,229,255,0.4),transparent)" }} />
+              </motion.div>
+            ))}
+
+            {/* Placeholder cards for remaining 45 */}
+            {Array.from({ length: 45 }, (_, i) => (
+              <div key={i + 6} className="rounded-2xl p-5 opacity-[0.18] select-none"
+                style={{ border: "1px dashed rgba(255,255,255,0.08)" }}>
+                <div className="text-[10px] font-black font-mono mb-2" style={{ color: "rgba(200,215,255,0.3)" }}>
+                  #{String(i + 6).padStart(2, "0")}
+                </div>
+                <div className="h-2 rounded w-3/4 mb-2" style={{ background: "rgba(255,255,255,0.06)" }} />
+                <div className="h-2 rounded w-1/2" style={{ background: "rgba(255,255,255,0.04)" }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ROOT APP — ROUTING TABLE
+═══════════════════════════════════════════════════════════ */
+export default function App() {
+  return (
+    <AnimatePresence mode="wait">
+      <Routes>
+        <Route path="/" element={<ShowcasePage />} />
+        <Route path="/preview/:slug" element={<PreviewPage />} />
+      </Routes>
+    </AnimatePresence>
+  );
+}
+
+/* Wrapper that reads the :slug param and renders PreviewRoute */
+function PreviewPage() {
+  return <PreviewRoute />;
+}
+
