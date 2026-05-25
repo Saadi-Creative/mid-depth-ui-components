@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useRef, useCallback } from "react";
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useMotionTemplate } from "framer-motion";
 import { PRICING_THEMES, PRICING_THEME_LIST } from "../../themes/themeConfig";
 
 /* ═══════════════════════════════════════════════════════════
@@ -33,10 +33,14 @@ const IconSpinner = () => (
 ═══════════════════════════════════════════════════════════ */
 const ThemePicker = ({ currentTheme, onThemeChange }) => (
   <div className="flex gap-2.5 items-center justify-center">
-    {PRICING_THEME_LIST.map((t) => (
+    {PRICING_THEME_LIST.map((t, i) => (
       <motion.button key={t.id} title={t.label}
         onClick={() => onThemeChange(t)}
-        whileHover={{ scale: 1.35, y: -2 }} whileTap={{ scale: 0.85 }}
+        whileHover={{ scale: 1.45, y: -3, rotate: 20 }}
+        whileTap={{ scale: 0.8, rotate: -10 }}
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.6 + i * 0.08, type: "spring", stiffness: 300 }}
         className="rounded-full cursor-pointer flex-shrink-0"
         style={{
           width: 22, height: 22,
@@ -52,49 +56,180 @@ const ThemePicker = ({ currentTheme, onThemeChange }) => (
 );
 
 /* ═══════════════════════════════════════════════════════════
-   FEATURE ROW
+   FLOATING PARTICLES
 ═══════════════════════════════════════════════════════════ */
-const Feature = ({ text, included, theme }) => (
-  <li className="flex items-center gap-2.5">
-    <div className="flex-shrink-0 w-[18px] h-[18px] rounded-full flex items-center justify-center transition-all duration-500"
-      style={{
-        background: included ? theme.primaryMuted : "rgba(255,255,255,0.03)",
-        border: `1px solid ${included ? theme.border : "rgba(255,255,255,0.07)"}`,
-      }}>
-      {included ? <IconCheck color={theme.primary} /> : <IconX />}
-    </div>
-    <span className="text-xs sm:text-sm leading-snug transition-colors duration-300"
-      style={{ color: included ? "rgba(225,235,255,0.82)" : "rgba(200,215,255,0.22)" }}>
-      {text}
-    </span>
-  </li>
+const FloatingParticles = ({ theme, active }) => (
+  <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+    {[...Array(6)].map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute w-1 h-1 rounded-full"
+        style={{ background: theme.primary, opacity: 0 }}
+        animate={active ? {
+          opacity: [0, 0.6, 0],
+          y: [0, -80 - i * 20],
+          x: [0, (i % 2 === 0 ? 1 : -1) * (15 + i * 8)],
+          scale: [0, 1.2, 0],
+        } : { opacity: 0 }}
+        transition={{
+          duration: 2 + i * 0.3,
+          repeat: Infinity,
+          delay: i * 0.35,
+          ease: "easeOut",
+        }}
+        initial={{
+          left: `${20 + i * 12}%`,
+          bottom: "10%",
+        }}
+      />
+    ))}
+  </div>
 );
 
 /* ═══════════════════════════════════════════════════════════
-   PRICING CARD
+   FEATURE ROW — with hover micro-interaction
 ═══════════════════════════════════════════════════════════ */
-const PricingCard = ({ tier, theme, index, isPro }) => {
+const Feature = ({ text, included, theme, index }) => {
+  const iconVariants = {
+    initial: { scale: 1, rotate: 0, x: 0 },
+    hover: {
+      scale: 1.25,
+      rotate: included ? 360 : 0,
+      x: included ? 0 : [0, -2.5, 2.5, -2.5, 2.5, 0],
+      transition: {
+        rotate: { duration: 0.5, ease: "easeInOut" },
+        x: { duration: 0.35, ease: "linear" },
+        scale: { type: "spring", stiffness: 250 }
+      }
+    }
+  };
+
+  return (
+    <motion.li
+      className="flex items-center gap-2.5 group cursor-default"
+      initial={{ opacity: 0, x: -12 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: 0.3 + index * 0.06, duration: 0.4 }}
+      whileHover="hover"
+    >
+      <motion.div
+        variants={iconVariants}
+        className="flex-shrink-0 w-[18px] h-[18px] rounded-full flex items-center justify-center transition-colors duration-500"
+        style={{
+          background: included ? theme.primaryMuted : "rgba(255,255,255,0.03)",
+          border: `1px solid ${included ? theme.border : "rgba(255,255,255,0.07)"}`,
+        }}
+      >
+        {included ? <IconCheck color={theme.primary} /> : <IconX />}
+      </motion.div>
+      <motion.span
+        variants={{
+          initial: { x: 0, color: included ? "rgba(225,235,255,0.82)" : "rgba(200,215,255,0.22)" },
+          hover: { x: 4, color: included ? "#fff" : "rgba(200,215,255,0.35)" }
+        }}
+        transition={{ duration: 0.2 }}
+        className="text-xs sm:text-sm leading-snug"
+      >
+        {text}
+      </motion.span>
+    </motion.li>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════════
+   RIPPLE EFFECT HOOK
+═══════════════════════════════════════════════════════════ */
+const useRipple = () => {
+  const [ripples, setRipples] = useState([]);
+  const addRipple = useCallback((e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const id = Date.now();
+    setRipples(prev => [...prev, { x, y, id }]);
+    setTimeout(() => setRipples(prev => prev.filter(r => r.id !== id)), 600);
+  }, []);
+  return { ripples, addRipple };
+};
+
+const RippleLayer = ({ ripples, color }) => (
+  <>
+    {ripples.map(r => (
+      <motion.span
+        key={r.id}
+        className="absolute rounded-full pointer-events-none"
+        initial={{ width: 0, height: 0, opacity: 0.5 }}
+        animate={{ width: 200, height: 200, opacity: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        style={{
+          left: r.x - 100,
+          top: r.y - 100,
+          background: color || "rgba(255,255,255,0.3)",
+        }}
+      />
+    ))}
+  </>
+);
+
+/* ═══════════════════════════════════════════════════════════
+   PRICING CARD — with magnetic tilt + micro-interactions
+═══════════════════════════════════════════════════════════ */
+const PricingCard = ({ tier, theme, index, isPro, isYearly }) => {
   const [hovered, setHovered] = useState(false);
   const [loading, setLoading] = useState(false);
+  const cardRef = useRef(null);
+  const { ripples, addRipple } = useRipple();
+
+  /* Magnetic tilt on hover */
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const springCfg = { stiffness: 150, damping: 20 };
+  const rotateX = useSpring(useTransform(my, [-0.5, 0.5], [4, -4]), springCfg);
+  const rotateY = useSpring(useTransform(mx, [-0.5, 0.5], [-4, 4]), springCfg);
+
+  /* Magnetic cursor glow */
+  const glowX = useMotionValue(50);
+  const glowY = useMotionValue(50);
+  const glowBg = useMotionTemplate`radial-gradient(280px circle at ${glowX}% ${glowY}%, ${theme.primary}, transparent 65%)`;
+
+  const handleMouseMove = useCallback((e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    mx.set((e.clientX - rect.left) / rect.width - 0.5);
+    my.set((e.clientY - rect.top) / rect.height - 0.5);
+    /* Glow follows cursor percentage */
+    glowX.set(((e.clientX - rect.left) / rect.width) * 100);
+    glowY.set(((e.clientY - rect.top) / rect.height) * 100);
+  }, [mx, my, glowX, glowY]);
+
+  const handleMouseLeave = useCallback(() => {
+    mx.set(0);
+    my.set(0);
+  }, [mx, my]);
 
   return (
     <motion.div
+      ref={cardRef}
       initial={{ opacity: 0, y: 70 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.12, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       className="relative flex flex-col"
-      /* On mobile: full width. On md+: flex-1 in a row */
-      style={{ zIndex: isPro ? 10 : 1 }}
+      style={{
+        zIndex: isPro ? 10 : 1,
+        perspective: 800,
+      }}
     >
       {/* 2.5D depth shadow slab */}
       <motion.div
         className="absolute inset-0 rounded-2xl pointer-events-none"
         animate={{
           opacity: hovered ? 0.9 : isPro ? 0.7 : 0.2,
-          y: hovered ? 16 : isPro ? 12 : 5,
-          scale: hovered ? 0.96 : isPro ? 0.97 : 0.985,
+          y: hovered ? 18 : isPro ? 12 : 5,
+          scale: hovered ? 0.95 : isPro ? 0.97 : 0.985,
         }}
         transition={{ duration: 0.35, ease: "easeOut" }}
         style={{
@@ -104,7 +239,7 @@ const PricingCard = ({ tier, theme, index, isPro }) => {
         }}
       />
 
-      {/* Card */}
+      {/* Card with magnetic tilt */}
       <motion.div
         animate={{
           y: hovered ? -12 : isPro ? -6 : 0,
@@ -113,6 +248,9 @@ const PricingCard = ({ tier, theme, index, isPro }) => {
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
         className="relative rounded-2xl overflow-hidden flex flex-col flex-1"
         style={{
+          rotateX: hovered ? rotateX : 0,
+          rotateY: hovered ? rotateY : 0,
+          transformStyle: "preserve-3d",
           background: "linear-gradient(155deg,rgba(18,22,46,0.97) 0%,rgba(8,10,24,0.99) 100%)",
           border: `1px solid ${isPro ? theme.border : hovered ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.06)"}`,
           backdropFilter: "blur(28px)",
@@ -124,8 +262,10 @@ const PricingCard = ({ tier, theme, index, isPro }) => {
           transition: "border-color 0.4s, box-shadow 0.35s",
         }}
       >
-        {/* Top edge glow */}
-        <div className="absolute top-0 inset-x-0 h-px transition-all duration-500"
+        {/* Top edge glow — pulses on hover */}
+        <motion.div className="absolute top-0 inset-x-0 h-px transition-all duration-500"
+          animate={hovered ? { opacity: [0.7, 1, 0.7] } : { opacity: 1 }}
+          transition={hovered ? { duration: 1.5, repeat: Infinity } : {}}
           style={{
             background: isPro
               ? `linear-gradient(90deg,transparent,${theme.primary},transparent)`
@@ -133,31 +273,51 @@ const PricingCard = ({ tier, theme, index, isPro }) => {
           }}
         />
 
-        {/* PRO badge */}
+        {/* Magnetic cursor-follow glow */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-500 rounded-2xl"
+          style={{
+            opacity: hovered ? 0.12 : 0,
+            background: glowBg,
+          }}
+        />
+
+        {/* Floating particles on hover */}
+        <FloatingParticles theme={theme} active={hovered} />
+
+        {/* PRO badge — floating bounce */}
         {isPro && (
-          <motion.div className="absolute -top-[16px] left-1/2 -translate-x-1/2 z-20"
-            initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.45 }}>
-            <div className="px-4 py-1 rounded-full text-[10px] font-black tracking-widest uppercase
+          <div style={{ transform: "translateZ(45px)", transformStyle: "preserve-3d" }} className="absolute -top-[16px] left-1/2 -translate-x-1/2 z-20">
+            <motion.div
+              animate={{ y: [0, -3, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="px-4 py-1 rounded-full text-[10px] font-black tracking-widest uppercase
               flex items-center gap-1 transition-all duration-500"
               style={{
                 background: `linear-gradient(135deg,${theme.primary},${theme.primaryDark})`,
                 color: "#000",
                 boxShadow: `0 3px 18px ${theme.glow}`,
               }}>
-              <IconBolt size={10} /> Most Popular
-            </div>
-          </motion.div>
+              <motion.span animate={{ rotate: [0, 15, -15, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+                <IconBolt size={10} />
+              </motion.span>
+              Most Popular
+            </motion.div>
+          </div>
         )}
 
-        <div className="p-5 sm:p-6 lg:p-7 flex flex-col flex-1 pt-8">
+        <div className="p-5 sm:p-6 lg:p-7 flex flex-col flex-1 pt-8" style={{ transformStyle: "preserve-3d" }}>
 
           {/* Tier header */}
-          <div className="mb-4">
-            <div className="text-[9px] sm:text-[10px] font-black tracking-widest uppercase mb-1.5 transition-colors duration-500"
+          <div className="mb-4" style={{ transform: "translateZ(30px)", transformStyle: "preserve-3d" }}>
+            <motion.div
+              animate={hovered ? { x: [0, 2, 0] } : { x: 0 }}
+              transition={{ duration: 0.4 }}
+              className="text-[9px] sm:text-[10px] font-black tracking-widest uppercase mb-1.5 transition-colors duration-500"
               style={{ color: isPro ? theme.primary : "rgba(200,215,255,0.32)" }}>
               {tier.badge}
-            </div>
+            </motion.div>
             <h3 className="font-black text-white mb-1" style={{ fontSize: "clamp(18px,2.5vw,22px)" }}>
               {tier.name}
             </h3>
@@ -166,56 +326,66 @@ const PricingCard = ({ tier, theme, index, isPro }) => {
             </p>
           </div>
 
-          {/* Price */}
-          <div className="flex items-end gap-1 mb-5">
-            <span className="text-sm font-bold mb-0.5" style={{ color: "rgba(200,215,255,0.45)" }}>$</span>
-            <AnimatePresence mode="wait">
-              <motion.span key={`${tier.price}-${theme.id}`}
-                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}
-                className="font-black text-white leading-none"
-                style={{ fontSize: "clamp(36px,5vw,48px)" }}>
-                {tier.price}
-              </motion.span>
-            </AnimatePresence>
-            <span className="text-xs mb-1.5" style={{ color: "rgba(200,215,255,0.38)" }}>/mo</span>
+          {/* Price — spring counter */}
+          <div className="flex flex-col mb-5" style={{ transform: "translateZ(45px)", transformStyle: "preserve-3d" }}>
+            <div className="flex items-end gap-1">
+              <span className="text-sm font-bold mb-0.5" style={{ color: "rgba(200,215,255,0.45)" }}>$</span>
+              <AnimatePresence mode="wait">
+                <motion.span key={`${tier.price}-${theme.id}`}
+                  initial={{ opacity: 0, y: 16, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -16, scale: 0.9 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                  className="font-black text-white leading-none"
+                  style={{ fontSize: "clamp(36px,5vw,48px)" }}>
+                  {tier.price}
+                </motion.span>
+              </AnimatePresence>
+              <span className="text-xs mb-1.5" style={{ color: "rgba(200,215,255,0.38)" }}>/mo</span>
+            </div>
+            <span className="text-[9px] font-mono mt-1 text-left uppercase font-bold" style={{ color: "rgba(200,215,255,0.22)" }}>
+              {isYearly && tier.price !== "0" ? `Billed annually ($${parseInt(tier.price) * 12}/yr)` : "Billed monthly"}
+            </span>
           </div>
 
-          {/* Features */}
-          <ul className="flex flex-col gap-3 flex-1 mb-6">
+          {/* Features — staggered hover */}
+          <ul className="flex flex-col gap-3 flex-1 mb-6" style={{ transform: "translateZ(25px)", transformStyle: "preserve-3d" }}>
             {tier.features.map((f, i) => (
-              <Feature key={i} text={f.text} included={f.included} theme={theme} />
+              <Feature key={i} text={f.text} included={f.included} theme={theme} index={i} />
             ))}
           </ul>
 
-          {/* CTA */}
-          <motion.button
-            onClick={() => setLoading(true)}
-            whileHover={{ scale: 1.025, y: -2 }}
-            whileTap={{ scale: 0.975 }}
-            className="relative w-full py-3.5 rounded-xl font-extrabold text-[11px] tracking-widest uppercase overflow-hidden cursor-pointer transition-all duration-500"
-            style={isPro ? {
-              background: `linear-gradient(135deg,${theme.primary},${theme.primaryDark})`,
-              color: "#000",
-              boxShadow: `0 6px 28px ${theme.glow}`,
-            } : {
-              background: "rgba(255,255,255,0.04)",
-              border: `1px solid ${hovered ? theme.border : "rgba(255,255,255,0.08)"}`,
-              color: hovered ? theme.primary : "rgba(200,215,255,0.5)",
-              boxShadow: hovered ? `0 0 20px ${theme.primaryMuted}` : "none",
-            }}
-          >
-            {isPro && (
-              <motion.div className="absolute inset-0 opacity-30"
-                style={{ background: "linear-gradient(105deg,transparent 35%,rgba(255,255,255,0.5) 50%,transparent 65%)" }}
-                animate={{ x: ["-100%", "220%"] }}
-                transition={{ duration: 3.2, repeat: Infinity, ease: "linear", repeatDelay: 0.8 }}
-              />
-            )}
-            <span className="relative z-10 flex items-center justify-center gap-2">
-              {loading ? <><IconSpinner />Processing…</> : tier.cta}
-            </span>
-          </motion.button>
+          {/* CTA — ripple effect */}
+          <div style={{ transform: "translateZ(40px)" }}>
+            <motion.button
+              onClick={(e) => { addRipple(e); setLoading(true); setTimeout(() => setLoading(false), 2000); }}
+              whileHover={{ scale: 1.03, y: -3, boxShadow: isPro ? `0 10px 40px ${theme.glow}` : `0 8px 30px ${theme.primaryMuted}` }}
+              whileTap={{ scale: 0.97, y: 0 }}
+              className="relative w-full py-3.5 rounded-xl font-extrabold text-[11px] tracking-widest uppercase overflow-hidden cursor-pointer transition-all duration-500"
+              style={isPro ? {
+                background: `linear-gradient(135deg,${theme.primary},${theme.primaryDark})`,
+                color: "#000",
+                boxShadow: `0 6px 28px ${theme.glow}`,
+              } : {
+                background: "rgba(255,255,255,0.04)",
+                border: `1px solid ${hovered ? theme.border : "rgba(255,255,255,0.08)"}`,
+                color: hovered ? theme.primary : "rgba(200,215,255,0.5)",
+                boxShadow: hovered ? `0 0 20px ${theme.primaryMuted}` : "none",
+              }}
+            >
+              {isPro && (
+                <motion.div className="absolute inset-0 opacity-30"
+                  style={{ background: "linear-gradient(105deg,transparent 35%,rgba(255,255,255,0.5) 50%,transparent 65%)" }}
+                  animate={{ x: ["-100%", "220%"] }}
+                  transition={{ duration: 3.2, repeat: Infinity, ease: "linear", repeatDelay: 0.8 }}
+                />
+              )}
+              <RippleLayer ripples={ripples} color={isPro ? "rgba(0,0,0,0.15)" : `${theme.primary}33`} />
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                {loading ? <><IconSpinner />Processing…</> : tier.cta}
+              </span>
+            </motion.button>
+          </div>
         </div>
       </motion.div>
     </motion.div>
@@ -226,9 +396,10 @@ const PricingCard = ({ tier, theme, index, isPro }) => {
    COMPONENT 02 — KINETIC PRICING MATRIX
    Responsive: mobile (1-col stack) → tablet (pro card featured)
                → laptop (3-col side by side)
-═══════════════════════════════════════════════════════════ */
+ ═══════════════════════════════════════════════════════════ */
 export default function KineticPricingMatrix() {
   const [currentTheme, setCurrentTheme] = useState(PRICING_THEMES.sapphire);
+  const [isYearly, setIsYearly] = useState(false);
 
   const tiers = [
     {
@@ -251,7 +422,7 @@ export default function KineticPricingMatrix() {
       name: "Pro",
       badge: "Most Popular",
       description: "For teams that need power, scale & flexibility.",
-      price: "49",
+      price: isYearly ? "39" : "49",
       cta: "Subscribe Now →",
       features: [
         { text: "Unlimited Projects", included: true },
@@ -267,7 +438,7 @@ export default function KineticPricingMatrix() {
       name: "Enterprise",
       badge: "Full Power",
       description: "Unlimited scale for serious organizations.",
-      price: "199",
+      price: isYearly ? "159" : "199",
       cta: "Contact Sales",
       features: [
         { text: "Unlimited Everything", included: true },
@@ -318,23 +489,35 @@ export default function KineticPricingMatrix() {
         className="relative z-10 text-center mb-12 sm:mb-16 w-full max-w-lg px-2"
       >
         {/* Label chip */}
-        <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[10px] sm:text-[11px]
-          font-black tracking-widest uppercase mb-4 transition-all duration-500"
+        <motion.div
+          whileHover={{ scale: 1.05, y: -2 }}
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[10px] sm:text-[11px]
+          font-black tracking-widest uppercase mb-4 transition-all duration-500 cursor-default"
           style={{
             background: currentTheme.primaryMuted,
             border: `1px solid ${currentTheme.border}`,
             color: currentTheme.primary,
             boxShadow: `0 0 24px ${currentTheme.primaryMuted}`,
           }}>
-          <IconBolt /> Transparent Pricing
-        </div>
+          <motion.span
+            animate={{ rotate: [0, 15, -15, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
+            <IconBolt />
+          </motion.span>
+          Transparent Pricing
+        </motion.div>
 
         <h1 className="font-black text-white mb-3 leading-tight tracking-tight"
           style={{ fontSize: "clamp(26px, 5vw, 46px)" }}>
           Choose Your{" "}
-          <span className="transition-colors duration-500" style={{ color: currentTheme.primary }}>
+          <motion.span
+            className="transition-colors duration-500 inline-block"
+            style={{ color: currentTheme.primary }}
+            animate={{ scale: [1, 1.02, 1] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          >
             Power Level
-          </span>
+          </motion.span>
         </h1>
         <p className="text-sm sm:text-base" style={{ color: "rgba(200,215,255,0.4)" }}>
           Scale effortlessly. No hidden fees, cancel anytime.
@@ -347,17 +530,64 @@ export default function KineticPricingMatrix() {
           </p>
           <ThemePicker currentTheme={currentTheme} onThemeChange={setCurrentTheme} />
         </div>
+
+        {/* Billing Switcher */}
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <div className="relative flex items-center bg-white/4 p-1 rounded-xl border border-white/6 backdrop-blur">
+            <button
+              onClick={() => setIsYearly(false)}
+              className="px-4 py-1.5 rounded-lg text-xs font-extrabold relative transition-colors duration-200 cursor-pointer"
+              style={{ color: !isYearly ? "#000" : "rgba(200,215,255,0.5)" }}
+            >
+              {!isYearly && (
+                <motion.div
+                  layoutId="billing-pill"
+                  className="absolute inset-0 rounded-lg"
+                  style={{ background: currentTheme.primary }}
+                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                />
+              )}
+              <span className="relative z-10">Monthly</span>
+            </button>
+            <button
+              onClick={() => setIsYearly(true)}
+              className="px-4 py-1.5 rounded-lg text-xs font-extrabold relative transition-colors duration-200 cursor-pointer"
+              style={{ color: isYearly ? "#000" : "rgba(200,215,255,0.5)" }}
+            >
+              {isYearly && (
+                <motion.div
+                  layoutId="billing-pill"
+                  className="absolute inset-0 rounded-lg"
+                  style={{ background: currentTheme.primary }}
+                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                />
+              )}
+              <span className="relative z-10">Yearly</span>
+            </button>
+          </div>
+          
+          <motion.div
+            animate={{ scale: [1, 1.06, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider"
+            style={{
+              background: currentTheme.primaryMuted,
+              color: currentTheme.primary,
+              border: `1px solid ${currentTheme.border}`,
+              boxShadow: `0 0 10px ${currentTheme.glow}22`,
+            }}
+          >
+            Save 20%
+          </motion.div>
+        </div>
       </motion.div>
 
-      {/* ── Cards grid ──
-           Mobile:  1 col (stacked)
-           md 768+: 3 cols side by side
-      ── */}
+      {/* ── Cards grid ── */}
       <div className="relative z-10 w-full max-w-5xl pt-5
         grid grid-cols-1 gap-5
         md:grid-cols-3 md:gap-5 md:items-stretch">
         {tiers.map((tier, i) => (
-          <PricingCard key={tier.name} tier={tier} theme={currentTheme} index={i} isPro={i === 1} />
+          <PricingCard key={tier.name} tier={tier} theme={currentTheme} index={i} isPro={i === 1} isYearly={isYearly} />
         ))}
       </div>
 

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useRef, useCallback } from "react";
+import { motion, useMotionValue, useSpring, useTransform, useMotionTemplate, AnimatePresence } from "framer-motion";
 import { BENTO_THEMES, BENTO_THEME_LIST } from "../../themes/themeConfig";
 
 /* ═══════════════════════════════════════════════════════════  ICONS  */
@@ -47,39 +47,77 @@ const IconCheckCircle = () => (
 );
 
 /* ═══════════════════════════════════════════════════════════  BENTO TILE CONTAINER  */
-const BentoTile = ({ children, className = "", delay = 0, theme }) => (
-  <motion.div
-    variants={{
-      hidden: { opacity: 0, y: 15 },
-      visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 18 } },
-    }}
-    whileHover={{
-      y: -2,
-      borderColor: `${theme.primary}33`,
-      boxShadow: `0 12px 30px rgba(0,0,0,0.45)`,
-    }}
-    className={`rounded-2xl p-5 border border-white/5 transition-colors duration-300 relative flex flex-col justify-between overflow-hidden cursor-default group ${className}`}
-    style={{
-      background: "linear-gradient(135deg, rgba(16, 20, 44, 0.6) 0%, rgba(8, 10, 22, 0.8) 100%)",
-      boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-      backdropFilter: "blur(20px)",
-    }}
-  >
-    {/* Subtle corner light accent */}
-    <div
-      className="absolute top-0 right-0 w-24 h-24 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-      style={{
-        background: `radial-gradient(circle at top right, ${theme.primaryMuted}, transparent 70%)`,
+const BentoTile = ({ children, className = "", theme }) => {
+  const [hovered, setHovered] = useState(false);
+  const tileRef = useRef(null);
+
+  /* Magnetic tilt */
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const springCfg = { stiffness: 120, damping: 18 };
+  const rotateX = useSpring(useTransform(my, [-0.5, 0.5], [3, -3]), springCfg);
+  const rotateY = useSpring(useTransform(mx, [-0.5, 0.5], [-3, 3]), springCfg);
+
+  /* Glow follows cursor percentage */
+  const glowX = useMotionValue(50);
+  const glowY = useMotionValue(50);
+  const glowBg = useMotionTemplate`radial-gradient(180px circle at ${glowX}% ${glowY}%, ${theme.primary}, transparent 65%)`;
+
+  const handleMouseMove = useCallback((e) => {
+    if (!tileRef.current) return;
+    const rect = tileRef.current.getBoundingClientRect();
+    mx.set((e.clientX - rect.left) / rect.width - 0.5);
+    my.set((e.clientY - rect.top) / rect.height - 0.5);
+    glowX.set(((e.clientX - rect.left) / rect.width) * 100);
+    glowY.set(((e.clientY - rect.top) / rect.height) * 100);
+  }, [mx, my, glowX, glowY]);
+
+  const handleMouseLeave = useCallback(() => {
+    mx.set(0);
+    my.set(0);
+  }, [mx, my]);
+
+  return (
+    <motion.div
+      ref={tileRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+      whileHover="hover"
+      variants={{
+        hidden: { opacity: 0, y: 15 },
+        visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 18 } },
       }}
-    />
-    {children}
-  </motion.div>
-);
+      style={{
+        rotateX: hovered ? rotateX : 0,
+        rotateY: hovered ? rotateY : 0,
+        transformStyle: "preserve-3d",
+        background: "linear-gradient(135deg, rgba(16, 20, 44, 0.6) 0%, rgba(8, 10, 22, 0.8) 100%)",
+        boxShadow: hovered ? `0 12px 30px rgba(0,0,0,0.55)` : "0 4px 20px rgba(0,0,0,0.3)",
+        borderColor: hovered ? `${theme.primary}33` : "rgba(255,255,255,0.05)",
+      }}
+      className={`rounded-2xl p-5 border transition-all duration-300 relative flex flex-col justify-between overflow-hidden cursor-default group ${className}`}
+    >
+      {/* Magnetic cursor-follow glow */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-500 rounded-2xl"
+        style={{
+          opacity: hovered ? 0.09 : 0,
+          background: glowBg,
+        }}
+      />
+      {children}
+    </motion.div>
+  );
+};
 
 /* ═══════════════════════════════════════════════════════════  TOGGLE SWITCH  */
 const Toggle = ({ active, onChange, theme }) => (
-  <button
+  <motion.button
     onClick={onChange}
+    whileHover={{ scale: 1.06 }}
+    whileTap={{ scale: 0.92 }}
     className="w-10 h-5.5 rounded-full p-0.5 cursor-pointer outline-none relative transition-colors duration-300 flex items-center"
     style={{
       background: active ? theme.primary : "rgba(255,255,255,0.06)",
@@ -89,14 +127,14 @@ const Toggle = ({ active, onChange, theme }) => (
   >
     <motion.div
       layout
-      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+      transition={{ type: "spring", stiffness: 450, damping: 22 }}
       className="w-4 h-4 rounded-full shadow-md"
       style={{
         background: active ? "#000" : "#fff",
         x: active ? "18px" : "0px",
       }}
     />
-  </button>
+  </motion.button>
 );
 
 export default function BentoProfile() {
@@ -192,7 +230,7 @@ export default function BentoProfile() {
         >
           {/* TILE 1: Profile Summary (Spans 2 rows, Col 1) */}
           <BentoTile className="md:col-span-1 md:row-span-2 flex flex-col justify-between min-h-[380px]" theme={currentTheme}>
-            <div className="w-full">
+            <div className="w-full" style={{ transform: "translateZ(25px)", transformStyle: "preserve-3d" }}>
               {/* Profile Avatar Stack */}
               <div className="relative w-20 h-20 mx-auto mb-4 group/avatar">
                 <div
@@ -207,12 +245,15 @@ export default function BentoProfile() {
                   alt="Aria Thorne"
                   className="w-full h-full rounded-full object-cover p-1 relative z-10"
                 />
-                <div
+                <motion.div
+                  variants={{
+                    hover: { scale: 1.25, rotate: 360, transition: { type: "spring", stiffness: 200 } }
+                  }}
                   className="absolute bottom-0 right-0 w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#090b17] z-20 text-[10px] font-black"
                   style={{ background: currentTheme.primary, color: "#000" }}
                 >
                   ✓
-                </div>
+                </motion.div>
               </div>
 
               {/* Name Details */}
@@ -239,7 +280,7 @@ export default function BentoProfile() {
             </div>
 
             {/* Micro Stats */}
-            <div className="grid grid-cols-3 gap-2 pt-5 border-t border-white/5 mt-5">
+            <div className="grid grid-cols-3 gap-2 pt-5 border-t border-white/5 mt-5" style={{ transform: "translateZ(15px)" }}>
               {[
                 { label: "Projects", val: "48" },
                 { label: "Followers", val: "12K" },
@@ -255,14 +296,19 @@ export default function BentoProfile() {
 
           {/* TILE 2: System Settings / Analytics Progress (Col 2, Row 1) */}
           <BentoTile className="md:col-span-1" theme={currentTheme}>
-            <div>
+            <div style={{ transform: "translateZ(20px)", transformStyle: "preserve-3d" }}>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest font-mono">
                   Analytics & Status
                 </span>
-                <span className="text-white/30">
+                <motion.span
+                  variants={{
+                    hover: { rotate: 180, scale: 1.15, transition: { duration: 0.4 } }
+                  }}
+                  className="text-white/30"
+                >
                   <IconCpu />
-                </span>
+                </motion.span>
               </div>
               <h3 className="text-sm font-black text-white mb-4">System Performance</h3>
 
@@ -279,17 +325,27 @@ export default function BentoProfile() {
                       <span style={{ color: currentTheme.primary }}>{bar.pct}%</span>
                     </div>
                     {/* Bar Track */}
-                    <div className="h-2 w-full rounded-full bg-white/5 border border-white/5 overflow-hidden">
+                    <div className="h-2 w-full rounded-full bg-white/5 border border-white/5 overflow-hidden relative">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${bar.pct}%` }}
                         transition={{ duration: 1.2, ease: "easeOut" }}
-                        className="h-full rounded-full transition-all duration-1000"
+                        className="h-full rounded-full relative overflow-hidden"
                         style={{
                           background: currentTheme.primary,
                           boxShadow: `0 0 8px ${currentTheme.glow}`,
                         }}
-                      />
+                      >
+                        {/* Shimmer sweep overlay */}
+                        <motion.div
+                          className="absolute inset-0"
+                          style={{
+                            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent)",
+                          }}
+                          animate={{ x: ["-100%", "200%"] }}
+                          transition={{ duration: 2.2, repeat: Infinity, ease: "linear" }}
+                        />
+                      </motion.div>
                     </div>
                   </div>
                 ))}
@@ -299,7 +355,7 @@ export default function BentoProfile() {
 
           {/* TILE 3: Appearance Tile Theme Customizer (Col 3, Row 1) */}
           <BentoTile className="md:col-span-1" theme={currentTheme}>
-            <div className="flex flex-col justify-between h-full">
+            <div className="flex flex-col justify-between h-full" style={{ transform: "translateZ(20px)", transformStyle: "preserve-3d" }}>
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest font-mono">
@@ -351,14 +407,19 @@ export default function BentoProfile() {
 
           {/* TILE 4: Preferences Toggles (Col 2-3, Row 2) */}
           <BentoTile className="md:col-span-2 flex flex-col justify-between" theme={currentTheme}>
-            <div className="w-full">
+            <div className="w-full" style={{ transform: "translateZ(20px)", transformStyle: "preserve-3d" }}>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest font-mono">
                   Preferences
                 </span>
-                <span className="text-white/30">
+                <motion.span
+                  variants={{
+                    hover: { rotate: [0, -12, 12, -12, 0], scale: 1.15, transition: { duration: 0.5 } }
+                  }}
+                  className="text-white/30"
+                >
                   <IconShield />
-                </span>
+                </motion.span>
               </div>
               <h3 className="text-sm font-black text-white mb-4">Privacy & System Control</h3>
 
@@ -406,14 +467,19 @@ export default function BentoProfile() {
 
           {/* TILE 5: Notification Center (Col 1-2, Row 3) */}
           <BentoTile className="md:col-span-2" theme={currentTheme}>
-            <div>
+            <div style={{ transform: "translateZ(20px)", transformStyle: "preserve-3d" }}>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest font-mono">
                   Log Console
                 </span>
-                <span className="text-white/30">
+                <motion.span
+                  variants={{
+                    hover: { rotate: [0, -15, 15, -15, 15, 0], scale: 1.15, transition: { duration: 0.5 } }
+                  }}
+                  className="text-white/30"
+                >
                   <IconBell />
-                </span>
+                </motion.span>
               </div>
               <h3 className="text-sm font-black text-white mb-3.5">Recent Security Events</h3>
 
@@ -439,9 +505,13 @@ export default function BentoProfile() {
                     unread: false,
                   },
                 ].map((evt, idx) => (
-                  <div
+                  <motion.div
                     key={idx}
-                    className="flex items-center justify-between gap-4 p-2.5 rounded-xl border border-white/5 hover:bg-white/2 transition-colors duration-200"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.15 + idx * 0.08, duration: 0.4 }}
+                    whileHover={{ x: 3, background: "rgba(255,255,255,0.03)" }}
+                    className="flex items-center justify-between gap-4 p-2.5 rounded-xl border border-white/5 transition-colors duration-200 cursor-default"
                   >
                     <div className="flex items-center gap-3">
                       {/* Notification Badge Reacts to theme */}
@@ -458,7 +528,7 @@ export default function BentoProfile() {
                       </div>
                     </div>
                     <span className="text-[9px] font-mono text-white/30 flex-shrink-0">{evt.time}</span>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
@@ -466,14 +536,19 @@ export default function BentoProfile() {
 
           {/* TILE 6: Premium Card / Quick Highlights (Col 3, Row 3) */}
           <BentoTile className="md:col-span-1 flex flex-col justify-between" theme={currentTheme}>
-            <div className="w-full">
+            <div className="w-full" style={{ transform: "translateZ(20px)", transformStyle: "preserve-3d" }}>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest font-mono">
                   Account Plan
                 </span>
-                <span className="text-white/30">
+                <motion.span
+                  variants={{
+                    hover: { rotate: 360, scale: 1.15, transition: { duration: 0.8, ease: "linear" } }
+                  }}
+                  className="text-white/30"
+                >
                   <IconGlobe />
-                </span>
+                </motion.span>
               </div>
               <h3 className="text-sm font-black text-white mb-2">Upgrade Calibration</h3>
               <p className="text-[11px] text-white/50 leading-relaxed mb-4">
@@ -482,20 +557,30 @@ export default function BentoProfile() {
             </div>
 
             {/* Active text highlight CTA button */}
-            <div className="pt-2">
-              <a
-                href="#upgrade"
-                className="w-full text-center py-2.5 rounded-xl text-[10px] uppercase font-black tracking-widest block transition-all duration-300 border font-mono select-none"
+            <div className="pt-2" style={{ transform: "translateZ(25px)" }}>
+              <motion.button
+                onClick={(e) => e.preventDefault()}
+                whileHover={{ scale: 1.03, y: -1, boxShadow: `0 6px 20px ${currentTheme.primary}44` }}
+                whileTap={{ scale: 0.97 }}
+                className="w-full text-center py-2.5 rounded-xl text-[10px] uppercase font-black tracking-widest block transition-all duration-300 border font-mono select-none relative overflow-hidden cursor-pointer"
                 style={{
                   background: currentTheme.primaryMuted,
                   borderColor: currentTheme.border,
                   color: currentTheme.primary,
                   boxShadow: `inset 0 1px 0 rgba(255,255,255,0.05)`,
                 }}
-                onClick={(e) => e.preventDefault()}
               >
+                {/* Sweep shimmer */}
+                <motion.div
+                  className="absolute inset-0"
+                  style={{
+                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)",
+                  }}
+                  animate={{ x: ["-100%", "200%"] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+                />
                 Upgrade to Premium
-              </a>
+              </motion.button>
               <span className="text-[9px] text-white/30 text-center block mt-2 font-mono uppercase font-semibold">
                 No credit card required. Cancel anytime.
               </span>

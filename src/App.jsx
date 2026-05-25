@@ -6,13 +6,33 @@ import KineticPricingMatrix from "./components/Component02_PricingMatrix";
 import WaitlistTeaser from "./components/Component03_WaitlistTeaser";
 import BentoProfile from "./components/Component04_BentoProfile";
 import StepConfigurator from "./components/Component05_StepConfigurator";
+import BentoNotificationCenter from "./components/Component06_BentoNotificationCenter";
+import KineticMediaSlider from "./components/Component07_KineticMediaSlider";
+import MultiStepCheckout from "./components/Component08_MultiStepCheckout";
+import PricingTable from "./components/Component09_PricingTable";
+import OnboardingWizard from "./components/Component10_OnboardingWizard";
+import MegaMenu from "./components/Component11_MegaMenu";
+import AdvancedFilterSidebar from "./components/Component12_AdvancedFilterSidebar";
+import ProductVariantConfigurator from "./components/Component13_ProductVariantConfigurator";
+import MultiSelectTagInput from "./components/Component14_MultiSelectTagInput";
+import InteractiveSkeletonLoader from "./components/Component15_InteractiveSkeletonLoader";
 
 // Raw code imports for previewer
 import AuthGatewayCode from "./components/Component01_AuthGateway/AuthGateway.jsx?raw";
 import KineticPricingMatrixCode from "./components/Component02_PricingMatrix/PricingMatrix.jsx?raw";
+import ProductVariantConfiguratorCode from "./components/Component13_ProductVariantConfigurator/ProductVariantConfigurator.jsx?raw";
+import MultiSelectTagInputCode from "./components/Component14_MultiSelectTagInput/MultiSelectTagInput.jsx?raw";
+import InteractiveSkeletonLoaderCode from "./components/Component15_InteractiveSkeletonLoader/InteractiveSkeletonLoader.jsx?raw";
 import WaitlistTeaserCode from "./components/Component03_WaitlistTeaser/WaitlistTeaser.jsx?raw";
 import BentoProfileCode from "./components/Component04_BentoProfile/BentoProfile.jsx?raw";
 import StepConfiguratorCode from "./components/Component05_StepConfigurator/StepConfigurator.jsx?raw";
+import BentoNotificationCenterCode from "./components/Component06_BentoNotificationCenter/BentoNotificationCenter.jsx?raw";
+import KineticMediaSliderCode from "./components/Component07_KineticMediaSlider/KineticMediaSlider.jsx?raw";
+import MultiStepCheckoutCode from "./components/Component08_MultiStepCheckout/MultiStepCheckout.jsx?raw";
+import PricingTableCode from "./components/Component09_PricingTable/PricingTable.jsx?raw";
+import OnboardingWizardCode from "./components/Component10_OnboardingWizard/OnboardingWizard.jsx?raw";
+import MegaMenuCode from "./components/Component11_MegaMenu/MegaMenu.jsx?raw";
+import AdvancedFilterSidebarCode from "./components/Component12_AdvancedFilterSidebar/AdvancedFilterSidebar.jsx?raw";
 
 /* ═══════════════════════════════════════════════════════════
    LIGHTWEIGHT JSX REGEX SYNTAX HIGHLIGHTER
@@ -127,6 +147,96 @@ export const COMPONENTS = [
     tags: ["Configurator", "Multi-Step", "AnimatePresence"],
     component: StepConfigurator,
     code: StepConfiguratorCode,
+  },
+  {
+    id: "06",
+    slug: "06",
+    name: "Modern Bento Notification Center",
+    description: "Asymmetric Bento Grid — 1px borders, layered flat aesthetic, 5-theme accent color sync, jelly-stretch morph toggles",
+    tags: ["Dashboard", "Notifications", "Bento Grid"],
+    component: BentoNotificationCenter,
+    code: BentoNotificationCenterCode,
+  },
+  {
+    id: "07",
+    slug: "07",
+    name: "Kinetic Media Slider",
+    description: "Product Showcase Carousel — 2.5D foreground layering, shutter-split reveal, kinetic letter scramble, magnetic particles",
+    tags: ["Slider", "Carousel", "Media"],
+    component: KineticMediaSlider,
+    code: KineticMediaSliderCode,
+  },
+  {
+    id: "08",
+    slug: "08",
+    name: "Multi-Step Checkout & Cart Drawer",
+    description: "Ecommerce Checkout Flow — liquid-elastic cart drawer, orbiting boundary neon tracers, active payment card lift, error vibration",
+    tags: ["Checkout", "Multi-Step", "Cart Drawer"],
+    component: MultiStepCheckout,
+    code: MultiStepCheckoutCode,
+  },
+  {
+    id: "09",
+    slug: "09",
+    name: "Interactive Pricing Table & Switcher",
+    description: "Pricing plans — monthly/yearly counter roll-up, 2.5D highlight tier layering, 5-theme accent layout controller, liquid-ripple click response",
+    tags: ["Pricing", "Cards", "Interactive"],
+    component: PricingTable,
+    code: PricingTableCode,
+  },
+  {
+    id: "10",
+    slug: "10",
+    name: "Multi-Step User Onboarding Wizard",
+    description: "Account creation flow — snappy staggered cascading spring entries, 5-theme accent swatch selector, progress tracking numbers morphing to checkmarks",
+    tags: ["Onboarding", "Multi-Step", "Form"],
+    component: OnboardingWizard,
+    code: OnboardingWizardCode,
+  },
+  {
+    id: "11",
+    slug: "11",
+    name: "Rich Mega-Menu Navigation Bar",
+    description: "Mega-Menu dropdown — layout-morph panel resizing, magnetic submenu hover pills, setting-revealed 5-theme swatch controller",
+    tags: ["Navigation", "Navbar", "Dropdown"],
+    component: MegaMenu,
+    code: MegaMenuCode,
+  },
+  {
+    id: "12",
+    slug: "12",
+    name: "Advanced Search & Filter Sidebar",
+    description: "Data catalog filters — path-drawn checkboxes with scale pop, dualprice tracking segment neon glow, category accordion height morphs",
+    tags: ["Sidebar", "Filter", "Catalog"],
+    component: AdvancedFilterSidebar,
+    code: AdvancedFilterSidebarCode,
+  },
+  {
+    id: "13",
+    slug: "13",
+    name: "Product Variant Configurator",
+    description: "Premium product customizer — dynamic vector watch faces, 5-theme accent swatch selector, crossfade variant transitions, layout-morph active boundaries, sweeping gloss CTA reflection",
+    tags: ["E-commerce", "Configurator", "Animations"],
+    component: ProductVariantConfigurator,
+    code: ProductVariantConfiguratorCode,
+  },
+  {
+    id: "14",
+    slug: "14",
+    name: "Multi-Select Tag Input",
+    description: "Autocomplete multi-tag selector — tag pop scales, dropdown slide entry, 5-theme color focus rings, backspace delete shake safeguard, arrow navigation",
+    tags: ["Input", "Form", "Keyboard"],
+    component: MultiSelectTagInput,
+    code: MultiSelectTagInputCode,
+  },
+  {
+    id: "15",
+    slug: "15",
+    name: "Interactive Skeleton Loader",
+    description: "Cohesive dashboard skeleton — unified angled linear sheen shimmers, 5-theme accent color sync, layout-stable component crossfades, responsive stats grid",
+    tags: ["Dashboard", "Skeleton", "Loader"],
+    component: InteractiveSkeletonLoader,
+    code: InteractiveSkeletonLoaderCode,
   },
 ];
 
@@ -391,22 +501,25 @@ function ShowcasePage() {
                 {/* Empty slots */}
                 <div className="text-[9px] font-black tracking-widest uppercase px-2 mt-3 mb-1.5"
                   style={{ color: "rgba(200,215,255,0.12)" }}>
-                  Coming soon (45)
+                  Coming soon ({50 - COMPONENTS.length})
                 </div>
-                {Array.from({ length: 45 }, (_, i) => i + 6).map((n) => (
-                  <div key={n} className="px-3 py-2 rounded-xl opacity-20 select-none"
-                    style={{ border: "1px dashed rgba(255,255,255,0.07)" }}>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black font-mono"
-                        style={{ color: "rgba(200,215,255,0.3)" }}>
-                        {String(n).padStart(2, "0")}
-                      </span>
-                      <div className="text-[10px]" style={{ color: "rgba(200,215,255,0.18)" }}>
-                        Upcoming component
+                {Array.from({ length: 50 }, (_, i) => i + 1)
+                  .filter((n) => !COMPONENTS.some((c) => parseInt(c.id) === n))
+                  .map((n) => (
+                    <div key={n} className="px-3 py-2 rounded-xl opacity-20 select-none"
+                      style={{ border: "1px dashed rgba(255,255,255,0.07)" }}>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-black font-mono"
+                          style={{ color: "rgba(200,215,255,0.3)" }}>
+                          {String(n).padStart(2, "0")}
+                        </span>
+                        <div className="text-[10px]" style={{ color: "rgba(200,215,255,0.18)" }}>
+                          Upcoming component
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                }
               </div>
             </div>
 
@@ -522,17 +635,20 @@ function ShowcasePage() {
               </motion.div>
             ))}
 
-            {/* Placeholder cards for remaining 45 */}
-            {Array.from({ length: 45 }, (_, i) => (
-              <div key={i + 6} className="rounded-2xl p-5 opacity-[0.18] select-none"
-                style={{ border: "1px dashed rgba(255,255,255,0.08)" }}>
-                <div className="text-[10px] font-black font-mono mb-2" style={{ color: "rgba(200,215,255,0.3)" }}>
-                  #{String(i + 6).padStart(2, "0")}
+            {/* Placeholder cards for remaining */}
+            {Array.from({ length: 50 }, (_, i) => i + 1)
+              .filter((n) => !COMPONENTS.some((c) => parseInt(c.id) === n))
+              .map((n) => (
+                <div key={n} className="rounded-2xl p-5 opacity-[0.18] select-none"
+                  style={{ border: "1px dashed rgba(255,255,255,0.08)" }}>
+                  <div className="text-[10px] font-black font-mono mb-2" style={{ color: "rgba(200,215,255,0.3)" }}>
+                    #{String(n).padStart(2, "0")}
+                  </div>
+                  <div className="h-2 rounded w-3/4 mb-2" style={{ background: "rgba(255,255,255,0.06)" }} />
+                  <div className="h-2 rounded w-1/2" style={{ background: "rgba(255,255,255,0.04)" }} />
                 </div>
-                <div className="h-2 rounded w-3/4 mb-2" style={{ background: "rgba(255,255,255,0.06)" }} />
-                <div className="h-2 rounded w-1/2" style={{ background: "rgba(255,255,255,0.04)" }} />
-              </div>
-            ))}
+              ))
+            }
           </div>
         </div>
       </main>
