@@ -16,6 +16,8 @@ import AdvancedFilterSidebar from "./components/Component12_AdvancedFilterSideba
 import ProductVariantConfigurator from "./components/Component13_ProductVariantConfigurator";
 import MultiSelectTagInput from "./components/Component14_MultiSelectTagInput";
 import InteractiveSkeletonLoader from "./components/Component15_InteractiveSkeletonLoader";
+import LayeredMetricCharts from "./components/Component17_LayeredMetricCharts";
+import TactileFAQAccordion from "./components/Component18_TactileFAQAccordion";
 
 // Raw code imports for previewer
 import AuthGatewayCode from "./components/Component01_AuthGateway/AuthGateway.jsx?raw";
@@ -23,6 +25,8 @@ import KineticPricingMatrixCode from "./components/Component02_PricingMatrix/Pri
 import ProductVariantConfiguratorCode from "./components/Component13_ProductVariantConfigurator/ProductVariantConfigurator.jsx?raw";
 import MultiSelectTagInputCode from "./components/Component14_MultiSelectTagInput/MultiSelectTagInput.jsx?raw";
 import InteractiveSkeletonLoaderCode from "./components/Component15_InteractiveSkeletonLoader/InteractiveSkeletonLoader.jsx?raw";
+import LayeredMetricChartsCode from "./components/Component17_LayeredMetricCharts/LayeredMetricCharts.jsx?raw";
+import TactileFAQAccordionCode from "./components/Component18_TactileFAQAccordion/TactileFAQAccordion.jsx?raw";
 import WaitlistTeaserCode from "./components/Component03_WaitlistTeaser/WaitlistTeaser.jsx?raw";
 import BentoProfileCode from "./components/Component04_BentoProfile/BentoProfile.jsx?raw";
 import StepConfiguratorCode from "./components/Component05_StepConfigurator/StepConfigurator.jsx?raw";
@@ -237,6 +241,24 @@ export const COMPONENTS = [
     tags: ["Dashboard", "Skeleton", "Loader"],
     component: InteractiveSkeletonLoader,
     code: InteractiveSkeletonLoaderCode,
+  },
+  {
+    id: "17",
+    slug: "17",
+    name: "3D Layered Metric Widgets & Trend Charts",
+    description: "Tactile dashboard metrics — 3D-angled chart surfaces, floating SVG path graphs, spring-loaded neon coordinate lines, liquid glass tooltips",
+    tags: ["Dashboard", "Charts", "Interactive"],
+    component: LayeredMetricCharts,
+    code: LayeredMetricChartsCode,
+  },
+  {
+    id: "18",
+    slug: "18",
+    name: "Tactile Elastic FAQ Accordion Stack",
+    description: "Physical support accordion — overlapping 2.5D card items, spring-loaded push-down physics, helpfulness rating counters with visual emoji particle splashes",
+    tags: ["FAQ", "Accordion", "Micro-interactions"],
+    component: TactileFAQAccordion,
+    code: TactileFAQAccordionCode,
   },
 ];
 
