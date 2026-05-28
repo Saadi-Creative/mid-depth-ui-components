@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useMotionTemplate } from "framer-motion";
-import { WAITLIST_THEMES, WAITLIST_THEME_LIST } from "../../themes/themeConfig";
+import { WAITLIST_THEMES } from "../../themes/themeConfig";
+import { useGlobalTheme } from "../../themes/ThemeContext";
 
 /* ═══════════════════════════════════════════════════════════  ICONS  */
 const IconMail = () => (
@@ -111,7 +112,15 @@ const QueueCounter = ({ value }) => {
 };
 
 export default function WaitlistTeaser() {
-  const [currentTheme, setCurrentTheme] = useState(WAITLIST_THEMES.mint);
+  const { activeVariant } = useGlobalTheme();
+  const themeMap = {
+    cyber: WAITLIST_THEMES.mint,
+    glass: WAITLIST_THEMES.indigo,
+    neomorphic: WAITLIST_THEMES.slateBlue,
+    brutal: WAITLIST_THEMES.coral,
+    luxury: WAITLIST_THEMES.roseGold
+  };
+  const currentTheme = themeMap[activeVariant.id] || WAITLIST_THEMES.mint;
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle"); // idle, loading, success
   const [errorMsg, setErrorMsg] = useState("");
@@ -534,41 +543,6 @@ export default function WaitlistTeaser() {
         </motion.div>
       </main>
 
-      {/* ── FOOTER THEME SWITCHER ── */}
-      <footer className="relative z-10 w-full max-w-md flex flex-col items-center gap-3.5 mt-8">
-        <span className="text-[10px] font-black tracking-widest text-white/30 uppercase font-mono">
-          Accent Customization
-        </span>
-        <div className="flex items-center gap-4 bg-black/40 backdrop-blur-md px-5 py-3 rounded-full border border-white/5">
-          {WAITLIST_THEME_LIST.map((theme) => {
-            const isActive = currentTheme.id === theme.id;
-            return (
-              <motion.button
-                key={theme.id}
-                onClick={() => setCurrentTheme(theme)}
-                whileHover={{ scale: 1.35, y: -2 }}
-                whileTap={{ scale: 0.85 }}
-                className="w-5 h-5 rounded-full cursor-pointer relative"
-                style={{
-                  background: theme.swatch,
-                }}
-              >
-                {isActive && (
-                  <motion.span
-                    layoutId="active-accent-ring"
-                    className="absolute -inset-1.5 rounded-full border-2"
-                    style={{
-                      borderColor: theme.swatch,
-                      boxShadow: `0 0 10px ${theme.glow}`,
-                    }}
-                    transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                  />
-                )}
-              </motion.button>
-            );
-          })}
-        </div>
-      </footer>
     </div>
   );
 }

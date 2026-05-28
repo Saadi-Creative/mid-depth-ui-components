@@ -6,7 +6,8 @@ import {
   useTransform,
   useSpring,
 } from "framer-motion";
-import { AUTH_THEMES, AUTH_THEME_LIST } from "../../themes/themeConfig";
+import { AUTH_THEMES } from "../../themes/themeConfig";
+import { useGlobalTheme } from "../../themes/ThemeContext";
 
 /* ═══════════════════════════════════════════════════════════  ICONS  */
 const IconLock = () => (
@@ -77,31 +78,6 @@ const FloatingParticles = ({ theme, active }) => (
   </div>
 );
 
-/* ═══════════════════════════════════════════════════════════  THEME PICKER  */
-const ThemePicker = ({ currentTheme, onThemeChange }) => (
-  <div className="flex gap-2 items-center">
-    {AUTH_THEME_LIST.map((t) => (
-      <motion.button
-        key={t.id}
-        title={t.label}
-        onClick={() => onThemeChange(t)}
-        whileHover={{ scale: 1.4, y: -3, rotate: 15 }}
-        whileTap={{ scale: 0.85 }}
-        className="rounded-full cursor-pointer flex-shrink-0"
-        style={{
-          width: 16,
-          height: 16,
-          background: t.swatch,
-          boxShadow:
-            currentTheme.id === t.id
-              ? `0 0 0 2px #0c0f1e, 0 0 0 3.5px ${t.swatch}, 0 0 10px ${t.glow}`
-              : `0 0 4px ${t.swatch}55`,
-          transition: "box-shadow 0.2s",
-        }}
-      />
-    ))}
-  </div>
-);
 
 /* ═══════════════════════════════════════════════════════════  INPUT  */
 const Field = ({ theme, label, type = "text", value, onChange, placeholder, Icon, compact }) => {
@@ -352,7 +328,15 @@ const SignupForm = ({ theme, onSwitch }) => {
    No vertical scroll on laptop. Mobile: scrollable gracefully.
 ═══════════════════════════════════════════════════════════ */
 export default function AuthGateway() {
-  const [currentTheme, setCurrentTheme] = useState(AUTH_THEMES.cyberGreen);
+  const { activeVariant } = useGlobalTheme();
+  const themeMap = {
+    cyber: AUTH_THEMES.cyberGreen,
+    glass: AUTH_THEMES.neonCyan,
+    neomorphic: AUTH_THEMES.plasmaPurple,
+    brutal: AUTH_THEMES.solarFlare,
+    luxury: AUTH_THEMES.crimsonRed
+  };
+  const currentTheme = themeMap[activeVariant.id] || AUTH_THEMES.cyberGreen;
   const [isLogin, setIsLogin] = useState(true);
   const [flipping, setFlipping] = useState(false);
   const [cardHovered, setCardHovered] = useState(false);
@@ -519,7 +503,6 @@ export default function AuthGateway() {
                     </div>
                   </div>
                 </div>
-                <ThemePicker currentTheme={currentTheme} onThemeChange={setCurrentTheme} />
               </div>
 
               {/* Title */}

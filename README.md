@@ -18,11 +18,9 @@ A curated catalog of premium, hyper-interactive **2.5D & mid-depth user interfac
 *   **Dynamic Theme Engine:** Integrated 5-theme accent color sync (Neon Teal, Cyber Rose, Toxic Lime, Amber Glow, Orbit Indigo) matching active states.
 *   **Framer Motion Physics:** Spring-based physics, morphing layouts, liquid ripples, and kinetic feedback.
 *   **Completely Modular:** Clean JSX components that you can drop directly into your project.
-*   **Vite Powered HMR:** Ultra-fast development previewer and code copy tools built directly into the showcase app.
+*   **Vite Powered HMR:** Ultra-fast development previewer and code copy tools built directly into the showcase app
 
----
-
-## 🎨 Component Showcase (`15 / 50` Completed)
+## 🎨 Component Showcase (`29 / 50` Completed)
 
 Below is the directory of all interactive components built so far. Each is designed for production use, accessibility, and high performance.
 
@@ -43,6 +41,20 @@ Below is the directory of all interactive components built so far. Each is desig
 | **13** | [Product Variant Configurator](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component13_ProductVariantConfigurator) | Customized watches with depth configurations. | Watch vectors, sweeping light reflect effects | `E-commerce`, `Configurator` |
 | **14** | [Multi-Select Tag Input](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component14_MultiSelectTagInput) | Keyboard-navigable autocomplete tag creator. | Staggered pop entry, backspace shake delete | `Input`, `Form`, `Keyboard` |
 | **15** | [Interactive Skeleton Loader](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component15_InteractiveSkeletonLoader) | Cohesive dashboard skeletons morphing to actual data. | Unified angled sheen, stable layout transitions | `Dashboard`, `Skeleton`, `Loader` |
+| **16** | [Elevated 2.5D Kinetic Data Grid](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component16_KineticDataGrid) | High-tech server status grid with Z-axis row lifting. | Sorting spring reordering, nested SVG diagnostics charts, batch actions | `Dashboard`, `Data Grid`, `Interactive` |
+| **17** | [3D Layered Metric Widgets](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component17_LayeredMetricCharts) | Tactile dashboard metrics with 3D-angled chart surfaces. | Floating SVG graphs, spring-loaded neon coordinate tracking, glass tooltips | `Dashboard`, `Charts`, `Interactive` |
+| **18** | [Tactile Elastic FAQ Accordion Stack](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component18_TactileFAQAccordion) | Physical support accordion cards with spring-loaded push-down physics. | Helpful rating counters, emoji particle splashes, elastic transitions | `FAQ`, `Accordion`, `Micro-interactions` |
+| **19** | [Kinetic Release Notes Feed](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component19_ReleaseNotesFeed) | Flat-layered changelog feed with a continuous tracking timeline. | Vertical tracking line, staggered horizontal reveal, cascading details, magnetic tags | `Changelog`, `Timeline`, `Interactive` |
+| **20** | [Kinetic OTP Verification](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component20_OTPVerification) | Flat-layered 2FA validation card with swatch-selected theme engine. | Quick box bouncing, automatic focus forwarding, validation success ripples, error haptic shake | `Auth`, `Validation`, `Form` |
+| **21** | [High-Conversion Newsletter CTA](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component21_NewsletterCTA) | Inline newsletter block with physics particle explosions. | Floating active placeholder labels, morphing actions, custom theme swatches | `Form`, `Input`, `Glow-Orbs` |
+| **22** | [Elastic 2.5D Kanban Board](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component22_ElasticKanbanBoard) | Collaborative board with Z-axis cursor-tilt cards. | Drag-and-drop column overlays, check-to-complete, inline task creation | `Kanban`, `Workflow`, `Interactive` |
+| **23** | [Dynamic Content Card Grid](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component23_ContentCardGrid) | Responsive card grid with category filter switcher. | Stagger-fade scroll entries, image zooms, active color overlays, magnetic read-more arrow | `Grid`, `Cards`, `Interactive` |
+| **24** | [Floating Support Messenger Widget](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component24_SupportMessenger) | Floating messenger window with bottom-anchored spring morphs. | Open-close spring layouts, slide-up message bubbles, sequential agent typing dots, scale bounces | `Messenger`, `Chat`, `Interactive` |
+| **25** | [Nested Threaded Discussion Board](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component25_DiscussionBoard) | Threaded comments section with recursive indentation guides. | Indented reply lines, layout-morph reply reveals, micro-jump upvotes, background highlights | `Discussion`, `Comments`, `Interactive` |
+| **26** | [Step-by-Step Interactive Product Tour](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component26_ProductTour) | Contextual overlay walkthrough. | Elastic outlines morphing x/y/w/h, snappy spring tooltip positioning, skip tour horizontal slide indicators | `Onboarding`, `Tour`, `Interactive` |
+| **27** | [Kinetic Hero Product Carousel](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component27_HeroCarousel) | Auto-advancing hero catalog. | Horizontal slides, cylinder roll text overlays, pause-on-hover filling progress dots, diagonal gloss sweep button | `Carousel`, `Landing Page`, `Interactive` |
+| **28** | [Sticky E-commerce Action Bar](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component28_StickyPurchaseBar) | Scroll-activated shopping bar. | Slide-in threshold triggers, color variant thumbnail flips, morphing loading and checkmark button states | `E-commerce`, `Sticky`, `Form` |
+| **29** | [Dynamic Mega Footer & Newsletter](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component29_MegaFooter) | Detailed flat-layered site footer. | Path animated link underlines, social icon hover bounces, SVG boundary input tracers, success ripples | `Footer`, `Layout`, `Interactive` |
 
 ---
 

@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useMotionTemplate } from "framer-motion";
-import { PRICING_THEMES, PRICING_THEME_LIST } from "../../themes/themeConfig";
+import { PRICING_THEMES } from "../../themes/themeConfig";
+import { useGlobalTheme } from "../../themes/ThemeContext";
 
 /* ═══════════════════════════════════════════════════════════
    ICONS
@@ -28,32 +29,6 @@ const IconSpinner = () => (
     className="block w-4 h-4 border-2 border-black/20 border-t-black rounded-full" />
 );
 
-/* ═══════════════════════════════════════════════════════════
-   THEME SWATCH PICKER
-═══════════════════════════════════════════════════════════ */
-const ThemePicker = ({ currentTheme, onThemeChange }) => (
-  <div className="flex gap-2.5 items-center justify-center">
-    {PRICING_THEME_LIST.map((t, i) => (
-      <motion.button key={t.id} title={t.label}
-        onClick={() => onThemeChange(t)}
-        whileHover={{ scale: 1.45, y: -3, rotate: 20 }}
-        whileTap={{ scale: 0.8, rotate: -10 }}
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.6 + i * 0.08, type: "spring", stiffness: 300 }}
-        className="rounded-full cursor-pointer flex-shrink-0"
-        style={{
-          width: 22, height: 22,
-          background: t.swatch,
-          boxShadow: currentTheme.id === t.id
-            ? `0 0 0 2px #08091a, 0 0 0 4px ${t.swatch}, 0 0 18px ${t.swatch}88`
-            : `0 0 8px ${t.swatch}44`,
-          transition: "box-shadow 0.22s",
-        }}
-      />
-    ))}
-  </div>
-);
 
 /* ═══════════════════════════════════════════════════════════
    FLOATING PARTICLES
@@ -398,7 +373,15 @@ const PricingCard = ({ tier, theme, index, isPro, isYearly }) => {
                → laptop (3-col side by side)
  ═══════════════════════════════════════════════════════════ */
 export default function KineticPricingMatrix() {
-  const [currentTheme, setCurrentTheme] = useState(PRICING_THEMES.sapphire);
+  const { activeVariant } = useGlobalTheme();
+  const themeMap = {
+    cyber: PRICING_THEMES.emerald,
+    glass: PRICING_THEMES.sapphire,
+    neomorphic: PRICING_THEMES.amethyst,
+    brutal: PRICING_THEMES.amber,
+    luxury: PRICING_THEMES.ruby
+  };
+  const currentTheme = themeMap[activeVariant.id] || PRICING_THEMES.sapphire;
   const [isYearly, setIsYearly] = useState(false);
 
   const tiers = [
@@ -523,13 +506,6 @@ export default function KineticPricingMatrix() {
           Scale effortlessly. No hidden fees, cancel anytime.
         </p>
 
-        {/* Theme picker */}
-        <div className="mt-6 sm:mt-8">
-          <p className="text-[9px] sm:text-[10px] uppercase tracking-widest mb-2.5" style={{ color: "rgba(200,215,255,0.26)" }}>
-            Select Theme
-          </p>
-          <ThemePicker currentTheme={currentTheme} onThemeChange={setCurrentTheme} />
-        </div>
 
         {/* Billing Switcher */}
         <div className="mt-6 flex items-center justify-center gap-3">

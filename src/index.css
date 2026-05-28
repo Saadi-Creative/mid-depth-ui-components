@@ -3,6 +3,25 @@
 
 @import "tailwindcss";
 
+/* ─── Typography & Border Utilities from CSS Variables ────── */
+:root {
+  --font-primary: 'Inter', sans-serif;
+  --font-secondary: 'Inter', sans-serif;
+  --font-mono: monospace;
+}
+
+.font-primary {
+  font-family: var(--font-primary), sans-serif;
+}
+
+.font-secondary {
+  font-family: var(--font-secondary), sans-serif;
+}
+
+.font-mono-theme {
+  font-family: var(--font-mono), monospace;
+}
+
 /* ─── Global reset ─────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -11,7 +30,7 @@ html { scroll-behavior: smooth; }
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', 'Space Grotesk', system-ui, sans-serif;
+  font-family: var(--font-secondary), 'Inter', 'Space Grotesk', system-ui, sans-serif;
   background: #060810;
   color: #fff;
   -webkit-font-smoothing: antialiased;
@@ -27,3 +46,4 @@ body {
 
 /* ─── Selection ────────────────────────────────────────────── */
 ::selection { background: rgba(0,229,255,0.25); color: #fff; }
+

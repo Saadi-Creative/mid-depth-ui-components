@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useGlobalTheme } from "./themes/ThemeContext";
 import AuthGateway from "./components/Component01_AuthGateway";
 import KineticPricingMatrix from "./components/Component02_PricingMatrix";
 import WaitlistTeaser from "./components/Component03_WaitlistTeaser";
@@ -18,6 +19,22 @@ import MultiSelectTagInput from "./components/Component14_MultiSelectTagInput";
 import InteractiveSkeletonLoader from "./components/Component15_InteractiveSkeletonLoader";
 import LayeredMetricCharts from "./components/Component17_LayeredMetricCharts";
 import TactileFAQAccordion from "./components/Component18_TactileFAQAccordion";
+import KineticDataGrid from "./components/Component16_KineticDataGrid";
+import ElasticKanbanBoard from "./components/Component22_ElasticKanbanBoard";
+import ReleaseNotesFeed from "./components/Component19_ReleaseNotesFeed";
+import OTPVerification from "./components/Component20_OTPVerification";
+import NewsletterCTA from "./components/Component21_NewsletterCTA";
+import ContentCardGrid from "./components/Component23_ContentCardGrid";
+import SupportMessenger from "./components/Component24_SupportMessenger";
+import DiscussionBoard from "./components/Component25_DiscussionBoard";
+import ProductTour from "./components/Component26_ProductTour";
+import HeroCarousel from "./components/Component27_HeroCarousel";
+import StickyPurchaseBar from "./components/Component28_StickyPurchaseBar";
+import MegaFooter from "./components/Component29_MegaFooter";
+import SupportTicketing from "./components/Component30_SupportTicketing";
+import EmptyStateRecovery from "./components/Component31_EmptyStateRecovery";
+import AccountSettingsHub from "./components/Component32_AccountSettingsHub";
+import EventRegistration from "./components/Component33_EventRegistration";
 
 // Raw code imports for previewer
 import AuthGatewayCode from "./components/Component01_AuthGateway/AuthGateway.jsx?raw";
@@ -37,6 +54,22 @@ import PricingTableCode from "./components/Component09_PricingTable/PricingTable
 import OnboardingWizardCode from "./components/Component10_OnboardingWizard/OnboardingWizard.jsx?raw";
 import MegaMenuCode from "./components/Component11_MegaMenu/MegaMenu.jsx?raw";
 import AdvancedFilterSidebarCode from "./components/Component12_AdvancedFilterSidebar/AdvancedFilterSidebar.jsx?raw";
+import KineticDataGridCode from "./components/Component16_KineticDataGrid/KineticDataGrid.jsx?raw";
+import ElasticKanbanBoardCode from "./components/Component22_ElasticKanbanBoard/ElasticKanbanBoard.jsx?raw";
+import ReleaseNotesFeedCode from "./components/Component19_ReleaseNotesFeed/ReleaseNotesFeed.jsx?raw";
+import OTPVerificationCode from "./components/Component20_OTPVerification/OTPVerification.jsx?raw";
+import NewsletterCTACode from "./components/Component21_NewsletterCTA/NewsletterCTA.jsx?raw";
+import ContentCardGridCode from "./components/Component23_ContentCardGrid/ContentCardGrid.jsx?raw";
+import SupportMessengerCode from "./components/Component24_SupportMessenger/SupportMessenger.jsx?raw";
+import DiscussionBoardCode from "./components/Component25_DiscussionBoard/DiscussionBoard.jsx?raw";
+import ProductTourCode from "./components/Component26_ProductTour/ProductTour.jsx?raw";
+import HeroCarouselCode from "./components/Component27_HeroCarousel/HeroCarousel.jsx?raw";
+import StickyPurchaseBarCode from "./components/Component28_StickyPurchaseBar/StickyPurchaseBar.jsx?raw";
+import MegaFooterCode from "./components/Component29_MegaFooter/MegaFooter.jsx?raw";
+import SupportTicketingCode from "./components/Component30_SupportTicketing/SupportTicketing.jsx?raw";
+import EmptyStateRecoveryCode from "./components/Component31_EmptyStateRecovery/EmptyStateRecovery.jsx?raw";
+import AccountSettingsHubCode from "./components/Component32_AccountSettingsHub/AccountSettingsHub.jsx?raw";
+import EventRegistrationCode from "./components/Component33_EventRegistration/EventRegistration.jsx?raw";
 
 /* ═══════════════════════════════════════════════════════════
    LIGHTWEIGHT JSX REGEX SYNTAX HIGHLIGHTER
@@ -243,6 +276,15 @@ export const COMPONENTS = [
     code: InteractiveSkeletonLoaderCode,
   },
   {
+    id: "16",
+    slug: "16",
+    name: "Elevated 2.5D Kinetic Data Grid",
+    description: "High-tech server status grid — dynamic Z-axis hover lifting, sorting spring reordering, nested detailed diagnostics charts, batch action drawer",
+    tags: ["Dashboard", "Data Grid", "Interactive"],
+    component: KineticDataGrid,
+    code: KineticDataGridCode,
+  },
+  {
     id: "17",
     slug: "17",
     name: "3D Layered Metric Widgets & Trend Charts",
@@ -259,6 +301,141 @@ export const COMPONENTS = [
     tags: ["FAQ", "Accordion", "Micro-interactions"],
     component: TactileFAQAccordion,
     code: TactileFAQAccordionCode,
+  },
+  {
+    id: "19",
+    slug: "19",
+    name: "Kinetic Release Notes Feed",
+    description: "Flat-layered changelog feed — vertical tracking timeline with glowing markers, horizontal staggered entries, magnetic tag pulls, custom accents selector",
+    tags: ["Changelog", "Timeline", "Interactive"],
+    component: ReleaseNotesFeed,
+    code: ReleaseNotesFeedCode,
+  },
+  {
+    id: "20",
+    slug: "20",
+    name: "Kinetic OTP Verification",
+    description: "Flat-layered 2FA validation panel — bounce input forwarding, synchronized error vibration shake, sequential liquid success animations, resend timers",
+    tags: ["Auth", "Validation", "Form"],
+    component: OTPVerification,
+    code: OTPVerificationCode,
+  },
+  {
+    id: "21",
+    slug: "21",
+    name: "High-Conversion Newsletter CTA",
+    description: "Flat-layered sub input card — floating active placeholder label, morphing button actions, physics-based micro-particle confetti explosions, 5-theme selector",
+    tags: ["Form", "Input", "Glow-Orbs"],
+    component: NewsletterCTA,
+    code: NewsletterCTACode,
+  },
+  {
+    id: "22",
+    slug: "22",
+    name: "Elastic 2.5D Kanban Board",
+    description: "Collaborative project board — Z-axis cursor-tilt cards, drag-and-drop column overlays, dynamic complete triggers, inline card creation",
+    tags: ["Kanban", "Workflow", "Interactive"],
+    component: ElasticKanbanBoard,
+    code: ElasticKanbanBoardCode,
+  },
+  {
+    id: "23",
+    slug: "23",
+    name: "Dynamic Content Card Grid",
+    description: "Flat-layered responsive card grid — stagger-fade scroll entries, featured image hover zooms, active color overlays, magnetic read-more arrow glide",
+    tags: ["Grid", "Cards", "Interactive"],
+    component: ContentCardGrid,
+    code: ContentCardGridCode,
+  },
+  {
+    id: "24",
+    slug: "24",
+    name: "Floating Support Messenger Widget",
+    description: "Floating messenger window — bottom-anchored spring morphs, incoming message slide-ins, sequentially bouncing typing dots, user message scale bounces",
+    tags: ["Messenger", "Chat", "Interactive"],
+    component: SupportMessenger,
+    code: SupportMessengerCode,
+  },
+  {
+    id: "25",
+    slug: "25",
+    name: "Nested Threaded Discussion Board",
+    description: "Nested comments section — indent guidelines, layout morph reply reveals, micro-jump upvotes, entry staggered highlights",
+    tags: ["Discussion", "Comments", "Interactive"],
+    component: DiscussionBoard,
+    code: DiscussionBoardCode,
+  },
+  {
+    id: "26",
+    slug: "26",
+    name: "Step-by-Step Interactive Product Tour",
+    description: "Interactive onboarding overlay — absolute outline highlight morphing, snappy spring tooltip positioning, skip tour horizontal slide indicators, custom themes",
+    tags: ["Onboarding", "Tour", "Interactive"],
+    component: ProductTour,
+    code: ProductTourCode,
+  },
+  {
+    id: "27",
+    slug: "27",
+    name: "Kinetic Hero Product Carousel",
+    description: "Auto-advancing product spotlight — horizontal slide-outs, vertical cylinder slots for titles and prices, pause-on-hover circular progress dots, CTA diagonal gloss sweep",
+    tags: ["Carousel", "Landing Page", "Interactive"],
+    component: HeroCarousel,
+    code: HeroCarouselCode,
+  },
+  {
+    id: "28",
+    slug: "28",
+    name: "Sticky E-commerce Action Bar",
+    description: "Scroll-threshold sticky purchase bar — dynamic color variant picker micro-flips, morphing button spinners, success checkmarks, settings gear swatches",
+    tags: ["E-commerce", "Sticky", "Form"],
+    component: StickyPurchaseBar,
+    code: StickyPurchaseBarCode,
+  },
+  {
+    id: "29",
+    slug: "29",
+    name: "Dynamic Mega Footer & Newsletter",
+    description: "Flat-layered interactive site footer — animated link underlines, social icon bounces, SVG input boundary tracers, newsletter success liquid ripples",
+    tags: ["Footer", "Layout", "Interactive"],
+    component: MegaFooter,
+    code: MegaFooterCode,
+  },
+  {
+    id: "30",
+    slug: "30",
+    name: "Support Ticketing & Contact Form",
+    description: "Flat-layered support dispatcher — dynamic department conditional questions with height morphs, button progress transitions, liquid-ripple success state",
+    tags: ["Form", "Ticketing", "Department"],
+    component: SupportTicketing,
+    code: SupportTicketingCode,
+  },
+  {
+    id: "31",
+    slug: "31",
+    name: "404 / Empty State Recovery Page",
+    description: "Tactile offline screen — floating sine-wave 404 animation, magnetic Home button pull, active swatch sync accents, database search",
+    tags: ["404", "Empty State", "Magnetic"],
+    component: EmptyStateRecovery,
+    code: EmptyStateRecoveryCode,
+  },
+  {
+    id: "32",
+    slug: "32",
+    name: "Accessible Account Settings Hub",
+    description: "Accessibility-first user dashboard — vertical active indicator tab sliding, guided layout-morph 2FA setups, instant content crossfades",
+    tags: ["A11y", "Settings", "Forms"],
+    component: AccountSettingsHub,
+    code: AccountSettingsHubCode,
+  },
+  {
+    id: "33",
+    slug: "33",
+    name: "Kinetic Event & Webinar Registration",
+    description: "High-conversion RSVP block — mechanical split-flap countdown rolls, hover slide-out speaker cards, layout-dissolving confirmation morphs",
+    tags: ["Form", "Countdown", "Cards"],
+    component: EventRegistration,
+    code: EventRegistrationCode,
   },
 ];
 
@@ -454,9 +631,10 @@ function PreviewRoute() {
 function ShowcasePage() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { activeVariant } = useGlobalTheme();
 
   return (
-    <div className="flex min-h-screen" style={{ background: "#060810" }}>
+    <div className="flex min-h-screen">
 
       {/* ── Sidebar ── */}
       <AnimatePresence initial={false}>
@@ -502,12 +680,12 @@ function ShowcasePage() {
                     whileHover={{ x: 3 }} whileTap={{ scale: 0.97 }}
                     className="w-full text-left px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200"
                     style={{
-                      background: "rgba(0,229,255,0.06)",
-                      border: "1px solid rgba(0,229,255,0.15)",
+                      background: `${activeVariant.triggerColor}0f`,
+                      border: `1px solid ${activeVariant.triggerColor}26`,
                     }}>
                     <div className="flex items-start gap-2.5">
-                      <span className="text-[10px] font-black font-mono mt-0.5 flex-shrink-0"
-                        style={{ color: "#00E5FF" }}>
+                      <span className="text-[10px] font-black font-mono-theme mt-0.5 flex-shrink-0"
+                        style={{ color: activeVariant.triggerColor }}>
                         {item.id}
                       </span>
                       <div>
@@ -585,19 +763,17 @@ function ShowcasePage() {
           <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }} className="mb-10">
             <div className="flex items-center gap-3 mb-3">
-              <div className="text-[10px] font-black tracking-widest uppercase px-2.5 py-1 rounded-full"
-                style={{ background: "rgba(0,229,255,0.1)", border: "1px solid rgba(0,229,255,0.2)", color: "#00E5FF" }}>
+              <div className="text-[10px] font-black tracking-widest uppercase px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
                 Library
               </div>
-              <span className="text-[11px]" style={{ color: "rgba(200,215,255,0.3)" }}>
+              <span className="text-[11px] opacity-40">
                 {COMPONENTS.length} / 50 built
               </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-white mb-2">50 × 2.5D Components</h1>
-            <p className="text-sm" style={{ color: "rgba(200,215,255,0.4)" }}>
+            <h1 className="text-3xl sm:text-4xl font-black mb-2">50 × 2.5D Components</h1>
+            <p className="text-sm opacity-60">
               Click any card to preview it full-screen, or navigate directly via{" "}
-              <code className="px-1.5 py-0.5 rounded text-[11px]"
-                style={{ background: "rgba(0,229,255,0.1)", color: "#00E5FF" }}>
+              <code className="px-1.5 py-0.5 rounded text-[11px] bg-cyan-500/10 text-cyan-400">
                 /preview/01
               </code>
             </p>
@@ -609,42 +785,36 @@ function ShowcasePage() {
               <motion.div key={item.id}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ delay: i * 0.04, duration: 0.4 }}
                 onClick={() => navigate(`/preview/${item.slug}`)}
                 whileHover={{ y: -4, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="relative rounded-2xl overflow-hidden cursor-pointer group"
-                style={{
-                  background: "linear-gradient(145deg,rgba(16,20,44,0.95) 0%,rgba(8,10,22,0.97) 100%)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-                }}
+                className={`relative overflow-hidden cursor-pointer group p-5 transition-all duration-300 ${activeVariant.cardClass}`}
               >
                 {/* Hover glow */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{ background: "linear-gradient(135deg,rgba(0,229,255,0.05) 0%,transparent 100%)" }} />
+                  style={{ background: `linear-gradient(135deg, ${activeVariant.triggerColor}0d 0%, transparent 100%)` }} />
 
                 <div className="relative p-5">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-[10px] font-black font-mono px-2 py-1 rounded-lg"
-                      style={{ background: "rgba(0,229,255,0.1)", color: "#00E5FF" }}>
+                    <span className="text-[10px] font-black font-mono-theme px-2 py-1 rounded-lg"
+                      style={{ background: `${activeVariant.triggerColor}1a`, color: activeVariant.triggerColor }}>
                       #{item.id}
                     </span>
                     <svg className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                      width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" strokeWidth="2.5">
+                      width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={activeVariant.triggerColor} strokeWidth="2.5">
                       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
                       <polyline points="15 3 21 3 21 9"/>
                       <line x1="10" y1="14" x2="21" y2="3"/>
                     </svg>
                   </div>
-                  <h3 className="font-black text-white text-sm mb-1">{item.name}</h3>
-                  <p className="text-[11px] leading-snug mb-3" style={{ color: "rgba(200,215,255,0.38)" }}>
+                  <h3 className={`font-black text-sm mb-1 ${activeVariant.accentText}`}>{item.name}</h3>
+                  <p className={`text-[11px] leading-snug mb-3 opacity-60 ${activeVariant.mode === 'dark' ? 'text-white' : 'text-slate-800'}`}>
                     {item.description}
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {item.tags.map((tag) => (
-                      <span key={tag} className="text-[9px] font-bold px-2 py-0.5 rounded-full"
-                        style={{ background: "rgba(255,255,255,0.05)", color: "rgba(200,215,255,0.4)" }}>
+                      <span key={tag} className={`text-[9px] font-bold px-2 py-0.5 rounded-full bg-current/5 ${activeVariant.mode === 'dark' ? 'text-white/60' : 'text-slate-800/60'}`}>
                         {tag}
                       </span>
                     ))}
@@ -653,21 +823,19 @@ function ShowcasePage() {
 
                 {/* Bottom accent */}
                 <div className="h-px opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{ background: "linear-gradient(90deg,transparent,rgba(0,229,255,0.4),transparent)" }} />
+                  style={{ background: `linear-gradient(90deg, transparent, ${activeVariant.triggerColor}80, transparent)` }} />
               </motion.div>
             ))}
 
-            {/* Placeholder cards for remaining */}
             {Array.from({ length: 50 }, (_, i) => i + 1)
               .filter((n) => !COMPONENTS.some((c) => parseInt(c.id) === n))
               .map((n) => (
-                <div key={n} className="rounded-2xl p-5 opacity-[0.18] select-none"
-                  style={{ border: "1px dashed rgba(255,255,255,0.08)" }}>
-                  <div className="text-[10px] font-black font-mono mb-2" style={{ color: "rgba(200,215,255,0.3)" }}>
+                <div key={n} className={`p-5 opacity-20 select-none ${activeVariant.cardClass}`}>
+                  <div className="text-[10px] font-black font-mono mb-2 opacity-50">
                     #{String(n).padStart(2, "0")}
                   </div>
-                  <div className="h-2 rounded w-3/4 mb-2" style={{ background: "rgba(255,255,255,0.06)" }} />
-                  <div className="h-2 rounded w-1/2" style={{ background: "rgba(255,255,255,0.04)" }} />
+                  <div className="h-2 rounded w-3/4 mb-2 bg-current opacity-10" />
+                  <div className="h-2 rounded w-1/2 bg-current opacity-10" />
                 </div>
               ))
             }
@@ -684,6 +852,7 @@ function ShowcasePage() {
 export default function App() {
   return (
     <AnimatePresence mode="wait">
+      <GlobalThemeSwitcher />
       <Routes>
         <Route path="/" element={<ShowcasePage />} />
         <Route path="/preview/:slug" element={<PreviewPage />} />
@@ -691,6 +860,40 @@ export default function App() {
     </AnimatePresence>
   );
 }
+
+function GlobalThemeSwitcher() {
+  const { activeVariant, setActiveVariant, variants } = useGlobalTheme();
+  
+  return (
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] bg-[#0c0e1a]/95 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl flex items-center gap-3.5 shadow-2xl">
+      <span className="text-[9px] font-mono uppercase tracking-widest text-white/50 hidden sm:inline">Global Engine:</span>
+      <div className="flex gap-2">
+        {variants.map(variant => (
+          <button
+            key={variant.id}
+            onClick={() => setActiveVariant(variant)}
+            className="w-4 h-4 rounded-full cursor-pointer relative transition-all hover:scale-110 flex items-center justify-center border border-white/20"
+            style={{ backgroundColor: variant.triggerColor }}
+            title={variant.name}
+            aria-label={`Switch style to ${variant.name}`}
+          >
+            {activeVariant.id === variant.id && (
+              <motion.div
+                layoutId="global-active-theme-ring"
+                className="absolute -inset-1.5 rounded-full border-2 border-white"
+                transition={{ type: "spring", stiffness: 350, damping: 20 }}
+              />
+            )}
+          </button>
+        ))}
+      </div>
+      <span className="text-[9px] font-mono uppercase text-cyan-400 border-l border-white/10 pl-3 hidden sm:inline">
+        {activeVariant.name}
+      </span>
+    </div>
+  );
+}
+
 
 /* Wrapper that reads the :slug param and renders PreviewRoute */
 function PreviewPage() {

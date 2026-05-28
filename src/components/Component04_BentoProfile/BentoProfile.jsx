@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, useMotionValue, useSpring, useTransform, useMotionTemplate, AnimatePresence } from "framer-motion";
-import { BENTO_THEMES, BENTO_THEME_LIST } from "../../themes/themeConfig";
+import { BENTO_THEMES } from "../../themes/themeConfig";
+import { useGlobalTheme } from "../../themes/ThemeContext";
 
 /* ═══════════════════════════════════════════════════════════  ICONS  */
 const IconShield = () => (
