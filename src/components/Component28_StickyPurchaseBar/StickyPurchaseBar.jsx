@@ -69,7 +69,7 @@ export default function StickyPurchaseBar() {
 
   return (
     <div 
-      className={`min-h-screen relative transition-colors duration-500 py-12 px-6 ${activeVariant.canvasClass} font-secondary`}
+      className={`min-h-screen relative transition-colors duration-500 py-12 px-6  pt-[120px] pb-8 sm:pt-[120px] sm:pb-8 ${activeVariant.canvasClass} font-secondary`}
     >
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
 

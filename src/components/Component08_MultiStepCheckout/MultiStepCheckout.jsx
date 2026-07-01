@@ -167,7 +167,7 @@ export default function MultiStepCheckout() {
   const cartTotal = cartSubtotal > 0 ? cartSubtotal + 15 : 0; // plus $15 flat shipping
 
   return (
-    <div className={`min-h-screen relative overflow-x-hidden flex flex-col p-4 md:p-8 transition-colors duration-500 ${activeVariant.canvasClass}`}>
+    <div className={`min-h-screen relative overflow-x-hidden flex flex-col p-4 md:p-8 transition-colors duration-500  pt-[120px] pb-8 sm:pt-[120px] sm:pb-8 ${activeVariant.canvasClass}`}>
       
       {/* Configuration Header */}
       <header className={`w-full max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-6 mb-8 ${activeVariant.cardClass}`}>

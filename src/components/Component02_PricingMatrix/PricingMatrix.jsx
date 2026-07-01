@@ -460,7 +460,7 @@ export default function KineticPricingMatrix() {
   return (
     <div
       id="component-02-pricing-matrix"
-      className={`relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden py-16 sm:py-20 px-4 sm:px-6 ${activeVariant.canvasClass}`}
+      className={`relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden py-16 sm:py-20 px-4 sm:px-6  pt-[120px] pb-8 sm:pt-[120px] sm:pb-8 ${activeVariant.canvasClass}`}
     >
       {/* ── Ambient glow ── */}
       {activeVariant.id !== 'brutal' && (

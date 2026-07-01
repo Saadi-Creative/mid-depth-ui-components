@@ -131,7 +131,7 @@ export default function BentoNotificationCenter() {
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center p-4 sm:p-6 transition-colors duration-500 ${activeVariant.canvasClass}`}>
+    <div className={`min-h-screen flex items-center justify-center p-4 sm:p-6 transition-colors duration-500  pt-[120px] pb-8 sm:pt-[120px] sm:pb-8 ${activeVariant.canvasClass}`}>
       <motion.div 
         variants={staggerContainer}
         initial="hidden"

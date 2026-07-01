@@ -128,7 +128,7 @@ export default function AdvancedFilterSidebar() {
   };
 
   return (
-    <div className={`min-h-screen flex justify-start items-stretch relative overflow-x-hidden transition-colors duration-500 ${activeVariant.canvasClass}`}>
+    <div className={`min-h-screen flex justify-start items-stretch relative overflow-x-hidden transition-colors duration-500  pt-[120px] pb-8 sm:pt-[120px] sm:pb-8 ${activeVariant.canvasClass}`}>
       
       {/* Search & Filter Sidebar Container */}
       <aside 

@@ -176,7 +176,7 @@ export default function KineticMediaSlider() {
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center p-4 sm:p-8 transition-colors duration-500 ${activeVariant.canvasClass}`}>
+    <div className={`min-h-screen flex items-center justify-center p-4 sm:p-8 transition-colors duration-500  pt-[120px] pb-8 sm:pt-[120px] sm:pb-8 ${activeVariant.canvasClass}`}>
       <div className="w-full max-w-6xl relative h-[600px] flex items-center justify-center">
         
         {/* Background inactive slides (2.5D effect) */}

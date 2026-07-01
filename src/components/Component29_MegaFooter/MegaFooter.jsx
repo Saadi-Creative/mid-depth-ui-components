@@ -48,7 +48,7 @@ export default function MegaFooter() {
 
   return (
     <div 
-      className={`min-h-screen relative flex flex-col justify-between transition-colors duration-500 py-12 ${activeVariant.canvasClass} font-secondary`}
+      className={`min-h-screen relative flex flex-col justify-between transition-colors duration-500 py-12  pt-[120px] pb-8 sm:pt-[120px] sm:pb-8 ${activeVariant.canvasClass} font-secondary`}
     >
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff01_1px,transparent_1px),linear-gradient(to_bottom,#ffffff01_1px,transparent_1px)] bg-[size:30px_30px] pointer-events-none" />
       

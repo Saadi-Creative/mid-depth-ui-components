@@ -116,7 +116,7 @@ export default function MegaMenu() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col justify-start pt-16 p-4 md:p-8 transition-colors duration-500 ${activeVariant.canvasClass}`}>
+    <div className={`min-h-screen flex flex-col justify-start pt-16 p-4 md:p-8 transition-colors duration-500  pt-[120px] pb-8 sm:pt-[120px] sm:pb-8 ${activeVariant.canvasClass}`}>
       
       {/* Mega-Menu Navigation Container */}
       <div 

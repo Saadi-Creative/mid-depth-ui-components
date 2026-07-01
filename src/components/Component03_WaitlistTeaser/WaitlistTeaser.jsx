@@ -194,7 +194,7 @@ export default function WaitlistTeaser() {
   return (
     <div
       id="component-03-waitlist-teaser"
-      className={`relative w-full min-h-screen overflow-hidden flex flex-col justify-between items-center px-4 py-8 select-none transition-colors duration-1000 ${activeVariant.canvasClass}`}
+      className={`relative w-full min-h-screen overflow-hidden flex flex-col justify-between items-center px-4 py-8 select-none transition-colors duration-1000  pt-[120px] pb-8 sm:pt-[120px] sm:pb-8 ${activeVariant.canvasClass}`}
     >
       {/* ── DRIFTING 2D COLOR ORBS (CSS BLUR) ── */}
       {activeVariant.id !== 'brutal' && (

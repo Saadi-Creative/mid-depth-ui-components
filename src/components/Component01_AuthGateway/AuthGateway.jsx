@@ -390,7 +390,7 @@ export default function AuthGateway() {
   return (
     <div
       id="component-01-auth-gateway"
-      className={`relative w-full overflow-hidden flex items-center justify-center ${activeVariant.canvasClass}`}
+      className={`relative w-full overflow-hidden flex items-center justify-center  pt-[120px] pb-8 sm:pt-[120px] sm:pb-8 ${activeVariant.canvasClass}`}
       style={{
         height: "100vh",
       }}

@@ -81,7 +81,7 @@ export default function SupportMessenger() {
   };
 
   return (
-    <div className={`min-h-screen relative overflow-hidden transition-colors duration-500 ${activeVariant.canvasClass}`}>
+    <div className={`min-h-screen relative overflow-hidden transition-colors duration-500  pt-[120px] pb-8 sm:pt-[120px] sm:pb-8 ${activeVariant.canvasClass}`}>
       
       {/* Centered Instructions in background canvas */}
       <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center select-none pointer-events-none opacity-40">

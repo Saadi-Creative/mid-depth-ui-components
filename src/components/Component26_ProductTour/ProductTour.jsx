@@ -148,7 +148,7 @@ export default function ProductTour() {
   };
 
   return (
-    <div className={`min-h-screen p-4 md:p-8 select-none transition-colors duration-500 flex items-center justify-center ${activeVariant.canvasClass}`}>
+    <div className={`min-h-screen p-4 md:p-8 select-none transition-colors duration-500 flex items-center justify-center  pt-[120px] pb-8 sm:pt-[120px] sm:pb-8 ${activeVariant.canvasClass}`}>
       
       <div 
         ref={containerRef}

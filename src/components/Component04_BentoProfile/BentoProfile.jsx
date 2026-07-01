@@ -193,7 +193,7 @@ export default function BentoProfile() {
   return (
     <div
       id="component-04-bento-profile"
-      className={`relative w-full min-h-screen flex flex-col justify-start items-center p-6 md:p-8 font-secondary ${activeVariant.canvasClass}`}
+      className={`relative w-full min-h-screen flex flex-col justify-start items-center p-6 md:p-8 font-secondary  pt-[120px] pb-8 sm:pt-[120px] sm:pb-8 ${activeVariant.canvasClass}`}
     >
       {/* Background orbs */}
       {activeVariant.id !== 'brutal' && (

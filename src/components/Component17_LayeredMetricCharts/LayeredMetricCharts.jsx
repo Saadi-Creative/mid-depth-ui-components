@@ -243,7 +243,7 @@ export default function LayeredMetricCharts() {
 
   return (
     <div 
-      className={`min-h-screen flex flex-col justify-start p-4 md:p-8 select-none transition-colors duration-500 ${activeVariant.canvasClass}`}
+      className={`min-h-screen flex flex-col justify-start p-4 md:p-8 select-none transition-colors duration-500  pt-[120px] pb-8 sm:pt-[120px] sm:pb-8 ${activeVariant.canvasClass}`}
     >
       <div className="w-full max-w-5xl mx-auto flex flex-col gap-6">
         

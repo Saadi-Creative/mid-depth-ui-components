@@ -138,7 +138,7 @@ export default function OnboardingWizard() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 transition-colors duration-500 ${activeVariant.canvasClass}`}>
+    <div className={`min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 transition-colors duration-500  pt-[120px] pb-8 sm:pt-[120px] sm:pb-8 ${activeVariant.canvasClass}`}>
       
       {/* Header Controller */}
       <header className={`w-full max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-6 mb-8 ${activeVariant.cardClass}`}>

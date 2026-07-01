@@ -179,7 +179,7 @@ export default function StepConfigurator() {
   return (
     <div
       id="component-05-step-configurator"
-      className={`relative w-full min-h-screen flex flex-col justify-start items-center p-6 md:p-8 overflow-hidden select-none transition-colors duration-500 ${activeVariant.canvasClass}`}
+      className={`relative w-full min-h-screen flex flex-col justify-start items-center p-6 md:p-8 overflow-hidden select-none transition-colors duration-500  pt-[120px] pb-8 sm:pt-[120px] sm:pb-8 ${activeVariant.canvasClass}`}
     >
       {/* Background soft glowing blur orbs */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden opacity-20">

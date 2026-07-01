@@ -91,7 +91,7 @@ export default function NewsletterCTA() {
   const isError = status === "error";
 
   return (
-    <div className={`min-h-screen flex items-center justify-center p-4 select-none transition-colors duration-500 ${activeVariant.canvasClass}`}>
+    <div className={`min-h-screen flex items-center justify-center p-4 select-none transition-colors duration-500  pt-[120px] pb-8 sm:pt-[120px] sm:pb-8 ${activeVariant.canvasClass}`}>
       
       <div className="w-full max-w-2xl flex flex-col gap-6 relative">
         
