@@ -801,12 +801,19 @@ function ShowcasePage() {
                       style={{ background: `${activeVariant.triggerColor}1a`, color: activeVariant.triggerColor }}>
                       #{item.id}
                     </span>
-                    <svg className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                      width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={activeVariant.triggerColor} strokeWidth="2.5">
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                      <polyline points="15 3 21 3 21 9"/>
-                      <line x1="10" y1="14" x2="21" y2="3"/>
-                    </svg>
+                    <a
+                      href={`/preview/${item.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:scale-110"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={activeVariant.triggerColor} strokeWidth="2.5">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                        <polyline points="15 3 21 3 21 9"/>
+                        <line x1="10" y1="14" x2="21" y2="3"/>
+                      </svg>
+                    </a>
                   </div>
                   <h3 className={`font-black text-sm mb-1 ${activeVariant.accentText}`}>{item.name}</h3>
                   <p className={`text-[11px] leading-snug mb-3 opacity-60 ${activeVariant.mode === 'dark' ? 'text-white' : 'text-slate-800'}`}>
