@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Settings, ShoppingCart, Check, Loader2, Star, Shield, Truck, RotateCcw } from "lucide-react";
+import { ShoppingCart, Check, Loader2, Star } from "lucide-react";
 import { useGlobalTheme } from "../../themes/ThemeContext";
 
 const VARIANTS = [
@@ -25,9 +25,8 @@ const VARIANTS = [
 ];
 
 export default function StickyPurchaseBar() {
-  const { activeVariant, setActiveVariant, variants } = useGlobalTheme();
+  const { activeVariant } = useGlobalTheme();
   const [selectedVariant, setSelectedVariant] = useState(VARIANTS[0]);
-  const [showSettings, setShowSettings] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [status, setStatus] = useState("idle"); // idle, loading, success, hide
   const [flipKey, setFlipKey] = useState(0);
@@ -248,7 +247,7 @@ export default function StickyPurchaseBar() {
               </div>
             </div>
 
-            {/* Middle: Mini variant-picker & settings gear */}
+            {/* Middle: Mini variant-picker (Removed settings gear) */}
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 {VARIANTS.map(v => (
@@ -268,14 +267,6 @@ export default function StickyPurchaseBar() {
                   </button>
                 ))}
               </div>
-
-              <button
-                onClick={() => setShowSettings(!showSettings)}
-                className="p-1.5 border border-current/10 hover:border-current/20 opacity-60 hover:opacity-100 cursor-pointer transition-all"
-                style={{ borderRadius: "var(--theme-border-radius-action)" }}
-              >
-                <Settings size={14} className={showSettings ? "rotate-45" : ""} />
-              </button>
             </div>
 
             {/* Right: Morphing Add to Cart Button */}
@@ -315,32 +306,6 @@ export default function StickyPurchaseBar() {
                 )}
               </motion.button>
             </div>
-
-            {/* Settings Swatch Overlay Drawer (positioned elegantly on top of the bar) */}
-            <AnimatePresence>
-              {showSettings && (
-                <motion.div
-                  initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 15, scale: 0.95 }}
-                  className={`absolute bottom-16 right-4 p-3 flex items-center gap-2.5 z-[var(--z-overlay)] transition-all duration-300 ${activeVariant.cardClass}`}
-                >
-                  <span className="text-[8px] font-mono-theme uppercase tracking-widest opacity-40 mr-1">Style</span>
-                  {variants.map(variant => (
-                    <button
-                      key={variant.id}
-                      onClick={() => setActiveVariant(variant)}
-                      className="w-4 h-4 rounded-full cursor-pointer relative flex items-center justify-center transition-transform hover:scale-110"
-                      style={{ backgroundColor: variant.triggerColor }}
-                    >
-                      {activeVariant.id === variant.id && (
-                        <div className="absolute -inset-0.5 rounded-full border border-white" />
-                      )}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>

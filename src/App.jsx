@@ -862,34 +862,70 @@ export default function App() {
 }
 
 function GlobalThemeSwitcher() {
-  const { activeVariant, setActiveVariant, variants } = useGlobalTheme();
+  const { 
+    activeStyle, 
+    activePalette, 
+    setActiveStyleId, 
+    setActivePaletteId, 
+    variants 
+  } = useGlobalTheme();
   
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] bg-[#0c0e1a]/95 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl flex items-center gap-3.5 shadow-2xl">
-      <span className="text-[9px] font-mono uppercase tracking-widest text-white/50 hidden sm:inline">Global Engine:</span>
-      <div className="flex gap-2">
-        {variants.map(variant => (
-          <button
-            key={variant.id}
-            onClick={() => setActiveVariant(variant)}
-            className="w-4 h-4 rounded-full cursor-pointer relative transition-all hover:scale-110 flex items-center justify-center border border-white/20"
-            style={{ backgroundColor: variant.triggerColor }}
-            title={variant.name}
-            aria-label={`Switch style to ${variant.name}`}
-          >
-            {activeVariant.id === variant.id && (
-              <motion.div
-                layoutId="global-active-theme-ring"
-                className="absolute -inset-1.5 rounded-full border-2 border-white"
-                transition={{ type: "spring", stiffness: 350, damping: 20 }}
-              />
-            )}
-          </button>
-        ))}
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] flex flex-col items-center gap-2">
+      {/* Style Selector */}
+      <div className="bg-[#0c0e1a]/95 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl flex items-center gap-3.5 shadow-2xl">
+        <span className="text-[9px] font-mono uppercase tracking-widest text-white/50 hidden sm:inline">Architecture:</span>
+        <div className="flex gap-2">
+          {variants.map(variant => (
+            <button
+              key={variant.id}
+              onClick={() => setActiveStyleId(variant.id)}
+              className="px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wide transition-all border cursor-pointer"
+              style={{
+                backgroundColor: activeStyle.id === variant.id ? "rgba(255,255,255,0.1)" : "transparent",
+                borderColor: activeStyle.id === variant.id ? "rgba(255,255,255,0.2)" : "transparent",
+                color: activeStyle.id === variant.id ? "#fff" : "rgba(255,255,255,0.5)"
+              }}
+              title={variant.name}
+            >
+              {variant.name}
+            </button>
+          ))}
+        </div>
       </div>
-      <span className="text-[9px] font-mono uppercase text-cyan-400 border-l border-white/10 pl-3 hidden sm:inline">
-        {activeVariant.name}
-      </span>
+      
+      {/* Palette Selector */}
+      <motion.div 
+        key={activeStyle.id}
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-[#0c0e1a]/95 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl flex items-center gap-3.5 shadow-xl"
+      >
+        <span className="text-[9px] font-mono uppercase tracking-widest text-white/50 hidden sm:inline">Color Palette:</span>
+        <div className="flex gap-2">
+          {activeStyle.palettes.map(palette => (
+            <button
+              key={palette.id}
+              onClick={() => setActivePaletteId(palette.id)}
+              className="w-5 h-5 rounded-full cursor-pointer relative transition-all hover:scale-110 flex items-center justify-center border border-white/20"
+              style={{ backgroundColor: palette.triggerColor }}
+              title={palette.name}
+              aria-label={`Switch palette to ${palette.name}`}
+            >
+              {activePalette.id === palette.id && (
+                <motion.div
+                  layoutId="global-active-palette-ring"
+                  className="absolute -inset-1.5 rounded-full border-2 border-white"
+                  transition={{ type: "spring", stiffness: 350, damping: 20 }}
+                />
+              )}
+            </button>
+          ))}
+        </div>
+        <span className="text-[9px] font-mono uppercase border-l border-white/10 pl-3 hidden sm:inline" style={{ color: activePalette.triggerColor }}>
+          {activePalette.name}
+        </span>
+      </motion.div>
     </div>
   );
 }

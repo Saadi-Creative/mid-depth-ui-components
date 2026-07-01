@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import {
   motion,
   AnimatePresence,
@@ -6,7 +6,6 @@ import {
   useTransform,
   useSpring,
 } from "framer-motion";
-import { AUTH_THEMES } from "../../themes/themeConfig";
 import { useGlobalTheme } from "../../themes/ThemeContext";
 
 /* ═══════════════════════════════════════════════════════════  ICONS  */
@@ -81,6 +80,8 @@ const FloatingParticles = ({ theme, active }) => (
 
 /* ═══════════════════════════════════════════════════════════  INPUT  */
 const Field = ({ theme, label, type = "text", value, onChange, placeholder, Icon, compact }) => {
+  const { activeVariant } = useGlobalTheme();
+  const isLight = activeVariant.mode === "light";
   const [focused, setFocused] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -97,7 +98,7 @@ const Field = ({ theme, label, type = "text", value, onChange, placeholder, Icon
         className="block font-semibold uppercase tracking-widest mb-1 transition-colors duration-300"
         style={{
           fontSize: 10,
-          color: focused ? theme.primary : hovered ? "rgba(200,215,255,0.65)" : "rgba(200,215,255,0.5)",
+          color: focused ? theme.primary : hovered ? (isLight ? "rgba(0,0,0,0.65)" : "rgba(200,215,255,0.65)") : (isLight ? "rgba(0,0,0,0.5)" : "rgba(200,215,255,0.5)"),
         }}
       >
         {label}
@@ -106,7 +107,7 @@ const Field = ({ theme, label, type = "text", value, onChange, placeholder, Icon
         {Icon && (
           <motion.span
             className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none transition-colors duration-300"
-            style={{ color: focused ? theme.primary : hovered ? "rgba(200,215,255,0.45)" : "rgba(200,215,255,0.28)" }}
+            style={{ color: focused ? theme.primary : hovered ? (isLight ? "rgba(0,0,0,0.45)" : "rgba(200,215,255,0.45)") : (isLight ? "rgba(0,0,0,0.28)" : "rgba(200,215,255,0.28)") }}
             animate={focused ? { scale: 1.15, rotate: -5 } : { scale: 1, rotate: 0 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
@@ -120,23 +121,12 @@ const Field = ({ theme, label, type = "text", value, onChange, placeholder, Icon
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           placeholder={placeholder}
-          className="w-full rounded-xl text-white outline-none transition-all duration-300"
+          className={`w-full outline-none transition-all duration-300 ${activeVariant.inputClass}`}
           style={{
             fontSize: 12,
             padding: compact ? "8px 12px" : "10px 12px",
             paddingLeft: Icon ? "2.25rem" : "0.75rem",
             paddingRight: isPass ? "2.5rem" : "0.75rem",
-            background: focused
-              ? `linear-gradient(135deg, ${theme.primaryMuted}, rgba(255,255,255,0.02))`
-              : hovered
-                ? "rgba(255,255,255,0.06)"
-                : "rgba(255,255,255,0.04)",
-            border: `1px solid ${focused ? theme.primary : hovered ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.08)"}`,
-            boxShadow: focused
-              ? `0 0 0 2.5px ${theme.primaryMuted}, 0 0 14px ${theme.glow}28`
-              : hovered
-                ? `0 0 8px ${theme.primaryMuted}`
-                : "none",
           }}
         />
         {isPass && (
@@ -146,7 +136,7 @@ const Field = ({ theme, label, type = "text", value, onChange, placeholder, Icon
             whileHover={{ scale: 1.2, rotate: 10 }}
             whileTap={{ scale: 0.9 }}
             className="absolute right-3 top-1/2 -translate-y-1/2 opacity-35 hover:opacity-70 transition-opacity cursor-pointer"
-            style={{ color: "white" }}
+            style={{ color: isLight ? "black" : "white" }}
           >
             <IconEye open={showPwd} />
           </motion.button>
@@ -157,7 +147,15 @@ const Field = ({ theme, label, type = "text", value, onChange, placeholder, Icon
 };
 
 /* ═══════════════════════════════════════════════════════════  LOGIN FORM  */
+
 const LoginForm = ({ theme, onSwitch }) => {
+  const { activeVariant } = useGlobalTheme();
+  const isLight = activeVariant.mode === "light";
+  const txtPrimary = isLight ? "text-slate-900" : "text-white";
+  const txtMuted = isLight ? "text-slate-600 font-semibold" : "text-white/50";
+  const txtDim = isLight ? "text-slate-500" : "text-white/40";
+  const txtSuperDim = isLight ? "text-slate-400" : "text-white/30";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -180,7 +178,7 @@ const LoginForm = ({ theme, onSwitch }) => {
           >
             <div className="w-1.5 h-1.5 rounded-sm" style={{ background: theme.primary }} />
           </motion.div>
-          <span className="group-hover:text-white/60 transition-colors" style={{ fontSize: 11, color: "rgba(200,215,255,0.45)" }}>Remember me</span>
+          <span className={`group-hover:opacity-100 transition-opacity ${txtMuted}`} style={{ fontSize: 11 }}>Remember me</span>
         </label>
         <motion.button
           type="button"
@@ -192,55 +190,45 @@ const LoginForm = ({ theme, onSwitch }) => {
         </motion.button>
       </div>
 
-      <motion.button type="submit" whileHover={{ scale: 1.02, y: -2, boxShadow: `0 8px 30px ${theme.glow}` }} whileTap={{ scale: 0.985 }}
+      <motion.button type="submit" whileHover={activeVariant.id === 'brutal' ? { translate: "-2px -2px" } : { scale: 1.02, y: -2 }} whileTap={{ scale: 0.985 }}
         disabled={loading}
-        className="relative w-full rounded-xl font-extrabold tracking-widest uppercase overflow-hidden cursor-pointer"
-        style={{
-          fontSize: 11, padding: "11px 16px",
-          background: `linear-gradient(135deg, ${theme.primary}, ${theme.primaryDark})`,
-          color: "#000",
-          boxShadow: `0 5px 20px ${theme.glow}88`,
-        }}>
-        <motion.div className="absolute inset-0 opacity-40"
-          style={{ background: "linear-gradient(105deg,transparent 35%,rgba(255,255,255,0.55) 50%,transparent 65%)" }}
-          animate={{ x: ["-100%", "210%"] }}
-          transition={{ duration: 2.8, repeat: Infinity, ease: "linear", repeatDelay: 1.2 }} />
+        className={`relative w-full py-3 rounded-xl font-extrabold tracking-widest uppercase overflow-hidden cursor-pointer ${activeVariant.buttonClass}`}
+        style={{ fontSize: 11 }}
+      >
+        {activeVariant.id !== 'brutal' && (
+          <motion.div className="absolute inset-0 opacity-40"
+            style={{ background: "linear-gradient(105deg,transparent 35%,rgba(255,255,255,0.55) 50%,transparent 65%)" }}
+            animate={{ x: ["-100%", "210%"] }}
+            transition={{ duration: 2.8, repeat: Infinity, ease: "linear", repeatDelay: 1.2 }} />
+        )}
         <span className="relative z-10 flex items-center justify-center gap-2">
           {loading ? <><IconSpinner />Authenticating…</> : "Sign In →"}
         </span>
       </motion.button>
 
       <div className="flex items-center gap-2">
-        <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.06)" }} />
-        <span style={{ fontSize: 10, color: "rgba(200,215,255,0.28)" }}>or continue with</span>
-        <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.06)" }} />
+        <div className="flex-1 h-px bg-black/10 dark:bg-white/5" />
+        <span style={{ fontSize: 10 }} className={txtSuperDim}>or continue with</span>
+        <div className="flex-1 h-px bg-black/10 dark:bg-white/5" />
       </div>
       <div className="grid grid-cols-3 gap-2">
         {[{ label: "Google", icon: "G" }, { label: "Apple", icon: "⌘" }, { label: "GitHub", icon: "◈" }].map(({ label, icon }) => (
           <motion.button key={label} type="button"
-            whileHover={{
+            whileHover={activeVariant.id === 'brutal' ? { translate: "-2px -2px" } : {
               y: -3,
               scale: 1.06,
-              borderColor: `${theme.primary}55`,
-              boxShadow: `0 6px 20px ${theme.primaryMuted}, inset 0 0 15px ${theme.primaryMuted}`,
             }}
             whileTap={{ scale: 0.92, y: 0 }}
-            className="rounded-xl font-semibold cursor-pointer relative overflow-hidden group"
+            className={`rounded-xl font-semibold cursor-pointer relative overflow-hidden group ${activeVariant.buttonClass}`}
             style={{
               fontSize: 13, padding: "9px 4px",
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.07)",
-              color: "rgba(200,215,255,0.5)",
             }}>
-            {/* Hover glow bg */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              style={{ background: `radial-gradient(circle at center, ${theme.primaryMuted}, transparent 70%)` }} />
             <span className="relative z-10 group-hover:text-white transition-colors duration-200">{icon}</span>
           </motion.button>
         ))}
       </div>
 
-      <p className="text-center" style={{ fontSize: 11, color: "rgba(200,215,255,0.35)" }}>
+      <p className={`text-center ${txtMuted}`} style={{ fontSize: 11 }}>
         No account?{" "}
         <motion.button
           type="button"
@@ -263,6 +251,10 @@ const LoginForm = ({ theme, onSwitch }) => {
 
 /* ═══════════════════════════════════════════════════════════  SIGNUP FORM  */
 const SignupForm = ({ theme, onSwitch }) => {
+  const { activeVariant } = useGlobalTheme();
+  const isLight = activeVariant.mode === "light";
+  const txtMuted = isLight ? "text-slate-600 font-semibold" : "text-white/50";
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
@@ -283,25 +275,23 @@ const SignupForm = ({ theme, onSwitch }) => {
           onChange={(e) => setConfirm(e.target.value)} placeholder="••••••••" compact />
       </div>
 
-      <motion.button type="submit" whileHover={{ scale: 1.02, y: -2, boxShadow: `0 8px 30px ${theme.glow}` }} whileTap={{ scale: 0.985 }}
+      <motion.button type="submit" whileHover={activeVariant.id === 'brutal' ? { translate: "-2px -2px" } : { scale: 1.02, y: -2 }} whileTap={{ scale: 0.985 }}
         disabled={loading}
-        className="relative w-full rounded-xl font-extrabold tracking-widest uppercase overflow-hidden cursor-pointer"
-        style={{
-          fontSize: 11, padding: "11px 16px",
-          background: `linear-gradient(135deg, ${theme.primary}, ${theme.primaryDark})`,
-          color: "#000",
-          boxShadow: `0 5px 20px ${theme.glow}88`,
-        }}>
-        <motion.div className="absolute inset-0 opacity-40"
-          style={{ background: "linear-gradient(105deg,transparent 35%,rgba(255,255,255,0.55) 50%,transparent 65%)" }}
-          animate={{ x: ["-100%", "210%"] }}
-          transition={{ duration: 2.8, repeat: Infinity, ease: "linear", repeatDelay: 1.2 }} />
+        className={`relative w-full py-3 rounded-xl font-extrabold tracking-widest uppercase overflow-hidden cursor-pointer ${activeVariant.buttonClass}`}
+        style={{ fontSize: 11 }}
+      >
+        {activeVariant.id !== 'brutal' && (
+          <motion.div className="absolute inset-0 opacity-40"
+            style={{ background: "linear-gradient(105deg,transparent 35%,rgba(255,255,255,0.55) 50%,transparent 65%)" }}
+            animate={{ x: ["-100%", "210%"] }}
+            transition={{ duration: 2.8, repeat: Infinity, ease: "linear", repeatDelay: 1.2 }} />
+        )}
         <span className="relative z-10 flex items-center justify-center gap-2">
           {loading ? <><IconSpinner />Creating Account…</> : "Create Account →"}
         </span>
       </motion.button>
 
-      <p className="text-center" style={{ fontSize: 11, color: "rgba(200,215,255,0.35)" }}>
+      <p className={`text-center ${txtMuted}`} style={{ fontSize: 11 }}>
         Already have an account?{" "}
         <motion.button
           type="button"
@@ -329,14 +319,35 @@ const SignupForm = ({ theme, onSwitch }) => {
 ═══════════════════════════════════════════════════════════ */
 export default function AuthGateway() {
   const { activeVariant } = useGlobalTheme();
-  const themeMap = {
-    cyber: AUTH_THEMES.cyberGreen,
-    glass: AUTH_THEMES.neonCyan,
-    neomorphic: AUTH_THEMES.plasmaPurple,
-    brutal: AUTH_THEMES.solarFlare,
-    luxury: AUTH_THEMES.crimsonRed
-  };
-  const currentTheme = themeMap[activeVariant.id] || AUTH_THEMES.cyberGreen;
+  const currentTheme = useMemo(() => {
+    const hex = activeVariant.triggerColor || "#3B82F6";
+    let r = 59, g = 130, b = 246;
+    const match = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+    if (match) {
+      r = parseInt(match[1], 16);
+      g = parseInt(match[2], 16);
+      b = parseInt(match[3], 16);
+    } else {
+      const shortMatch = hex.match(/^#?([a-f\d])([a-f\d])([a-f\d])$/i);
+      if (shortMatch) {
+        r = parseInt(shortMatch[1] + shortMatch[1], 16);
+        g = parseInt(shortMatch[2] + shortMatch[2], 16);
+        b = parseInt(shortMatch[3] + shortMatch[3], 16);
+      }
+    }
+    const rDark = Math.max(0, Math.floor(r * 0.75));
+    const gDark = Math.max(0, Math.floor(g * 0.75));
+    const bDark = Math.max(0, Math.floor(b * 0.75));
+    return {
+      id: activeVariant.id || "global",
+      primary: hex,
+      primaryDark: `rgb(${rDark}, ${gDark}, ${bDark})`,
+      primaryMuted: `rgba(${r}, ${g}, ${b}, 0.12)`,
+      glow: `rgba(${r}, ${g}, ${b}, 0.5)`,
+      shadow: `0 30px 80px rgba(${r}, ${g}, ${b}, 0.2)`,
+      border: `rgba(${r}, ${g}, ${b}, 0.3)`,
+    };
+  }, [activeVariant]);
   const [isLogin, setIsLogin] = useState(true);
   const [flipping, setFlipping] = useState(false);
   const [cardHovered, setCardHovered] = useState(false);
@@ -370,35 +381,42 @@ export default function AuthGateway() {
     setTimeout(() => { setIsLogin((v) => !v); setFlipping(false); }, 400);
   };
 
+  const isLight = activeVariant.mode === "light";
+  const txtPrimary = isLight ? "text-slate-900 font-bold" : "text-white";
+  const txtMuted = isLight ? "text-slate-600 font-semibold" : "text-white/50";
+  const txtDim = isLight ? "text-slate-500" : "text-white/40";
+  const txtSuperDim = isLight ? "text-slate-400" : "text-white/30";
+
   return (
     <div
       id="component-01-auth-gateway"
-      className="relative w-full overflow-hidden flex items-center justify-center"
+      className={`relative w-full overflow-hidden flex items-center justify-center ${activeVariant.canvasClass}`}
       style={{
         height: "100vh",
-        background: "linear-gradient(135deg,#060810 0%,#0b0e1d 55%,#060a15 100%)",
       }}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
     >
       {/* Ambient glow */}
-      <motion.div
-        className="absolute pointer-events-none transition-all duration-1000"
-        animate={{
-          scale: cardHovered ? 1.15 : 1,
-          opacity: cardHovered ? 1 : 0.7,
-        }}
-        transition={{ duration: 0.8 }}
-        style={{
-          width: "60vw", height: "60vw", maxWidth: 600, maxHeight: 600,
-          borderRadius: "50%", top: "50%", left: "50%",
-          transform: "translate(-50%,-50%)", filter: "blur(80px)",
-          background: `radial-gradient(circle, ${currentTheme.primaryMuted} 0%, transparent 70%)`,
-        }}
-      />
+      {activeVariant.id !== 'brutal' && (
+        <motion.div
+          className="absolute pointer-events-none transition-all duration-1000"
+          animate={{
+            scale: cardHovered ? 1.15 : 1,
+            opacity: cardHovered ? 1 : 0.7,
+          }}
+          transition={{ duration: 0.8 }}
+          style={{
+            width: "60vw", height: "60vw", maxWidth: 600, maxHeight: 600,
+            borderRadius: "50%", top: "50%", left: "50%",
+            transform: "translate(-50%,-50%)", filter: "blur(80px)",
+            background: `radial-gradient(circle, ${currentTheme.primaryMuted} 0%, transparent 70%)`,
+          }}
+        />
+      )}
 
       {/* Grid */}
-      <div className="absolute inset-0 pointer-events-none"
+      <div className="absolute inset-0 pointer-events-none opacity-[0.08]"
         style={{
           backgroundImage: `
             linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
@@ -418,20 +436,22 @@ export default function AuthGateway() {
         <div style={{ maxWidth: 420, margin: "0 auto", padding: "0 16px" }}>
 
           {/* Depth shadow slab */}
-          <motion.div
-            className="absolute inset-0 rounded-2xl pointer-events-none transition-all duration-700"
-            animate={{
-              opacity: cardHovered ? 0.85 : 0.6,
-              y: cardHovered ? 20 : 16,
-              scale: cardHovered ? 0.94 : 0.95,
-            }}
-            transition={{ duration: 0.4 }}
-            style={{
-              transform: "translateZ(-28px)",
-              background: currentTheme.primaryMuted,
-              filter: "blur(24px)",
-            }}
-          />
+          {activeVariant.id !== 'brutal' && (
+            <motion.div
+              className="absolute inset-0 rounded-2xl pointer-events-none transition-all duration-700"
+              animate={{
+                opacity: cardHovered ? 0.85 : 0.6,
+                y: cardHovered ? 20 : 16,
+                scale: cardHovered ? 0.94 : 0.95,
+              }}
+              transition={{ duration: 0.4 }}
+              style={{
+                transform: "translateZ(-28px)",
+                background: currentTheme.primaryMuted,
+                filter: "blur(24px)",
+              }}
+            />
+          )}
 
           {/* Card shell with 3D flip */}
           <motion.div
@@ -440,40 +460,40 @@ export default function AuthGateway() {
               scale: flipping ? 0.94 : 1,
             }}
             transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-            className="relative rounded-2xl overflow-hidden"
-            style={{
-              background: "linear-gradient(150deg,rgba(18,22,46,0.97) 0%,rgba(8,10,24,0.99) 100%)",
-              border: `1px solid ${currentTheme.border}`,
-              backdropFilter: "blur(40px)",
-              boxShadow: `${currentTheme.shadow}, inset 0 1px 0 rgba(255,255,255,0.07)`,
-            }}
+            className={`relative overflow-hidden ${activeVariant.cardClass}`}
           >
             {/* Magnetic cursor-follow glow */}
-            <motion.div
-              className="absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-500 rounded-2xl"
-              style={{
-                opacity: cardHovered ? 0.12 : 0,
-                background: `radial-gradient(300px circle at ${glowX.get()}% ${glowY.get()}%, ${currentTheme.primary}, transparent 60%)`,
-              }}
-            />
+            {activeVariant.id !== 'brutal' && activeVariant.id !== 'luxury' && (
+              <motion.div
+                className="absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-500 rounded-2xl"
+                style={{
+                  opacity: cardHovered ? 0.12 : 0,
+                  background: `radial-gradient(300px circle at ${glowX.get()}% ${glowY.get()}%, ${currentTheme.primary}, transparent 60%)`,
+                }}
+              />
+            )}
 
             {/* Top accent with pulse */}
-            <motion.div
-              className="absolute top-0 inset-x-0 h-px transition-all duration-500"
-              animate={cardHovered ? { opacity: [0.7, 1, 0.7] } : { opacity: 1 }}
-              transition={cardHovered ? { duration: 2, repeat: Infinity } : {}}
-              style={{ background: `linear-gradient(90deg,transparent,${currentTheme.primary},transparent)` }}
-            />
+            {activeVariant.id !== 'brutal' && (
+              <motion.div
+                className="absolute top-0 inset-x-0 h-px transition-all duration-500"
+                animate={cardHovered ? { opacity: [0.7, 1, 0.7] } : { opacity: 1 }}
+                transition={cardHovered ? { duration: 2, repeat: Infinity } : {}}
+                style={{ background: `linear-gradient(90deg,transparent,${currentTheme.primary},transparent)` }}
+              />
+            )}
             {/* Corner glow */}
-            <motion.div
-              className="absolute top-0 right-0 w-28 h-28 pointer-events-none"
-              animate={cardHovered ? { opacity: 0.9, scale: 1.2 } : { opacity: 0.6, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              style={{ background: `radial-gradient(circle at top right,${currentTheme.primaryMuted},transparent 70%)` }}
-            />
+            {activeVariant.id !== 'brutal' && (
+              <motion.div
+                className="absolute top-0 right-0 w-28 h-28 pointer-events-none"
+                animate={cardHovered ? { opacity: 0.9, scale: 1.2 } : { opacity: 0.6, scale: 1 }}
+                transition={{ duration: 0.5 }}
+                style={{ background: `radial-gradient(circle at top right,${currentTheme.primaryMuted},transparent 70%)` }}
+              />
+            )}
 
             {/* Floating particles on hover */}
-            <FloatingParticles theme={currentTheme} active={cardHovered} />
+            {activeVariant.id !== 'brutal' && <FloatingParticles theme={currentTheme} active={cardHovered} />}
 
             {/* Card body — compact padding for laptop viewport */}
             <div className="relative z-10" style={{ padding: "22px 24px" }}>
@@ -489,7 +509,7 @@ export default function AuthGateway() {
                       background: currentTheme.primaryMuted,
                       border: `1px solid ${currentTheme.border}`,
                       color: currentTheme.primary,
-                      boxShadow: `0 3px 14px ${currentTheme.glow}55`,
+                      boxShadow: activeVariant.id === 'brutal' ? 'none' : `0 3px 14px ${currentTheme.glow}55`,
                     }}>
                     <IconLock />
                   </motion.div>
@@ -498,7 +518,7 @@ export default function AuthGateway() {
                       className="font-black tracking-widest uppercase transition-colors duration-500">
                       NEXUS
                     </div>
-                    <div style={{ fontSize: 9, color: "rgba(200,215,255,0.28)" }}>
+                    <div style={{ fontSize: 9 }} className={txtSuperDim}>
                       Secure Gateway v2.5
                     </div>
                   </div>
@@ -511,10 +531,10 @@ export default function AuthGateway() {
                   <motion.div key={isLogin ? "l" : "s"}
                     initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -7 }} transition={{ duration: 0.22 }}>
-                    <h1 className="font-black text-white tracking-tight leading-tight" style={{ fontSize: 22 }}>
+                    <h1 className={`font-black tracking-tight leading-tight ${txtPrimary}`} style={{ fontSize: 22 }}>
                       {isLogin ? "Welcome back" : "Join the grid"}
                     </h1>
-                    <p style={{ fontSize: 11, color: "rgba(200,215,255,0.38)" }} className="mt-1">
+                    <p style={{ fontSize: 11 }} className={`mt-1 ${txtDim}`}>
                       {isLogin
                         ? "Enter your credentials to access the system."
                         : "Create your account and enter the system."}
@@ -524,8 +544,7 @@ export default function AuthGateway() {
               </div>
 
               {/* Tab strip */}
-              <div className="flex mb-3.5 rounded-xl p-1"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <div className="flex mb-3.5 p-1 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 backdrop-blur">
                 {["Login", "Sign Up"].map((label, i) => {
                   const active = (i === 0 && isLogin) || (i === 1 && !isLogin);
                   return (
@@ -534,7 +553,7 @@ export default function AuthGateway() {
                       whileHover={!active ? { backgroundColor: "rgba(255,255,255,0.06)" } : {}}
                       whileTap={{ scale: 0.97 }}
                       className="flex-1 rounded-lg font-bold tracking-wide relative transition-colors duration-200 cursor-pointer"
-                      style={{ fontSize: 11, padding: "8px 4px", color: active ? "#000" : "rgba(200,215,255,0.4)" }}>
+                      style={{ fontSize: 11, padding: "8px 4px", color: active ? (isLight ? "#fff" : "#000") : (isLight ? "rgba(0,0,0,0.5)" : "rgba(200,215,255,0.4)") }}>
                       {active && (
                         <motion.div layoutId="auth-tab" className="absolute inset-0 rounded-lg"
                           style={{ background: currentTheme.primary }}
@@ -562,12 +581,14 @@ export default function AuthGateway() {
             </div>
 
             {/* Bottom accent */}
-            <motion.div
-              className="absolute bottom-0 inset-x-0 h-px transition-all duration-500"
-              animate={cardHovered ? { opacity: [0.5, 1, 0.5] } : { opacity: 0.7 }}
-              transition={cardHovered ? { duration: 2, repeat: Infinity } : {}}
-              style={{ background: `linear-gradient(90deg,transparent,${currentTheme.border},transparent)` }}
-            />
+            {activeVariant.id !== 'brutal' && (
+              <motion.div
+                className="absolute bottom-0 inset-x-0 h-px transition-all duration-500"
+                animate={cardHovered ? { opacity: [0.5, 1, 0.5] } : { opacity: 0.7 }}
+                transition={cardHovered ? { duration: 2, repeat: Infinity } : {}}
+                style={{ background: `linear-gradient(90deg,transparent,${currentTheme.border},transparent)` }}
+              />
+            )}
           </motion.div>
         </div>
       </motion.div>

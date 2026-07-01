@@ -1,75 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronUp, ChevronDown, Reply, Send, Settings, User, AlertCircle, MessageSquare } from "lucide-react";
-
-// Themes definition
-const THEMES = [
-  {
-    id: "cyberGreen",
-    name: "Cyber Green",
-    color: "#00FF88",
-    rgb: "0, 255, 136",
-    text: "text-emerald-400",
-    bg: "bg-emerald-500",
-    accentBg: "bg-emerald-500/10",
-    border: "border-emerald-500/20",
-    focusBorder: "focus-within:border-emerald-500",
-    glow: "shadow-[0_0_12px_rgba(0,255,136,0.25)]",
-    ring: "focus-within:ring-2 focus-within:ring-emerald-500/20"
-  },
-  {
-    id: "neonCyan",
-    name: "Neon Cyan",
-    color: "#00E5FF",
-    rgb: "0, 229, 255",
-    text: "text-cyan-400",
-    bg: "bg-cyan-500",
-    accentBg: "bg-cyan-500/10",
-    border: "border-cyan-500/20",
-    focusBorder: "focus-within:border-cyan-500",
-    glow: "shadow-[0_0_12px_rgba(0,229,255,0.25)]",
-    ring: "focus-within:ring-2 focus-within:ring-cyan-500/20"
-  },
-  {
-    id: "plasmaPurple",
-    name: "Plasma Purple",
-    color: "#BF5FFF",
-    rgb: "191, 95, 255",
-    text: "text-purple-400",
-    bg: "bg-purple-500",
-    accentBg: "bg-purple-500/10",
-    border: "border-purple-500/20",
-    focusBorder: "focus-within:border-purple-500",
-    glow: "shadow-[0_0_12px_rgba(191,95,255,0.25)]",
-    ring: "focus-within:ring-2 focus-within:ring-purple-500/20"
-  },
-  {
-    id: "solarFlare",
-    name: "Solar Flare",
-    color: "#FF6B00",
-    rgb: "255, 107, 0",
-    text: "text-orange-400",
-    bg: "bg-orange-500",
-    accentBg: "bg-orange-500/10",
-    border: "border-orange-500/20",
-    focusBorder: "focus-within:border-orange-500",
-    glow: "shadow-[0_0_12px_rgba(255,107,0,0.25)]",
-    ring: "focus-within:ring-2 focus-within:ring-orange-500/20"
-  },
-  {
-    id: "crimsonRed",
-    name: "Crimson Red",
-    color: "#FF1744",
-    rgb: "255, 23, 68",
-    text: "text-rose-400",
-    bg: "bg-rose-500",
-    accentBg: "bg-rose-500/10",
-    border: "border-rose-500/20",
-    focusBorder: "focus-within:border-rose-500",
-    glow: "shadow-[0_0_12px_rgba(255,23,68,0.25)]",
-    ring: "focus-within:ring-2 focus-within:ring-rose-500/20"
-  }
-];
+import { ChevronUp, ChevronDown, Reply, Send, User, MessageSquare } from "lucide-react";
+import { useGlobalTheme } from "../../themes/ThemeContext";
 
 // Initial nested comments database (flat array with parentId structure)
 const INITIAL_COMMENTS = [
@@ -126,12 +58,34 @@ const INITIAL_COMMENTS = [
 ];
 
 export default function DiscussionBoard() {
-  const [activeTheme, setActiveTheme] = useState(THEMES[0]);
+  const { activeVariant } = useGlobalTheme();
   const [comments, setComments] = useState(INITIAL_COMMENTS);
   const [replyingToId, setReplyingToId] = useState(null);
   const [replyValue, setReplyValue] = useState("");
   const [rootValue, setRootValue] = useState("");
-  const [showSettings, setShowSettings] = useState(false);
+
+  // Helper to convert hex to rgb string for inline rgba values
+  const hexToRgb = (hex) => {
+    if (!hex) return "0, 229, 255";
+    const cleanHex = hex.replace("#", "");
+    const r = parseInt(cleanHex.substring(0, 2), 16);
+    const g = parseInt(cleanHex.substring(2, 4), 16);
+    const b = parseInt(cleanHex.substring(4, 6), 16);
+    return isNaN(r) || isNaN(g) || isNaN(b) ? "0, 229, 255" : `${r}, ${g}, ${b}`;
+  };
+
+  const rgbStr = hexToRgb(activeVariant.triggerColor);
+  const activeTheme = {
+    color: activeVariant.triggerColor,
+    rgb: rgbStr,
+    text: activeVariant.textClass,
+    bg: "",
+    accentBg: `rgba(${rgbStr}, 0.1)`,
+    border: `rgba(${rgbStr}, 0.2)`,
+    focusBorder: "focus-within:border-current",
+    glow: `shadow-[0_0_12px_rgba(${rgbStr},0.25)]`,
+    ring: "focus-within:ring-2 focus-within:ring-current/10"
+  };
 
   // Voting mechanics with micro-jump triggers
   const handleVote = (id, direction) => {
@@ -230,6 +184,7 @@ export default function DiscussionBoard() {
               comment={comment}
               depth={depth + 1}
               activeTheme={activeTheme}
+              activeVariant={activeVariant}
               replyingToId={replyingToId}
               replyValue={replyValue}
               onVote={handleVote}
@@ -247,74 +202,32 @@ export default function DiscussionBoard() {
   const rootComments = comments.filter(c => c.parentId === null);
 
   return (
-    <div className="min-h-screen p-4 md:p-8 select-none bg-[#060810]"
-      style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className={`min-h-screen p-4 md:p-8 select-none transition-colors duration-500 ${activeVariant.canvasClass}`}>
       
       <div className="w-full max-w-3xl mx-auto flex flex-col gap-6">
         
         {/* Header Board Panel */}
-        <div className="bg-[#0a0d1a] border border-white/5 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
+        <div className={`p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${activeVariant.cardClass}`}>
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-mono tracking-widest text-white/40 uppercase block">
+            <span className="text-[10px] font-mono tracking-widest opacity-40 uppercase block">
               CLUSTER DISCUSSIONS
             </span>
-            <h1 className="text-xl md:text-2xl font-black text-white tracking-tight"
+            <h1 className="text-xl md:text-2xl font-black tracking-tight"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               Threaded Discussion Board
             </h1>
-            <p className="text-xs text-white/45 max-w-lg">
+            <p className="text-xs opacity-50 max-w-lg">
               Indented discussion cards with vertical guidelines, elastic reply-box reflows, micro-jump upvotes, and eye-drawing highlight sweeps.
             </p>
-          </div>
-
-          <div className="flex items-center gap-3 self-end md:self-auto flex-shrink-0">
-            {/* Minimal Settings Trigger */}
-            <button
-              onClick={() => setShowSettings(!showSettings)}
-              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-white/60 hover:text-white cursor-pointer transition-colors"
-            >
-              <Settings size={14} className={showSettings ? "rotate-45" : ""} />
-            </button>
-            
-            {/* Color Swatches */}
-            <AnimatePresence>
-              {showSettings && (
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  className="flex items-center gap-1.5 bg-black/35 px-2.5 py-1.5 rounded-xl border border-white/5"
-                >
-                  {THEMES.map(theme => (
-                    <button
-                      key={theme.id}
-                      onClick={() => setActiveTheme(theme)}
-                      className="w-3.5 h-3.5 rounded-full cursor-pointer relative flex items-center justify-center transition-transform active:scale-75"
-                      style={{ backgroundColor: theme.color }}
-                      aria-label={`Swatch ${theme.name}`}
-                    >
-                      {activeTheme.id === theme.id && (
-                        <motion.div
-                          layoutId="active-comments-theme-ring"
-                          className="absolute -inset-1 rounded-full border border-current opacity-80"
-                          style={{ color: theme.color }}
-                          transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                        />
-                      )}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
         </div>
 
         {/* New Root Comment Box */}
         <form 
           onSubmit={handlePostRoot}
-          className={`bg-[#0a0d1a] border rounded-2xl p-4 flex flex-col gap-3 transition-all duration-300 ${activeTheme.focusBorder} ${activeTheme.ring} border-white/5`}
+          className={`p-4 flex flex-col gap-3 transition-all duration-300 ${activeTheme.focusBorder} ${activeTheme.ring} ${activeVariant.cardClass}`}
         >
-          <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-white/40">
+          <div className="flex items-center gap-2 text-[10px] font-mono font-bold opacity-45">
             <MessageSquare size={11} />
             <span>POST ROOT UPDATE</span>
           </div>
@@ -323,7 +236,7 @@ export default function DiscussionBoard() {
             placeholder="Share your feedback or suggestions..."
             value={rootValue}
             onChange={(e) => setRootValue(e.target.value)}
-            className="w-full bg-white/[0.02] border border-white/5 focus:outline-none rounded-xl p-3 text-xs text-white placeholder-white/20 min-h-[70px] resize-none"
+            className={`w-full focus:outline-none p-3 text-xs placeholder-current/30 min-h-[70px] resize-none ${activeVariant.inputClass}`}
           />
 
           <div className="flex justify-end">
@@ -334,8 +247,8 @@ export default function DiscussionBoard() {
               whileTap={rootValue.trim() ? { scale: 0.98 } : {}}
               className={`px-4 py-2 rounded-xl font-bold font-mono text-[10px] uppercase tracking-wider transition-all duration-300 flex items-center gap-1.5 cursor-pointer ${
                 rootValue.trim()
-                  ? `text-black ${activeTheme.bg} ${activeTheme.glow}`
-                  : "bg-white/5 text-white/20 border border-white/5 cursor-not-allowed"
+                  ? `${activeVariant.buttonClass} ${activeTheme.glow}`
+                  : "bg-current/5 opacity-40 cursor-not-allowed border border-current/5"
               }`}
             >
               <Send size={10} />
@@ -352,6 +265,7 @@ export default function DiscussionBoard() {
                 comment={comment}
                 depth={0}
                 activeTheme={activeTheme}
+                activeVariant={activeVariant}
                 replyingToId={replyingToId}
                 replyValue={replyValue}
                 onVote={handleVote}
@@ -374,6 +288,7 @@ function CommentCard({
   comment,
   depth,
   activeTheme,
+  activeVariant,
   replyingToId,
   replyValue,
   onVote,
@@ -385,6 +300,7 @@ function CommentCard({
 
   const isUp = comment.userVote === "up";
   const isDown = comment.userVote === "down";
+  const baseBg = activeVariant.mode === "dark" ? "rgba(10,13,26,0.95)" : "rgba(255,255,255,0.95)";
 
   return (
     <motion.div
@@ -394,20 +310,17 @@ function CommentCard({
         opacity: 1, 
         y: 0,
         backgroundColor: comment.isNew 
-          ? [`rgba(${activeTheme.rgb}, 0.1)`, "rgba(10,13,26,0.95)"] 
-          : "rgba(10,13,26,0.95)"
+          ? [`rgba(${activeTheme.rgb}, 0.1)`, baseBg] 
+          : baseBg
       }}
       transition={{ 
         type: "spring", 
         stiffness: 220, 
         damping: 24,
-        backgroundColor: { duration: 2, ease: "easeOut" }
       }}
-      className={`border rounded-2xl p-4 md:p-5 relative overflow-hidden flex gap-4 ${
-        comment.isNew ? `border-white/10` : "border-white/5"
-      }`}
+      className={`p-4 md:p-5 relative overflow-hidden flex gap-4 ${activeVariant.cardClass}`}
       style={{
-        boxShadow: "0 4px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.02)"
+        boxShadow: activeVariant.id === "brutal" ? "none" : "0 4px 10px rgba(0,0,0,0.3)"
       }}
     >
       {/* Highlight Sweep Line Accent for new comments */}
@@ -416,7 +329,7 @@ function CommentCard({
           initial={{ left: "-100%" }}
           animate={{ left: "100%" }}
           transition={{ duration: 1.5, ease: "easeInOut" }}
-          className="absolute inset-y-0 w-24 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent pointer-events-none skew-x-12"
+          className="absolute inset-y-0 w-24 bg-gradient-to-r from-transparent via-current/5 to-transparent pointer-events-none skew-x-12"
         />
       )}
 
@@ -428,15 +341,15 @@ function CommentCard({
           onClick={() => onVote(comment.id, "up")}
           animate={isUp ? { y: [0, -5, 0], scale: 1.15 } : { y: 0, scale: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 10 }}
-          className={`p-1.5 rounded-lg bg-white/5 border hover:bg-white/10 transition-colors cursor-pointer ${
-            isUp ? `border-current ${activeTheme.text}` : "border-white/5 text-white/30"
+          className={`p-1.5 rounded-lg bg-current/5 border hover:bg-current/10 transition-colors cursor-pointer ${
+            isUp ? `border-current ${activeTheme.text}` : "border-current/10 opacity-40"
           }`}
         >
           <ChevronUp size={12} strokeWidth={isUp ? 4 : 2.5} />
         </motion.button>
 
         {/* Votes Count */}
-        <span className="text-[10px] font-bold font-mono text-white/50 w-6 text-center my-0.5">
+        <span className="text-[10px] font-bold font-mono opacity-50 w-6 text-center my-0.5">
           {comment.votes}
         </span>
 
@@ -445,8 +358,8 @@ function CommentCard({
           onClick={() => onVote(comment.id, "down")}
           animate={isDown ? { y: [0, 5, 0], scale: 1.15 } : { y: 0, scale: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 10 }}
-          className={`p-1.5 rounded-lg bg-white/5 border hover:bg-white/10 transition-colors cursor-pointer ${
-            isDown ? `border-current ${activeTheme.text}` : "border-white/5 text-white/30"
+          className={`p-1.5 rounded-lg bg-current/5 border hover:bg-current/10 transition-colors cursor-pointer ${
+            isDown ? `border-current ${activeTheme.text}` : "border-current/10 opacity-40"
           }`}
         >
           <ChevronDown size={12} strokeWidth={isDown ? 4 : 2.5} />
@@ -459,30 +372,30 @@ function CommentCard({
         {/* Header row */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-lg bg-white/5 flex items-center justify-center relative">
-              <User size={10} className="text-white/45" />
+            <span className="w-5 h-5 rounded-lg bg-current/5 flex items-center justify-center relative">
+              <User size={10} className="opacity-45" />
             </span>
             <span 
               className={`text-[10px] font-black font-mono transition-colors duration-300 ${
-                comment.author === "current_user" ? activeTheme.text : "text-white/80"
+                comment.author === "current_user" ? activeTheme.text : "opacity-80"
               }`}
             >
               {comment.author}
             </span>
           </div>
 
-          <span className="text-[9px] text-white/20 font-semibold font-mono">
+          <span className="text-[9px] opacity-30 font-semibold font-mono">
             {comment.timestamp}
           </span>
         </div>
 
         {/* Comment text */}
-        <p className="text-xs text-white/50 leading-relaxed pr-2 select-text selection:bg-cyan-500/25">
+        <p className="text-xs opacity-75 leading-relaxed pr-2 select-text selection:bg-current/25">
           {comment.content}
         </p>
 
         {/* Footer actions row */}
-        <div className="flex items-center justify-between pt-2 border-t border-white/5 mt-2">
+        <div className="flex items-center justify-between pt-2 border-t border-current/5 mt-2">
           <button
             onClick={() => {
               if (isReplying) {
@@ -493,7 +406,7 @@ function CommentCard({
               }
             }}
             className={`flex items-center gap-1 text-[9px] font-black uppercase font-mono tracking-wider transition-colors cursor-pointer ${
-              isReplying ? activeTheme.text : "text-white/35 hover:text-white"
+              isReplying ? activeTheme.text : "opacity-60 hover:opacity-100"
             }`}
           >
             <Reply size={9} />
@@ -509,29 +422,30 @@ function CommentCard({
               animate={{ height: "auto", opacity: 1, marginTop: 16 }}
               exit={{ height: 0, opacity: 0, marginTop: 0 }}
               transition={{ type: "spring", stiffness: 200, damping: 20 }}
-              className="overflow-hidden w-full flex flex-col gap-2 pt-2 border-t border-white/5"
+              className="overflow-hidden w-full flex flex-col gap-2 pt-2 border-t border-current/5"
             >
               <textarea
                 placeholder={`Reply to ${comment.author}...`}
                 value={replyValue}
                 onChange={(e) => onReplyChange(e.target.value)}
-                className="w-full bg-white/[0.02] border border-white/5 focus:outline-none rounded-xl p-2.5 text-xs text-white placeholder-white/20 min-h-[60px] resize-none"
+                className={`w-full focus:outline-none p-2.5 text-xs placeholder-current/25 min-h-[60px] resize-none ${activeVariant.inputClass}`}
               />
 
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => onSetReply(null)}
-                  className="px-2.5 py-1 bg-white/5 rounded-md text-[8px] uppercase font-bold font-mono text-white/40 cursor-pointer"
+                  className="px-2.5 py-1 text-[8px] uppercase font-bold font-mono opacity-60 hover:opacity-100 cursor-pointer bg-transparent border border-current/15"
+                  style={{ borderRadius: "var(--theme-border-radius-action)" }}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => onPostReply(comment.id)}
                   disabled={!replyValue.trim()}
-                  className={`px-3 py-1 rounded-md text-[8px] uppercase font-bold font-mono text-black flex items-center gap-1 cursor-pointer transition-colors duration-300 ${
+                  className={`px-3 py-1 rounded-md text-[8px] uppercase font-bold font-mono flex items-center gap-1 cursor-pointer transition-colors duration-300 ${
                     replyValue.trim()
-                      ? `${activeTheme.bg} ${activeTheme.glow}`
-                      : "bg-white/5 text-white/20 border border-white/5 cursor-not-allowed"
+                      ? `${activeVariant.buttonClass} ${activeTheme.glow}`
+                      : "bg-current/5 opacity-40 border border-current/5 cursor-not-allowed"
                   }`}
                 >
                   <Send size={8} />

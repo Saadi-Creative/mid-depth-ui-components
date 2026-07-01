@@ -1,6 +1,6 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CONFIGURATOR_THEMES, CONFIGURATOR_THEME_LIST } from "../../themes/themeConfig";
+import { useGlobalTheme } from "../../themes/ThemeContext";
 
 /* ═══════════════════════════════════════════════════════════  ICONS  */
 const IconServer = () => (
@@ -63,7 +63,28 @@ const FloatingParticles = ({ theme, active }) => (
 );
 
 export default function StepConfigurator() {
-  const [currentTheme, setCurrentTheme] = useState(CONFIGURATOR_THEMES.cobalt);
+  const { activeVariant } = useGlobalTheme();
+  const currentTheme = React.useMemo(() => {
+    const hex = activeVariant.triggerColor || "#2563EB";
+    let rgb = "37, 99, 235";
+    const match = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+    if (match) {
+      rgb = `${parseInt(match[1], 16)}, ${parseInt(match[2], 16)}, ${parseInt(match[3], 16)}`;
+    }
+    return {
+      id: activeVariant.id,
+      label: activeVariant.name,
+      swatch: hex,
+      primary: hex,
+      primaryDark: hex,
+      primaryMuted: `rgba(${rgb}, 0.12)`,
+      glow: hex,
+      shadow: `0 30px 80px rgba(${rgb}, 0.2)`,
+      border: `rgba(${rgb}, 0.3)`,
+      text: hex,
+    };
+  }, [activeVariant]);
+
   const [step, setStep] = useState(0); // 0, 1, 2, 3
   const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
   const [shakeTrigger, setShakeTrigger] = useState(false);
@@ -158,17 +179,14 @@ export default function StepConfigurator() {
   return (
     <div
       id="component-05-step-configurator"
-      className="relative w-full min-h-screen flex flex-col justify-start items-center p-6 md:p-8 overflow-hidden select-none"
-      style={{
-        background: "radial-gradient(circle at 50% 50%, #0c0d1b 0%, #05060b 100%)",
-      }}
+      className={`relative w-full min-h-screen flex flex-col justify-start items-center p-6 md:p-8 overflow-hidden select-none transition-colors duration-500 ${activeVariant.canvasClass}`}
     >
       {/* Background soft glowing blur orbs */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden opacity-20">
         <div
           className="absolute w-[400px] h-[400px] rounded-full transition-colors duration-1000"
           style={{
-            background: currentTheme.primary,
+            background: activeVariant.id === "brutal" ? "transparent" : currentTheme.primary,
             filter: "blur(130px)",
             top: "20%",
             left: "30%",
@@ -189,40 +207,19 @@ export default function StepConfigurator() {
 
       <div className="relative z-10 w-full max-w-[450px] flex flex-col gap-5 my-auto">
         {/* ── TOP NAV BAR WITH PINNED THEME SWITCHER ── */}
-        <div className="flex items-center justify-between bg-white/3 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/5 shadow-md">
+        <div className={`flex items-center justify-between px-4 py-3 shadow-md ${activeVariant.cardClass}`}>
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full" style={{ background: currentTheme.primary }} />
-            <span className="text-[11px] font-black uppercase tracking-wider text-white font-mono">
+            <span className="text-[11px] font-black uppercase tracking-wider font-mono">
               Vapor Node Builder
             </span>
-          </div>
-
-          {/* Theme switcher */}
-          <div className="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-full border border-white/5">
-            {CONFIGURATOR_THEME_LIST.map((theme) => {
-              const isActive = currentTheme.id === theme.id;
-              return (
-                <button
-                  key={theme.id}
-                  onClick={() => setCurrentTheme(theme)}
-                  className="w-3.5 h-3.5 rounded-full cursor-pointer relative transition-all duration-300"
-                  style={{
-                    background: theme.swatch,
-                    opacity: isActive ? 1 : 0.6,
-                    transform: isActive ? "scale(1.2)" : "scale(1)",
-                    boxShadow: isActive ? `0 0 8px ${theme.glow}` : "none",
-                  }}
-                  title={theme.label}
-                />
-              );
-            })}
           </div>
         </div>
 
         {/* ── STEP PROGRESS TRACKER ── */}
         <div className="flex justify-between items-center px-4 relative">
           {/* Base Connection line */}
-          <div className="absolute left-8 right-8 top-1/2 -translate-y-1/2 h-0.5 bg-white/5 -z-10" />
+          <div className="absolute left-8 right-8 top-1/2 -translate-y-1/2 h-0.5 bg-current/5 -z-10" />
           
           {/* Active Connection Line */}
           <motion.div
@@ -233,7 +230,7 @@ export default function StepConfigurator() {
             transition={{ type: "spring", stiffness: 80, damping: 20 }}
             style={{
               background: `linear-gradient(90deg, ${currentTheme.primary}, ${currentTheme.primaryDark})`,
-              boxShadow: `0 0 10px ${currentTheme.glow}`,
+              boxShadow: activeVariant.id === "brutal" ? "none" : `0 0 10px ${currentTheme.glow}`,
             }}
           />
 
@@ -245,13 +242,14 @@ export default function StepConfigurator() {
             return (
               <div key={idx} className="flex flex-col items-center gap-1.5">
                 <motion.div
-                  className="w-9 h-9 rounded-full flex items-center justify-center border bg-[#090b17]"
+                  className="w-9 h-9 rounded-full flex items-center justify-center border bg-transparent"
                   animate={isActive ? { scale: 1.15 } : { scale: 1 }}
                   transition={{ type: "spring", stiffness: 300, damping: 15 }}
                   style={{
-                    borderColor: isCompleted || isActive ? currentTheme.primary : "rgba(255,255,255,0.08)",
-                    color: isCompleted || isActive ? currentTheme.primary : "rgba(255,255,255,0.3)",
-                    boxShadow: isActive ? `0 0 12px ${currentTheme.glow}33` : "none",
+                    borderColor: isCompleted || isActive ? currentTheme.primary : "currentColor",
+                    color: isCompleted || isActive ? currentTheme.primary : "currentColor",
+                    opacity: isCompleted || isActive ? 1 : 0.3,
+                    boxShadow: isActive && activeVariant.id !== "brutal" ? `0 0 12px ${currentTheme.glow}33` : "none",
                   }}
                 >
                   {isCompleted ? "✓" : <Icon />}
@@ -259,7 +257,8 @@ export default function StepConfigurator() {
                 <span
                   className="text-[9px] font-bold uppercase tracking-wider transition-colors duration-500"
                   style={{
-                    color: isActive ? currentTheme.primary : isCompleted ? "white" : "rgba(255,255,255,0.3)",
+                    color: isActive ? currentTheme.primary : undefined,
+                    opacity: isActive || isCompleted ? 1 : 0.3
                   }}
                 >
                   {s.title}
@@ -272,18 +271,18 @@ export default function StepConfigurator() {
         {/* ── OVERLAPPING FLAT CARDS (2D/2.5D SHADOW STACK) ── */}
         <div className="relative w-full min-h-[340px] flex flex-col">
           {/* Overlapping back cards to simulate flat depth hierarchy using 2D transforms and shadows */}
-          {step < 3 && (
+          {step < 3 && activeVariant.id !== "brutal" && (
             <>
               {/* Back Card 2 (Furthest back) */}
               <div
-                className="absolute inset-0 rounded-2xl border border-white/5 transition-all duration-500 shadow-2xl -z-20 bg-[#121528] opacity-30"
+                className={`absolute inset-0 transition-all duration-500 shadow-2xl -z-20 opacity-30 ${activeVariant.cardClass}`}
                 style={{
                   transform: "translateY(12px) scale(0.95)",
                 }}
               />
               {/* Back Card 1 (Middle) */}
               <div
-                className="absolute inset-0 rounded-2xl border border-white/5 transition-all duration-500 shadow-xl -z-10 bg-[#161a32] opacity-60"
+                className={`absolute inset-0 transition-all duration-500 shadow-xl -z-10 opacity-60 ${activeVariant.cardClass}`}
                 style={{
                   transform: "translateY(6px) scale(0.975)",
                 }}
@@ -293,7 +292,7 @@ export default function StepConfigurator() {
 
           {/* Active Card Frame */}
           <motion.div
-            className="w-full flex-1 min-h-[340px] rounded-2xl relative flex flex-col bg-gradient-to-br from-[#141830] to-[#080a16] border border-white/10 shadow-2xl overflow-hidden"
+            className={`w-full flex-1 min-h-[340px] relative flex flex-col shadow-2xl overflow-hidden ${activeVariant.cardClass}`}
             animate={shakeTrigger ? {
               x: [0, -6, 6, -6, 6, 0],
               transition: { duration: 0.4, ease: "easeInOut" }
@@ -323,12 +322,12 @@ export default function StepConfigurator() {
                   {step === 0 && (
                     <div className="flex flex-col gap-3">
                       <div>
-                        <h2 className="text-sm font-black text-white">Create Virtual Workspace</h2>
-                        <p className="text-[10px] text-white/40">Select node configuration parameter specs.</p>
+                        <h2 className="text-sm font-black">Create Virtual Workspace</h2>
+                        <p className="text-[10px] opacity-40">Select node configuration parameter specs.</p>
                       </div>
 
                       <div className="flex flex-col gap-1.5 mt-1.5">
-                        <label className="text-[10px] font-bold text-white/50 uppercase tracking-wider font-mono">
+                        <label className="text-[10px] font-bold opacity-50 uppercase tracking-wider font-mono">
                           Workspace Handle
                         </label>
                         <input
@@ -336,23 +335,20 @@ export default function StepConfigurator() {
                           value={formData.workspaceName}
                           onChange={(e) => updateForm("workspaceName", e.target.value)}
                           placeholder="my-cool-workspace"
-                          className="w-full text-xs py-2 px-3 rounded-xl text-white outline-none bg-white/5 border transition-all duration-300 font-semibold focus:bg-white/10"
-                          style={{
-                            borderColor: "rgba(255, 255, 255, 0.08)",
-                          }}
+                          className={`w-full text-xs py-2 px-3 rounded-xl outline-none transition-all duration-300 font-semibold ${activeVariant.inputClass}`}
                           onFocus={(e) => {
                             e.target.style.borderColor = currentTheme.primary;
-                            e.target.style.boxShadow = `0 0 10px ${currentTheme.glow}33`;
+                            if (activeVariant.id !== "brutal") e.target.style.boxShadow = `0 0 10px ${currentTheme.glow}33`;
                           }}
                           onBlur={(e) => {
-                            e.target.style.borderColor = "rgba(255, 255, 255, 0.08)";
-                            e.target.style.boxShadow = "none";
+                            e.target.style.borderColor = "";
+                            e.target.style.boxShadow = "";
                           }}
                         />
                       </div>
 
                       <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-bold text-white/50 uppercase tracking-wider font-mono">
+                        <label className="text-[10px] font-bold opacity-50 uppercase tracking-wider font-mono">
                           Node Deploy Template
                         </label>
                         <div className="flex flex-col gap-1.5">
@@ -365,15 +361,15 @@ export default function StepConfigurator() {
                                 onClick={() => updateForm("nodeType", t)}
                                 whileHover={{ scale: 1.015, background: "rgba(255,255,255,0.04)" }}
                                 whileTap={{ scale: 0.985 }}
-                                className="w-full text-left p-2.5 rounded-xl border transition-all duration-300 flex items-center justify-between cursor-pointer group"
+                                className={`w-full text-left p-2.5 border transition-all duration-300 flex items-center justify-between cursor-pointer group ${activeVariant.buttonClass}`}
                                 style={{
-                                  background: isSel ? currentTheme.primaryMuted : "rgba(255,255,255,0.02)",
-                                  borderColor: isSel ? currentTheme.primary : "rgba(255,255,255,0.06)",
+                                  background: isSel ? currentTheme.primaryMuted : "transparent",
+                                  borderColor: isSel ? currentTheme.primary : undefined,
                                 }}
                               >
                                 <div>
-                                  <div className="text-xs font-extrabold text-white">{t}</div>
-                                  <div className="text-[9px] text-white/40 mt-0.5 font-mono">
+                                  <div className="text-xs font-extrabold text-current">{t}</div>
+                                  <div className="text-[9px] opacity-40 mt-0.5 font-mono">
                                     {t === "Vapor Compute Node" && "Standard virtual memory cloud node."}
                                     {t === "Neural Hub Node" && "Optimized for neural workflows & GPU processing."}
                                     {t === "Bare Metal Node" && "High performance dedicated hardware machine."}
@@ -382,7 +378,7 @@ export default function StepConfigurator() {
                                 <span
                                   className="w-4 h-4 rounded-full border flex items-center justify-center transition-all duration-300"
                                   style={{
-                                    borderColor: isSel ? currentTheme.primary : "rgba(255,255,255,0.2)",
+                                    borderColor: isSel ? currentTheme.primary : "currentColor",
                                   }}
                                 >
                                   {isSel && (
@@ -407,15 +403,15 @@ export default function StepConfigurator() {
                   {step === 1 && (
                     <div className="flex flex-col gap-3">
                       <div>
-                        <h2 className="text-sm font-black text-white">Allocate Resources</h2>
-                        <p className="text-[10px] text-white/40">Calibrate core hardware performance nodes.</p>
+                        <h2 className="text-sm font-black">Allocate Resources</h2>
+                        <p className="text-[10px] opacity-40">Calibrate core hardware performance nodes.</p>
                       </div>
 
                       <div className="flex flex-col gap-4 mt-3">
                         {/* CPU slider */}
                         <div className="flex flex-col gap-2">
                           <div className="flex justify-between text-xs font-mono">
-                            <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider">CPU Cores</span>
+                            <span className="text-[10px] font-bold opacity-50 uppercase tracking-wider">CPU Cores</span>
                             <span className="font-bold" style={{ color: currentTheme.primary }}>
                               {formData.cpu} Cores
                             </span>
@@ -431,7 +427,7 @@ export default function StepConfigurator() {
                               step="2"
                               value={formData.cpu}
                               onChange={(e) => updateForm("cpu", parseInt(e.target.value))}
-                              className="w-full h-1 bg-white/5 rounded-full appearance-none outline-none cursor-pointer"
+                              className="w-full h-1 bg-current/5 rounded-full appearance-none outline-none cursor-pointer"
                               style={{
                                 backgroundImage: `linear-gradient(90deg, ${currentTheme.primary} 0%, ${currentTheme.primary} ${cpuPercent}%, rgba(255,255,255,0.05) ${cpuPercent}%, rgba(255,255,255,0.05) 100%)`,
                               }}
@@ -445,13 +441,13 @@ export default function StepConfigurator() {
                               style={{
                                 left: `${cpuPercent}%`,
                                 background: currentTheme.primary,
-                                boxShadow: `0 2px 6px ${currentTheme.glow}`,
+                                boxShadow: activeVariant.id === "brutal" ? "none" : `0 2px 6px ${currentTheme.glow}`,
                               }}
                             >
                               {formData.cpu}C
                             </motion.div>
                           </div>
-                          <div className="flex justify-between text-[9px] text-white/30 font-mono">
+                          <div className="flex justify-between text-[9px] opacity-30 font-mono">
                             <span>2 Cores</span>
                             <span>64 Cores</span>
                           </div>
@@ -460,7 +456,7 @@ export default function StepConfigurator() {
                         {/* Memory slider */}
                         <div className="flex flex-col gap-2">
                           <div className="flex justify-between text-xs font-mono">
-                            <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider">Memory RAM</span>
+                            <span className="text-[10px] font-bold opacity-50 uppercase tracking-wider">Memory RAM</span>
                             <span className="font-bold" style={{ color: currentTheme.primary }}>
                               {formData.ram} GB
                             </span>
@@ -476,7 +472,7 @@ export default function StepConfigurator() {
                               step="4"
                               value={formData.ram}
                               onChange={(e) => updateForm("ram", parseInt(e.target.value))}
-                              className="w-full h-1 bg-white/5 rounded-full appearance-none outline-none cursor-pointer"
+                              className="w-full h-1 bg-current/5 rounded-full appearance-none outline-none cursor-pointer"
                               style={{
                                 backgroundImage: `linear-gradient(90deg, ${currentTheme.primary} 0%, ${currentTheme.primary} ${ramPercent}%, rgba(255,255,255,0.05) ${ramPercent}%, rgba(255,255,255,0.05) 100%)`,
                               }}
@@ -490,13 +486,13 @@ export default function StepConfigurator() {
                               style={{
                                 left: `${ramPercent}%`,
                                 background: currentTheme.primary,
-                                boxShadow: `0 2px 6px ${currentTheme.glow}`,
+                                boxShadow: activeVariant.id === "brutal" ? "none" : `0 2px 6px ${currentTheme.glow}`,
                               }}
                             >
                               {formData.ram}G
                             </motion.div>
                           </div>
-                          <div className="flex justify-between text-[9px] text-white/30 font-mono">
+                          <div className="flex justify-between text-[9px] opacity-30 font-mono">
                             <span>4 GB</span>
                             <span>512 GB</span>
                           </div>
@@ -504,18 +500,18 @@ export default function StepConfigurator() {
                       </div>
 
                       {/* Calculated Live Cost */}
-                      <div className="mt-3 p-3 rounded-xl border border-white/5 bg-black/30 flex items-center justify-between">
+                      <div className="mt-3 p-3 rounded-xl border border-current/10 bg-current/5 flex items-center justify-between">
                         <div>
-                          <div className="text-[10px] font-bold text-white/40 uppercase tracking-wider font-mono">
+                          <div className="text-[10px] font-bold opacity-40 uppercase tracking-wider font-mono">
                             Estimated Cost
                           </div>
-                          <div className="text-[9px] text-white/30 mt-0.5 font-mono">
+                          <div className="text-[9px] opacity-30 mt-0.5 font-mono">
                             Billed hourly. Cancel anytime.
                           </div>
                         </div>
                         <div className="text-right">
-                          <span className="text-xl font-mono font-black text-white">${calculatePrice()}</span>
-                          <span className="text-[9px] font-bold text-white/40 uppercase font-mono">/mo</span>
+                          <span className="text-xl font-mono font-black">${calculatePrice()}</span>
+                          <span className="text-[9px] font-bold opacity-40 uppercase font-mono">/mo</span>
                         </div>
                       </div>
                     </div>
@@ -525,26 +521,26 @@ export default function StepConfigurator() {
                   {step === 2 && (
                     <div className="flex flex-col gap-3">
                       <div>
-                        <h2 className="text-sm font-black text-white">Billing Authorization</h2>
-                        <p className="text-[10px] text-white/40">Verify payment credentials for node deployment.</p>
+                        <h2 className="text-sm font-black">Billing Authorization</h2>
+                        <p className="text-[10px] opacity-40">Verify payment credentials for node deployment.</p>
                       </div>
 
                       <div className="flex flex-col gap-3">
                         {/* Cost summary card */}
-                        <div className="p-2.5 rounded-xl border border-white/5 bg-black/25 flex justify-between items-center text-xs font-mono">
+                        <div className="p-2.5 rounded-xl border border-current/10 bg-current/5 flex justify-between items-center text-xs font-mono">
                           <div>
-                            <div className="font-black text-white">{formData.nodeType}</div>
-                            <div className="text-[10px] text-white/40 mt-0.5">
+                            <div className="font-black">{formData.nodeType}</div>
+                            <div className="text-[10px] opacity-40 mt-0.5">
                               {formData.cpu} Cores / {formData.ram}GB RAM
                             </div>
                           </div>
-                          <span className="font-extrabold text-white">${calculatePrice()}/mo</span>
+                          <span className="font-extrabold">${calculatePrice()}/mo</span>
                         </div>
 
                         {/* Card Input fields */}
                         <div className="flex flex-col gap-3 mt-1">
                           <div className="flex flex-col gap-1">
-                            <label className="text-[9px] font-bold text-white/50 uppercase tracking-wider font-mono">
+                            <label className="text-[9px] font-bold opacity-50 uppercase tracking-wider font-mono">
                               Card Number
                             </label>
                             <input
@@ -553,24 +549,21 @@ export default function StepConfigurator() {
                               value={formData.cardNumber}
                               onChange={(e) => updateForm("cardNumber", e.target.value)}
                               placeholder="•••• •••• •••• ••••"
-                              className="w-full text-xs py-2 px-3 rounded-xl text-white outline-none bg-white/5 border transition-all duration-300 font-semibold focus:bg-white/10"
-                              style={{
-                                borderColor: "rgba(255, 255, 255, 0.08)",
-                              }}
+                              className={`w-full text-xs py-2 px-3 rounded-xl outline-none transition-all duration-300 font-semibold ${activeVariant.inputClass}`}
                               onFocus={(e) => {
                                 e.target.style.borderColor = currentTheme.primary;
-                                e.target.style.boxShadow = `0 0 10px ${currentTheme.glow}33`;
+                                if (activeVariant.id !== "brutal") e.target.style.boxShadow = `0 0 10px ${currentTheme.glow}33`;
                               }}
                               onBlur={(e) => {
-                                e.target.style.borderColor = "rgba(255, 255, 255, 0.08)";
-                                e.target.style.boxShadow = "none";
+                                e.target.style.borderColor = "";
+                                e.target.style.boxShadow = "";
                               }}
                             />
                           </div>
 
                           <div className="grid grid-cols-2 gap-3">
                             <div className="flex flex-col gap-1">
-                              <label className="text-[9px] font-bold text-white/50 uppercase tracking-wider font-mono">
+                              <label className="text-[9px] font-bold opacity-50 uppercase tracking-wider font-mono">
                                 Expiry Date
                               </label>
                               <input
@@ -579,22 +572,19 @@ export default function StepConfigurator() {
                                 value={formData.cardExpiry}
                                 onChange={(e) => updateForm("cardExpiry", e.target.value)}
                                 placeholder="MM/YY"
-                                className="w-full text-xs py-2 px-3 rounded-xl text-white outline-none bg-white/5 border transition-all duration-300 font-semibold focus:bg-white/10"
-                                style={{
-                                  borderColor: "rgba(255, 255, 255, 0.08)",
-                                }}
+                                className={`w-full text-xs py-2 px-3 rounded-xl outline-none transition-all duration-300 font-semibold ${activeVariant.inputClass}`}
                                 onFocus={(e) => {
                                   e.target.style.borderColor = currentTheme.primary;
-                                  e.target.style.boxShadow = `0 0 10px ${currentTheme.glow}33`;
+                                  if (activeVariant.id !== "brutal") e.target.style.boxShadow = `0 0 10px ${currentTheme.glow}33`;
                                 }}
                                 onBlur={(e) => {
-                                  e.target.style.borderColor = "rgba(255, 255, 255, 0.08)";
-                                  e.target.style.boxShadow = "none";
+                                  e.target.style.borderColor = "";
+                                  e.target.style.boxShadow = "";
                                 }}
                               />
                             </div>
                             <div className="flex flex-col gap-1">
-                              <label className="text-[9px] font-bold text-white/50 uppercase tracking-wider font-mono">
+                              <label className="text-[9px] font-bold opacity-50 uppercase tracking-wider font-mono">
                                 Security CVC
                               </label>
                               <input
@@ -603,17 +593,14 @@ export default function StepConfigurator() {
                                 value={formData.cardCvc}
                                 onChange={(e) => updateForm("cardCvc", e.target.value)}
                                 placeholder="•••"
-                                className="w-full text-xs py-2 px-3 rounded-xl text-white outline-none bg-white/5 border transition-all duration-300 font-semibold focus:bg-white/10"
-                                style={{
-                                  borderColor: "rgba(255, 255, 255, 0.08)",
-                                }}
+                                className={`w-full text-xs py-2 px-3 rounded-xl outline-none transition-all duration-300 font-semibold ${activeVariant.inputClass}`}
                                 onFocus={(e) => {
                                   e.target.style.borderColor = currentTheme.primary;
-                                  e.target.style.boxShadow = `0 0 10px ${currentTheme.glow}33`;
+                                  if (activeVariant.id !== "brutal") e.target.style.boxShadow = `0 0 10px ${currentTheme.glow}33`;
                                 }}
                                 onBlur={(e) => {
-                                  e.target.style.borderColor = "rgba(255, 255, 255, 0.08)";
-                                  e.target.style.boxShadow = "none";
+                                  e.target.style.borderColor = "";
+                                  e.target.style.boxShadow = "";
                                 }}
                               />
                             </div>
@@ -643,25 +630,25 @@ export default function StepConfigurator() {
                       </motion.div>
 
                       <div>
-                        <h2 className="text-lg font-black text-white leading-tight">Node Successfully Provisioned</h2>
-                        <p className="text-xs text-white/50 max-w-[340px] mt-1.5 leading-relaxed">
-                          Workspace <span className="text-white font-bold font-mono">"{formData.workspaceName}"</span> is deploying on standard servers.
+                        <h2 className="text-lg font-black leading-tight">Node Successfully Provisioned</h2>
+                        <p className="text-xs opacity-50 max-w-[340px] mt-1.5 leading-relaxed">
+                          Workspace <span className="font-bold font-mono">"{formData.workspaceName}"</span> is deploying on standard servers.
                         </p>
                       </div>
 
                       {/* Metadata Box */}
-                      <div className="w-full p-3 rounded-xl border border-white/5 bg-black/30 flex flex-col gap-2 text-left font-mono text-[10px]">
+                      <div className="w-full p-3 rounded-xl border border-current/10 bg-current/5 flex flex-col gap-2 text-left font-mono text-[10px]">
                         <div className="flex justify-between">
-                          <span className="text-white/40">NODE CLUSTER IP:</span>
-                          <span className="text-white font-bold">198.51.100.42</span>
+                          <span className="opacity-40">NODE CLUSTER IP:</span>
+                          <span className="font-bold">198.51.100.42</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-white/40">TEMPLATED NODE:</span>
-                          <span className="text-white font-bold uppercase">{formData.nodeType}</span>
+                          <span className="opacity-40">TEMPLATED NODE:</span>
+                          <span className="font-bold uppercase">{formData.nodeType}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-white/40">HARDWARE MATRIX:</span>
-                          <span className="text-white font-bold">
+                          <span className="opacity-40">HARDWARE MATRIX:</span>
+                          <span className="font-bold">
                             {formData.cpu} Cores / {formData.ram}GB RAM
                           </span>
                         </div>
@@ -672,7 +659,7 @@ export default function StepConfigurator() {
                           setStep(0);
                           setDirection(-1);
                         }}
-                        className="px-4 py-2 border border-white/10 hover:border-white/20 hover:text-white text-white/60 text-[9px] rounded-lg transition-all tracking-wider font-bold uppercase cursor-pointer"
+                        className={`px-4 py-2 border transition-all tracking-wider font-bold uppercase cursor-pointer text-[9px] rounded-lg ${activeVariant.buttonClass} text-current hover:text-current`}
                       >
                         ← Reconfigure Node
                       </button>
@@ -681,13 +668,13 @@ export default function StepConfigurator() {
 
                   {/* ── BUTTON FOOTER NAVIGATION ── */}
                   {step < 3 && (
-                    <div className="flex justify-between items-center pt-4 border-t border-white/5 mt-4 z-30">
+                    <div className="flex justify-between items-center pt-4 border-t border-current/10 mt-4 z-30">
                       <motion.button
                         type="button"
                         onClick={handleBack}
                         whileHover={step > 0 ? { scale: 1.03, x: -2 } : {}}
                         whileTap={step > 0 ? { scale: 0.97 } : {}}
-                        className="px-4 py-2 rounded-xl border border-white/10 hover:border-white/25 hover:text-white text-white/50 text-[10px] font-bold uppercase tracking-wider transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer"
+                        className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer ${activeVariant.buttonClass} text-current hover:text-current`}
                         disabled={step === 0}
                       >
                         Back
@@ -695,13 +682,13 @@ export default function StepConfigurator() {
                       <motion.button
                         type="button"
                         onClick={handleNext}
-                        whileHover={{ scale: 1.03, boxShadow: `0 6px 18px ${currentTheme.glow}44` }}
+                        whileHover={{ scale: 1.03, boxShadow: activeVariant.id === "brutal" ? "none" : `0 6px 18px ${currentTheme.glow}44` }}
                         whileTap={{ scale: 0.97 }}
                         className="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider cursor-pointer shadow-md flex items-center gap-1.5 select-none transition-all duration-200 hover:brightness-110"
                         style={{
                           background: currentTheme.primary,
                           color: "#000",
-                          boxShadow: `0 4px 14px ${currentTheme.glow}33`,
+                          boxShadow: activeVariant.id === "brutal" ? "none" : `0 4px 14px ${currentTheme.glow}33`,
                         }}
                       >
                         <span>{step === 2 ? "Deploy Node" : "Continue"}</span>

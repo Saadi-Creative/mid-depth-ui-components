@@ -1,75 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ChevronLeft, ChevronRight, X, Play, Info, Sparkles, HelpCircle } from "lucide-react";
-
-// Themes definition
-const THEMES = [
-  {
-    id: "emerald",
-    name: "Emerald",
-    color: "#10b981",
-    rgb: "16, 185, 129",
-    border: "border-emerald-500/20",
-    bg: "bg-emerald-500",
-    hoverBg: "hover:bg-emerald-600",
-    text: "text-emerald-400",
-    accentBg: "bg-emerald-500/10",
-    glow: "shadow-[0_0_15px_rgba(16,185,129,0.3)]",
-    outlineGlow: "rgba(16,185,129,0.4)"
-  },
-  {
-    id: "sapphire",
-    name: "Sapphire Blue",
-    color: "#2979ff",
-    rgb: "41, 121, 255",
-    border: "border-blue-500/20",
-    bg: "bg-blue-500",
-    hoverBg: "hover:bg-blue-600",
-    text: "text-blue-400",
-    accentBg: "bg-blue-500/10",
-    glow: "shadow-[0_0_15px_rgba(41,121,255,0.35)]",
-    outlineGlow: "rgba(41,121,255,0.4)"
-  },
-  {
-    id: "amethyst",
-    name: "Amethyst",
-    color: "#aa00ff",
-    rgb: "170, 0, 255",
-    border: "border-purple-500/20",
-    bg: "bg-purple-500",
-    hoverBg: "hover:bg-purple-600",
-    text: "text-purple-400",
-    accentBg: "bg-purple-500/10",
-    glow: "shadow-[0_0_15px_rgba(170,0,255,0.35)]",
-    outlineGlow: "rgba(170,0,255,0.4)"
-  },
-  {
-    id: "ruby",
-    name: "Ruby",
-    color: "#ff1744",
-    rgb: "255, 23, 68",
-    border: "border-rose-500/20",
-    bg: "bg-rose-500",
-    hoverBg: "hover:bg-rose-600",
-    text: "text-rose-400",
-    accentBg: "bg-rose-500/10",
-    glow: "shadow-[0_0_15px_rgba(255,23,68,0.35)]",
-    outlineGlow: "rgba(255,23,68,0.4)"
-  },
-  {
-    id: "amber",
-    name: "Amber",
-    color: "#ffd600",
-    rgb: "255, 214, 0",
-    border: "border-amber-500/20",
-    bg: "bg-amber-500",
-    hoverBg: "hover:bg-amber-600",
-    text: "text-amber-400",
-    accentBg: "bg-amber-500/10",
-    glow: "shadow-[0_0_15px_rgba(255,214,0,0.35)]",
-    outlineGlow: "rgba(255,214,0,0.4)"
-  }
-];
+import { ArrowRight, ChevronLeft, ChevronRight, X, Play, Info, Sparkles } from "lucide-react";
+import { useGlobalTheme } from "../../themes/ThemeContext";
 
 // Tour Steps
 const TOUR_STEPS = [
@@ -100,12 +32,35 @@ const TOUR_STEPS = [
 ];
 
 export default function ProductTour() {
-  const [activeTheme, setActiveTheme] = useState(THEMES[0]);
+  const { activeVariant } = useGlobalTheme();
   const [tourActive, setTourActive] = useState(true);
   const [step, setStep] = useState(0);
   const [highlightBox, setHighlightBox] = useState({ top: 0, left: 0, width: 0, height: 0 });
 
   const containerRef = useRef(null);
+
+  // Helper to convert hex to rgb string for inline rgba values
+  const hexToRgb = (hex) => {
+    if (!hex) return "0, 229, 255";
+    const cleanHex = hex.replace("#", "");
+    const r = parseInt(cleanHex.substring(0, 2), 16);
+    const g = parseInt(cleanHex.substring(2, 4), 16);
+    const b = parseInt(cleanHex.substring(4, 6), 16);
+    return isNaN(r) || isNaN(g) || isNaN(b) ? "0, 229, 255" : `${r}, ${g}, ${b}`;
+  };
+
+  const rgbStr = hexToRgb(activeVariant.triggerColor);
+  const activeTheme = {
+    color: activeVariant.triggerColor,
+    rgb: rgbStr,
+    border: `rgba(${rgbStr}, 0.2)`,
+    bg: "",
+    hoverBg: "",
+    text: activeVariant.textClass,
+    accentBg: `rgba(${rgbStr}, 0.1)`,
+    glow: `shadow-[0_0_15px_rgba(${rgbStr},0.3)]`,
+    outlineGlow: `rgba(${rgbStr}, 0.4)`
+  };
 
   // Calculate target element coordinates relative to dashboard container
   useEffect(() => {
@@ -193,12 +148,11 @@ export default function ProductTour() {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-8 select-none bg-[#060810] flex items-center justify-center"
-      style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className={`min-h-screen p-4 md:p-8 select-none transition-colors duration-500 flex items-center justify-center ${activeVariant.canvasClass}`}>
       
       <div 
         ref={containerRef}
-        className="w-full max-w-5xl bg-[#080a14] border border-white/5 rounded-3xl p-6 md:p-8 relative min-h-[620px] overflow-hidden shadow-inner flex flex-col gap-6"
+        className={`w-full max-w-5xl p-6 md:p-8 relative min-h-[620px] overflow-hidden flex flex-col gap-6 ${activeVariant.cardClass}`}
       >
         {/* ========================================================
             MOCK DASHBOARD LAYOUT (BACKGROUND CANVAS TARGETS)
@@ -207,7 +161,7 @@ export default function ProductTour() {
         {/* Dashboard Header */}
         <div 
           id="tour-brand"
-          className="bg-[#0a0d1a] border border-white/5 rounded-2xl p-4 flex items-center justify-between shadow-md transition-colors"
+          className={`p-4 flex items-center justify-between transition-colors ${activeVariant.cardClass}`}
         >
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center"
@@ -229,7 +183,7 @@ export default function ProductTour() {
           {/* Main metrics module */}
           <div 
             id="tour-metrics"
-            className="md:col-span-8 bg-[#0a0d1a] border border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[220px]"
+            className={`md:col-span-8 p-5 flex flex-col justify-between min-h-[220px] ${activeVariant.cardClass}`}
           >
             <div className="flex justify-between items-center text-[10px] font-mono font-bold text-white/40 uppercase">
               <span>Diagnostic load metrics</span>
@@ -264,7 +218,7 @@ export default function ProductTour() {
           {/* Quick Actions sidebar panel */}
           <div 
             id="tour-actions"
-            className="md:col-span-4 bg-[#0a0d1a] border border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[220px]"
+            className={`md:col-span-4 p-5 flex flex-col justify-between min-h-[220px] ${activeVariant.cardClass}`}
           >
             <div className="text-[10px] font-mono font-bold text-white/40 uppercase">
               Core Actions
@@ -291,7 +245,7 @@ export default function ProductTour() {
         {/* Dashboard bottom layout */}
         <div 
           id="tour-settings"
-          className="bg-[#0a0d1a] border border-white/5 rounded-2xl p-4 flex items-center justify-between text-xs text-white/30 font-mono"
+          className={`p-4 flex items-center justify-between text-xs text-white/30 font-mono ${activeVariant.cardClass}`}
         >
           <span>VESSEL SHELL TERMINAL V2.5.0</span>
           
@@ -342,7 +296,7 @@ export default function ProductTour() {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 15 }}
                 transition={{ type: "spring", stiffness: 220, damping: 18 }}
-                className="absolute w-[300px] bg-[#0a0d1a] border border-white/10 rounded-2xl p-5 shadow-[0_20px_40px_rgba(0,0,0,0.6)] z-40 flex flex-col gap-4 font-sans select-none"
+                className={`absolute w-[300px] p-5 flex flex-col gap-4 font-sans select-none ${activeVariant.cardClass}`}
                 style={getTooltipPosition()}
               >
                 {/* Tooltip Header */}
@@ -368,7 +322,7 @@ export default function ProductTour() {
                   {currentStep.desc}
                 </p>
 
-                {/* Footer Controls, Indicators and Swatches */}
+                {/* Footer Controls and Navigation */}
                 <div className="flex flex-col gap-3 pt-3 border-t border-white/5">
                   
                   {/* Swatches & Indicator Dots row */}
@@ -384,26 +338,6 @@ export default function ProductTour() {
                             backgroundColor: step === idx ? activeTheme.color : "rgba(255,255,255,0.15)"
                           }}
                         />
-                      ))}
-                    </div>
-
-                    {/* Onboarding step indicator theme swatches */}
-                    <div className="flex items-center gap-1 bg-black/40 px-2 py-1 rounded-lg border border-white/5">
-                      {THEMES.map(theme => (
-                        <button
-                          key={theme.id}
-                          onClick={() => setActiveTheme(theme)}
-                          className="w-2.5 h-2.5 rounded-full cursor-pointer relative flex items-center justify-center transition-transform active:scale-75"
-                          style={{ backgroundColor: theme.color }}
-                        >
-                          {activeTheme.id === theme.id && (
-                            <motion.div
-                              layoutId="active-tour-theme-ring"
-                              className="absolute -inset-0.5 rounded-full border border-current opacity-70"
-                              style={{ color: theme.color }}
-                            />
-                          )}
-                        </button>
                       ))}
                     </div>
                   </div>
@@ -429,7 +363,7 @@ export default function ProductTour() {
                         className={`px-3 py-1.5 rounded-lg font-bold font-mono text-[9px] uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1 ${
                           step === TOUR_STEPS.length - 1 
                             ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
-                            : `text-black ${activeTheme.bg} ${activeTheme.hoverBg} ${activeTheme.glow}`
+                            : `text-white ${activeVariant.buttonClass}`
                         }`}
                       >
                         <span>

@@ -6,69 +6,7 @@ import {
   AlertTriangle, XCircle, ChevronDown, Activity, Play, Terminal
 } from "lucide-react";
 
-// Themes definition
-const THEMES = [
-  {
-    id: "cyan",
-    name: "Neon Teal",
-    color: "#00e5ff",
-    rgb: "0, 229, 255",
-    border: "border-cyan-500/15",
-    glow: "shadow-cyan-500/10",
-    bg: "bg-cyan-500",
-    text: "text-cyan-400",
-    accentBg: "bg-cyan-500/10",
-    glowText: "shadow-[0_0_12px_rgba(0,229,255,0.4)]"
-  },
-  {
-    id: "rose",
-    name: "Cyber Rose",
-    color: "#ff007f",
-    rgb: "255, 0, 127",
-    border: "border-rose-500/15",
-    glow: "shadow-rose-500/10",
-    bg: "bg-rose-500",
-    text: "text-rose-400",
-    accentBg: "bg-rose-500/10",
-    glowText: "shadow-[0_0_12px_rgba(255,0,127,0.4)]"
-  },
-  {
-    id: "toxic",
-    name: "Toxic Lime",
-    color: "#39ff14",
-    rgb: "57, 255, 20",
-    border: "border-lime-500/15",
-    glow: "shadow-lime-500/10",
-    bg: "bg-lime-500",
-    text: "text-lime-400",
-    accentBg: "bg-lime-500/10",
-    glowText: "shadow-[0_0_12px_rgba(57,255,20,0.4)]"
-  },
-  {
-    id: "amber",
-    name: "Amber Glow",
-    color: "#ffb800",
-    rgb: "255, 184, 0",
-    border: "border-amber-500/15",
-    glow: "shadow-amber-500/10",
-    bg: "bg-amber-500",
-    text: "text-amber-400",
-    accentBg: "bg-amber-500/10",
-    glowText: "shadow-[0_0_12px_rgba(255,184,0,0.4)]"
-  },
-  {
-    id: "indigo",
-    name: "Orbit Indigo",
-    color: "#6366f1",
-    rgb: "99, 102, 241",
-    border: "border-indigo-500/15",
-    glow: "shadow-indigo-500/10",
-    bg: "bg-indigo-500",
-    text: "text-indigo-400",
-    accentBg: "bg-indigo-500/10",
-    glowText: "shadow-[0_0_12px_rgba(99,102,241,0.4)]"
-  }
-];
+import { useGlobalTheme } from "../../themes/ThemeContext";
 
 // Initial mock data for nodes
 const INITIAL_NODES = [
@@ -83,7 +21,24 @@ const INITIAL_NODES = [
 ];
 
 export default function KineticDataGrid() {
-  const [activeTheme, setActiveTheme] = useState(THEMES[0]);
+  const { activeVariant } = useGlobalTheme();
+  const activeTheme = React.useMemo(() => {
+    const hex = activeVariant.triggerColor || "#00e5ff";
+    let rgb = "0, 229, 255";
+    const match = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+    if (match) {
+      rgb = `${parseInt(match[1], 16)}, ${parseInt(match[2], 16)}, ${parseInt(match[3], 16)}`;
+    }
+    return {
+      id: activeVariant.id,
+      name: activeVariant.name,
+      color: hex,
+      rgb: rgb,
+      accentBg: `rgba(${rgb}, 0.1)`,
+      glowText: `shadow-[0_0_12px_rgba(${rgb},0.4)]`
+    };
+  }, [activeVariant]);
+
   const [nodes, setNodes] = useState(INITIAL_NODES);
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState("id");
@@ -160,55 +115,32 @@ export default function KineticDataGrid() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col justify-start p-4 md:p-8 select-none bg-[#060810]"
-      style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className={`min-h-screen flex flex-col justify-start p-4 md:p-8 select-none transition-colors duration-500 ${activeVariant.canvasClass}`}>
       
       <div className="w-full max-w-6xl mx-auto flex flex-col gap-6">
         
         {/* Header Control Panel */}
-        <div className="bg-[#0a0d1a] border border-white/5 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
+        <div className={`p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${activeVariant.cardClass}`}>
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-mono tracking-widest text-white/40 uppercase block">
+            <span className="text-[10px] font-mono tracking-widest opacity-40 uppercase block">
               SYSTEM CONTROL UNIT
             </span>
-            <h1 className="text-xl md:text-2xl font-black text-white tracking-tight"
+            <h1 className="text-xl md:text-2xl font-black tracking-tight"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               Elevated 2.5D Kinetic Data Grid
             </h1>
-            <p className="text-xs text-white/45 max-w-xl">
+            <p className="text-xs opacity-45 max-w-xl">
               A high-tech monitoring table with spring-loaded physical layout transitions, Z-axis hover lifting, and interactive SVG node diagnostics.
             </p>
           </div>
 
-          {/* Theme & Refresh buttons */}
+          {/* Refresh button */}
           <div className="flex items-center gap-4 flex-shrink-0 self-end md:self-auto">
-            {/* Color Swatch Panel */}
-            <div className="flex items-center gap-1.5 bg-black/35 px-3 py-2 rounded-xl border border-white/5">
-              {THEMES.map(theme => (
-                <button
-                  key={theme.id}
-                  onClick={() => setActiveTheme(theme)}
-                  className="w-4 h-4 rounded-full cursor-pointer relative flex items-center justify-center transition-transform active:scale-90"
-                  style={{ backgroundColor: theme.color }}
-                  aria-label={`Theme ${theme.name}`}
-                >
-                  {activeTheme.id === theme.id && (
-                    <motion.div
-                      layoutId="active-grid-theme-ring"
-                      className="absolute -inset-1 rounded-full border border-current opacity-80"
-                      style={{ color: theme.color }}
-                      transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                    />
-                  )}
-                </button>
-              ))}
-            </div>
-
             <motion.button
               onClick={handleRefresh}
               whileHover={{ scale: 1.05, y: -1 }}
               whileTap={{ scale: 0.95 }}
-              className="p-2.5 rounded-xl border border-white/10 bg-white/5 text-white/70 hover:text-white cursor-pointer flex items-center justify-center"
+              className={`p-2.5 rounded-xl border flex items-center justify-center cursor-pointer ${activeVariant.buttonClass}`}
             >
               <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
             </motion.button>
@@ -218,7 +150,7 @@ export default function KineticDataGrid() {
         {/* Search & Actions Bar */}
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
           <div className="relative flex-1 w-full">
-            <span className="absolute inset-y-0 left-3 flex items-center text-white/30 pointer-events-none">
+            <span className="absolute inset-y-0 left-3 flex items-center opacity-30 pointer-events-none">
               <Search size={14} />
             </span>
             <input
@@ -226,14 +158,11 @@ export default function KineticDataGrid() {
               placeholder="Search by Node ID, Hostname, or Location..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 bg-[#0a0d1a] border border-white/5 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/20 transition-all font-mono"
-              style={{
-                boxShadow: "inset 0 1px 2px rgba(0,0,0,0.5)"
-              }}
+              className={`w-full pl-9 pr-4 py-2.5 focus:outline-none transition-all font-mono ${activeVariant.inputClass}`}
             />
           </div>
           
-          <button className="px-4 py-2.5 rounded-xl bg-white/5 border border-white/5 text-white/60 hover:text-white text-xs font-bold font-mono flex items-center gap-2 cursor-pointer transition-colors w-full sm:w-auto justify-center">
+          <button className="px-4 py-2.5 rounded-xl bg-current/5 border border-current/5 opacity-60 hover:opacity-100 text-xs font-bold font-mono flex items-center gap-2 cursor-pointer transition-colors w-full sm:w-auto justify-center">
             <SlidersHorizontal size={13} />
             Filter Nodes
           </button>
@@ -243,32 +172,32 @@ export default function KineticDataGrid() {
         <div className="w-full overflow-visible rounded-2xl relative" style={{ perspective: "1000px" }}>
           
           {/* Header Row */}
-          <div className="grid grid-cols-12 gap-2 px-6 py-3 text-[10px] uppercase font-bold tracking-widest text-white/30 border-b border-white/5 mb-2 font-mono">
+          <div className="grid grid-cols-12 gap-2 px-6 py-3 text-[10px] uppercase font-bold tracking-widest opacity-40 border-b border-current/5 mb-2 font-mono">
             <div className="col-span-1 flex items-center">
               <input
                 type="checkbox"
                 onChange={handleSelectAll}
                 checked={filteredNodes.length > 0 && selectedIds.length === filteredNodes.length}
-                className="w-3.5 h-3.5 rounded border-white/20 bg-black/40 text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                className="w-3.5 h-3.5 rounded border-current/20 bg-current/5 text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer"
               />
             </div>
             
-            <div className="col-span-2 flex items-center gap-1 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort("id")}>
+            <div className="col-span-2 flex items-center gap-1 cursor-pointer hover:opacity-100 transition-colors" onClick={() => handleSort("id")}>
               NODE ID
               <ArrowUpDown size={10} />
             </div>
 
-            <div className="col-span-3 flex items-center gap-1 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort("name")}>
+            <div className="col-span-3 flex items-center gap-1 cursor-pointer hover:opacity-100 transition-colors" onClick={() => handleSort("name")}>
               HOSTNAME
               <ArrowUpDown size={10} />
             </div>
 
-            <div className="col-span-2 flex items-center gap-1 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort("status")}>
+            <div className="col-span-2 flex items-center gap-1 cursor-pointer hover:opacity-100 transition-colors" onClick={() => handleSort("status")}>
               STATUS
               <ArrowUpDown size={10} />
             </div>
 
-            <div className="col-span-2 flex items-center gap-1 cursor-pointer hover:text-white transition-colors justify-end" onClick={() => handleSort("cpu")}>
+            <div className="col-span-2 flex items-center gap-1 cursor-pointer hover:opacity-100 transition-colors justify-end" onClick={() => handleSort("cpu")}>
               CPU LOAD
               <ArrowUpDown size={10} />
             </div>
@@ -287,6 +216,7 @@ export default function KineticDataGrid() {
                   node={node}
                   index={index}
                   activeTheme={activeTheme}
+                  activeVariant={activeVariant}
                   isSelected={selectedIds.includes(node.id)}
                   isExpanded={expandedId === node.id}
                   onSelect={() => handleSelectOne(node.id)}
@@ -300,10 +230,10 @@ export default function KineticDataGrid() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="w-full py-16 flex flex-col items-center justify-center bg-[#0a0d1a] border border-white/5 rounded-2xl"
+                className={`w-full py-16 flex flex-col items-center justify-center ${activeVariant.cardClass}`}
               >
-                <Server size={32} className="text-white/20 mb-3" />
-                <p className="text-xs text-white/50 font-mono">No active cluster nodes match query</p>
+                <Server size={32} className="opacity-20 mb-3" />
+                <p className="text-xs opacity-50 font-mono">No active cluster nodes match query</p>
               </motion.div>
             )}
           </div>
@@ -319,8 +249,9 @@ export default function KineticDataGrid() {
               transition={{ type: "spring", stiffness: 260, damping: 25 }}
               className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 p-4 border rounded-2xl flex items-center justify-between gap-6 min-w-[340px] md:min-w-[460px]"
               style={{
-                background: "rgba(10, 13, 26, 0.95)",
+                background: activeVariant.mode === "dark" ? "rgba(10, 13, 26, 0.95)" : "rgba(255, 255, 255, 0.98)",
                 borderColor: `rgba(${activeTheme.rgb}, 0.25)`,
+                color: activeVariant.mode === "dark" ? "#ffffff" : "#0f172a",
                 backdropFilter: "blur(16px)",
                 boxShadow: `0 20px 40px rgba(0,0,0,0.6), 0 0 20px rgba(${activeTheme.rgb}, 0.15), inset 0 1px 1px rgba(255,255,255,0.15)`
               }}
@@ -330,16 +261,16 @@ export default function KineticDataGrid() {
                   style={{ background: activeTheme.accentBg, color: activeTheme.color }}>
                   {selectedIds.length}
                 </div>
-                <span className="text-[11px] font-bold text-white/80 uppercase font-mono">Selected Nodes</span>
+                <span className="text-[11px] font-bold opacity-80 uppercase font-mono">Selected Nodes</span>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleBatchReboot}
-                  className="px-3 py-1.5 rounded-lg border text-[10px] font-bold font-mono transition-all duration-200 cursor-pointer uppercase flex items-center gap-1.5 hover:bg-white/5"
+                  className="px-3 py-1.5 rounded-lg border text-[10px] font-bold font-mono transition-all duration-200 cursor-pointer uppercase flex items-center gap-1.5 hover:bg-current/5"
                   style={{
-                    borderColor: "rgba(255,255,255,0.1)",
-                    color: "rgba(255,255,255,0.7)"
+                    borderColor: "rgba(128,128,128,0.2)",
+                    color: "inherit"
                   }}
                 >
                   <Play size={10} />
@@ -363,7 +294,7 @@ export default function KineticDataGrid() {
 }
 
 /* Row Component with 2.5D tilt & elevation */
-function DataGridRow({ node, index, activeTheme, isSelected, isExpanded, onSelect, onToggleExpand }) {
+function DataGridRow({ node, index, activeTheme, activeVariant, isSelected, isExpanded, onSelect, onToggleExpand }) {
   const rowRef = useRef(null);
   const [tiltX, setTiltX] = useState(0);
   const [tiltY, setTiltY] = useState(0);
@@ -406,8 +337,8 @@ function DataGridRow({ node, index, activeTheme, isSelected, isExpanded, onSelec
         };
       default:
         return {
-          glow: "bg-white/5 border-white/10 text-white/50",
-          dotBg: "bg-white/30"
+          glow: "bg-current/5 border-current/10 opacity-50",
+          dotBg: "bg-current/30"
         };
     }
   };
@@ -437,16 +368,16 @@ function DataGridRow({ node, index, activeTheme, isSelected, isExpanded, onSelec
         rotateX: { type: "spring", stiffness: 100, damping: 15 },
         rotateY: { type: "spring", stiffness: 100, damping: 15 }
       }}
-      className={`rounded-xl border transition-all cursor-pointer select-none overflow-hidden relative ${
+      className={`rounded-xl border transition-all cursor-pointer select-none overflow-hidden relative ${activeVariant.cardClass} ${
         isSelected 
-          ? `bg-[#0e1124] border-white/10` 
-          : "bg-[#0a0d1a] border-white/5 hover:border-white/10"
+          ? `brightness-110` 
+          : "hover:brightness-105"
       }`}
       style={{
         transformStyle: "preserve-3d",
-        boxShadow: isHovered 
+        boxShadow: isHovered && activeVariant.id !== "brutal"
           ? `0 15px 30px rgba(0, 0, 0, 0.4), 0 0 15px rgba(${activeTheme.rgb}, 0.05), inset 0 1px 0 rgba(255,255,255,0.05)` 
-          : "0 4px 10px rgba(0,0,0,0.3)"
+          : activeVariant.id !== "brutal" ? "0 4px 10px rgba(0,0,0,0.3)" : "none"
       }}
     >
       {/* Selection Glow Border Accent */}
@@ -466,23 +397,23 @@ function DataGridRow({ node, index, activeTheme, isSelected, isExpanded, onSelec
             type="checkbox"
             checked={isSelected}
             onChange={onSelect}
-            className="w-3.5 h-3.5 rounded border-white/20 bg-black/40 text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+            className="w-3.5 h-3.5 rounded border-current/20 bg-current/5 text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer"
           />
         </div>
 
         {/* Node ID */}
         <div className="col-span-2 flex items-center">
-          <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-white/5 text-white/50 border border-white/5 uppercase">
+          <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-current/5 opacity-55 border border-current/5 uppercase">
             {node.id}
           </span>
         </div>
 
         {/* Hostname */}
         <div className="col-span-3 flex flex-col justify-center">
-          <span className="text-xs font-black text-white leading-none font-mono">
+          <span className="text-xs font-black leading-none font-mono">
             {node.name}
           </span>
-          <span className="text-[9px] text-white/30 mt-0.5">
+          <span className="text-[9px] opacity-30 mt-0.5">
             {node.region}
           </span>
         </div>
@@ -498,7 +429,7 @@ function DataGridRow({ node, index, activeTheme, isSelected, isExpanded, onSelec
         {/* CPU Progress Bar */}
         <div className="col-span-2 flex flex-col items-end justify-center font-mono">
           <div className="flex items-center gap-2 w-2/3">
-            <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
+            <div className="flex-1 h-1 bg-current/5 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${node.cpu}%` }}
@@ -513,7 +444,7 @@ function DataGridRow({ node, index, activeTheme, isSelected, isExpanded, onSelec
                 }}
               />
             </div>
-            <span className="text-[10px] font-bold text-white/70 w-8 text-right">
+            <span className="text-[10px] font-bold opacity-70 w-8 text-right">
               {node.cpu}%
             </span>
           </div>
@@ -524,7 +455,7 @@ function DataGridRow({ node, index, activeTheme, isSelected, isExpanded, onSelec
           <motion.div
             animate={{ rotate: isExpanded ? 180 : 0 }}
             transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="text-white/40 hover:text-white"
+            className="opacity-40 hover:opacity-100"
           >
             <ChevronDown size={14} />
           </motion.div>
@@ -539,60 +470,60 @@ function DataGridRow({ node, index, activeTheme, isSelected, isExpanded, onSelec
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ type: "spring", stiffness: 180, damping: 20 }}
-            className="border-t border-white/5 bg-black/25 overflow-hidden"
+            className="border-t border-current/5 bg-current/[0.02] overflow-hidden"
           >
             <div className="p-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
               
               {/* Stats overview */}
               <div className="md:col-span-5 grid grid-cols-2 gap-4">
-                <div className="bg-[#0a0d1a] border border-white/5 rounded-xl p-3.5 flex flex-col gap-0.5">
-                  <span className="text-[9px] uppercase tracking-wider text-white/30 font-bold flex items-center gap-1 font-mono">
+                <div className={`p-3.5 flex flex-col gap-0.5 ${activeVariant.cardClass}`}>
+                  <span className="text-[9px] uppercase tracking-wider opacity-40 font-bold flex items-center gap-1 font-mono">
                     <Activity size={10} />
                     Bandwidth
                   </span>
-                  <span className="text-sm font-black text-white font-mono mt-1">
+                  <span className="text-sm font-black font-mono mt-1">
                     {node.traffic} Mbps
                   </span>
-                  <span className="text-[9px] text-white/40 leading-none">Live data egress</span>
+                  <span className="text-[9px] opacity-40 leading-none">Live data egress</span>
                 </div>
 
-                <div className="bg-[#0a0d1a] border border-white/5 rounded-xl p-3.5 flex flex-col gap-0.5">
-                  <span className="text-[9px] uppercase tracking-wider text-white/30 font-bold flex items-center gap-1 font-mono">
+                <div className={`p-3.5 flex flex-col gap-0.5 ${activeVariant.cardClass}`}>
+                  <span className="text-[9px] uppercase tracking-wider opacity-40 font-bold flex items-center gap-1 font-mono">
                     <Cpu size={10} />
                     Disk Capacity
                   </span>
-                  <span className="text-sm font-black text-white font-mono mt-1">
+                  <span className="text-sm font-black font-mono mt-1">
                     {node.disk}
                   </span>
-                  <span className="text-[9px] text-white/40 leading-none">Total block store</span>
+                  <span className="text-[9px] opacity-40 leading-none">Total block store</span>
                 </div>
 
-                <div className="bg-[#0a0d1a] border border-white/5 rounded-xl p-3.5 flex flex-col gap-0.5">
-                  <span className="text-[9px] uppercase tracking-wider text-white/30 font-bold flex items-center gap-1 font-mono">
+                <div className={`p-3.5 flex flex-col gap-0.5 ${activeVariant.cardClass}`}>
+                  <span className="text-[9px] uppercase tracking-wider opacity-40 font-bold flex items-center gap-1 font-mono">
                     <Wifi size={10} />
                     SLA Uptime
                   </span>
-                  <span className="text-sm font-black text-white font-mono mt-1">
+                  <span className="text-sm font-black font-mono mt-1">
                     {node.uptime}
                   </span>
-                  <span className="text-[9px] text-white/40 leading-none">Last 30 days active</span>
+                  <span className="text-[9px] opacity-40 leading-none">Last 30 days active</span>
                 </div>
 
-                <div className="bg-[#0a0d1a] border border-white/5 rounded-xl p-3.5 flex flex-col gap-0.5">
-                  <span className="text-[9px] uppercase tracking-wider text-white/30 font-bold flex items-center gap-1 font-mono">
+                <div className={`p-3.5 flex flex-col gap-0.5 ${activeVariant.cardClass}`}>
+                  <span className="text-[9px] uppercase tracking-wider opacity-40 font-bold flex items-center gap-1 font-mono">
                     <Server size={10} />
                     Ram Usage
                   </span>
-                  <span className="text-sm font-black text-white font-mono mt-1">
+                  <span className="text-sm font-black font-mono mt-1">
                     {node.memory}%
                   </span>
-                  <span className="text-[9px] text-white/40 leading-none">Virtual allocations</span>
+                  <span className="text-[9px] opacity-40 leading-none">Virtual allocations</span>
                 </div>
               </div>
 
               {/* Mini Diagnostic chart */}
-              <div className="md:col-span-4 h-[110px] bg-[#0a0d1a] border border-white/5 rounded-xl p-4 flex flex-col justify-between">
-                <div className="flex justify-between items-center text-[9px] font-mono text-white/30 font-bold">
+              <div className={`h-[110px] p-4 flex flex-col justify-between ${activeVariant.cardClass}`}>
+                <div className="flex justify-between items-center text-[9px] font-mono opacity-40 font-bold">
                   <span>LOAD SPECTRUM (CPU)</span>
                   <span className="text-[10px]" style={{ color: activeTheme.color }}>LIVE</span>
                 </div>
@@ -638,12 +569,7 @@ function DataGridRow({ node, index, activeTheme, isSelected, isExpanded, onSelec
                 <motion.button
                   whileHover={{ scale: 1.02, y: -1 }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full py-2 rounded-xl text-[10px] font-bold font-mono uppercase tracking-wider border cursor-pointer transition-all flex items-center justify-center gap-1.5 hover:bg-white/5"
-                  style={{
-                    background: "rgba(255,255,255,0.03)",
-                    borderColor: "rgba(255,255,255,0.08)",
-                    color: "rgba(255,255,255,0.6)"
-                  }}
+                  className={`w-full py-2 rounded-xl text-[10px] font-bold font-mono uppercase tracking-wider border cursor-pointer transition-all flex items-center justify-center gap-1.5 ${activeVariant.buttonClass}`}
                 >
                   <Play size={10} />
                   System Reboot

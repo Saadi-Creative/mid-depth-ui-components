@@ -1,68 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence, useSpring } from "framer-motion";
-import { 
-  Sparkles, Calendar, ChevronDown, Check, 
-  ArrowRight, ShieldAlert, Cpu, Terminal, GitBranch 
-} from "lucide-react";
-
-// Themes definition
-const THEMES = [
-  {
-    id: "oceanBlue",
-    name: "Ocean Blue",
-    color: "#3b82f6",
-    rgb: "59, 130, 246",
-    border: "border-blue-500/20",
-    text: "text-blue-400",
-    bg: "bg-blue-500",
-    accentBg: "bg-blue-500/10",
-    glow: "shadow-[0_0_15px_rgba(59,130,246,0.35)]"
-  },
-  {
-    id: "sunsetGold",
-    name: "Sunset Gold",
-    color: "#ffb800",
-    rgb: "255, 184, 0",
-    border: "border-amber-500/20",
-    text: "text-amber-400",
-    bg: "bg-amber-500",
-    accentBg: "bg-amber-500/10",
-    glow: "shadow-[0_0_15px_rgba(255,184,0,0.35)]"
-  },
-  {
-    id: "forestGreen",
-    name: "Forest Green",
-    color: "#10b981",
-    rgb: "16, 185, 129",
-    border: "border-emerald-500/20",
-    text: "text-emerald-400",
-    bg: "bg-emerald-500",
-    accentBg: "bg-emerald-500/10",
-    glow: "shadow-[0_0_15px_rgba(16,185,129,0.35)]"
-  },
-  {
-    id: "deepPlum",
-    name: "Deep Plum",
-    color: "#8b5cf6",
-    rgb: "139, 92, 246",
-    border: "border-purple-500/20",
-    text: "text-purple-400",
-    bg: "bg-purple-500",
-    accentBg: "bg-purple-500/10",
-    glow: "shadow-[0_0_15px_rgba(139,92,246,0.35)]"
-  },
-  {
-    id: "copper",
-    name: "Copper",
-    color: "#f97316",
-    rgb: "249, 115, 22",
-    border: "border-orange-500/20",
-    text: "text-orange-400",
-    bg: "bg-orange-500",
-    accentBg: "bg-orange-500/10",
-    glow: "shadow-[0_0_15px_rgba(249,115,22,0.35)]"
-  }
-];
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown, Terminal } from "lucide-react";
+import { useGlobalTheme } from "../../themes/ThemeContext";
 
 // Mock release feed items
 const RELEASES = [
@@ -137,55 +76,48 @@ const config = {
 ];
 
 export default function ReleaseNotesFeed() {
-  const [activeTheme, setActiveTheme] = useState(THEMES[0]);
+  const { activeVariant } = useGlobalTheme();
   const [expandedIndex, setExpandedIndex] = useState(0); // v2.5.0 expanded by default
 
+  // Helper to convert hex to rgb string for inline rgba values
+  const hexToRgb = (hex) => {
+    if (!hex) return "0, 229, 255";
+    const cleanHex = hex.replace("#", "");
+    const r = parseInt(cleanHex.substring(0, 2), 16);
+    const g = parseInt(cleanHex.substring(2, 4), 16);
+    const b = parseInt(cleanHex.substring(4, 6), 16);
+    return isNaN(r) || isNaN(g) || isNaN(b) ? "0, 229, 255" : `${r}, ${g}, ${b}`;
+  };
+
+  const rgbStr = hexToRgb(activeVariant.triggerColor);
+  const activeTheme = {
+    color: activeVariant.triggerColor,
+    rgb: rgbStr,
+    border: `border-current/20`,
+    text: activeVariant.textClass,
+    bg: "",
+    accentBg: `rgba(${rgbStr}, 0.1)`,
+    glow: `shadow-[0_0_15px_rgba(${rgbStr},0.35)]`
+  };
+
   return (
-    <div className="min-h-screen p-4 md:p-8 select-none bg-[#060810]"
-      style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className={`min-h-screen p-4 md:p-8 select-none transition-colors duration-500 ${activeVariant.canvasClass}`}>
       
       <div className="w-full max-w-4xl mx-auto flex flex-col gap-8">
         
         {/* Sticky Header Panel */}
-        <div className="bg-[#0a0d1a] border border-white/5 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
+        <div className={`p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${activeVariant.cardClass}`}>
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-mono tracking-widest text-white/40 uppercase block">
+            <span className="text-[10px] font-mono tracking-widest opacity-40 uppercase block">
               DEPLOYMENT CHRONOLOGY
             </span>
-            <h1 className="text-xl md:text-2xl font-black text-white tracking-tight"
+            <h1 className="text-xl md:text-2xl font-black tracking-tight"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               Kinetic Release Notes
             </h1>
-            <p className="text-xs text-white/45 max-w-lg">
+            <p className="text-xs opacity-45 max-w-lg">
               Explore version changelogs configured with staggered slide-in cards, magnetic categories, and a continuous glowing timeline tracking core updates.
             </p>
-          </div>
-
-          {/* Theme Selector Swatches */}
-          <div className="flex flex-col gap-1.5 self-end md:self-auto">
-            <span className="text-[9px] uppercase tracking-widest text-white/30 font-bold font-mono">
-              Feed Color Accents
-            </span>
-            <div className="flex items-center gap-2 bg-black/35 px-3 py-2 rounded-xl border border-white/5">
-              {THEMES.map(theme => (
-                <button
-                  key={theme.id}
-                  onClick={() => setActiveTheme(theme)}
-                  className="w-4 h-4 rounded-full cursor-pointer relative flex items-center justify-center transition-transform active:scale-90"
-                  style={{ backgroundColor: theme.color }}
-                  aria-label={`Theme ${theme.name}`}
-                >
-                  {activeTheme.id === theme.id && (
-                    <motion.div
-                      layoutId="active-feed-theme-ring"
-                      className="absolute -inset-1 rounded-full border border-current opacity-80"
-                      style={{ color: theme.color }}
-                      transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                    />
-                  )}
-                </button>
-              ))}
-            </div>
           </div>
         </div>
 
@@ -193,7 +125,7 @@ export default function ReleaseNotesFeed() {
         <div className="relative pl-6 md:pl-28 mt-4 flex flex-col gap-8">
           
           {/* Continuous Vertical Timeline Line */}
-          <div className="absolute left-[30px] md:left-[118px] top-4 bottom-4 w-px bg-white/5 shadow-inner" />
+          <div className="absolute left-[30px] md:left-[118px] top-4 bottom-4 w-px bg-current/10 shadow-inner" />
 
           {RELEASES.map((item, index) => {
             const isExpanded = expandedIndex === index;
@@ -204,6 +136,7 @@ export default function ReleaseNotesFeed() {
                 index={index}
                 isExpanded={isExpanded}
                 activeTheme={activeTheme}
+                activeVariant={activeVariant}
                 onToggle={() => setExpandedIndex(isExpanded ? null : index)}
               />
             );
@@ -216,8 +149,9 @@ export default function ReleaseNotesFeed() {
 }
 
 /* Single Release Card Component */
-function ReleaseCard({ item, index, isExpanded, activeTheme, onToggle }) {
+function ReleaseCard({ item, index, isExpanded, activeTheme, activeVariant, onToggle }) {
   const cardRef = useRef(null);
+  const timelineNodeBg = activeVariant.mode === "dark" ? "#060810" : "#f4f4f0";
 
   return (
     <motion.div
@@ -236,19 +170,20 @@ function ReleaseCard({ item, index, isExpanded, activeTheme, onToggle }) {
       {/* Date Marker floating on the left side of the timeline line */}
       <div className="absolute -left-[37px] md:-left-[125px] top-6 flex items-center justify-end w-24">
         {/* Date on desktop */}
-        <span className="hidden md:inline text-[10px] font-bold text-white/35 font-mono uppercase tracking-wider mr-4">
+        <span className="hidden md:inline text-[10px] font-bold opacity-35 font-mono uppercase tracking-wider mr-4">
           {item.date}
         </span>
         
         {/* Glow Node Marker */}
         <motion.div 
           animate={{
-            borderColor: isExpanded ? activeTheme.color : "rgba(255,255,255,0.15)",
+            borderColor: isExpanded ? activeTheme.color : (activeVariant.mode === "dark" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)"),
             boxShadow: isExpanded ? `0 0 12px ${activeTheme.color}` : "none",
-            backgroundColor: isExpanded ? "#060810" : "rgba(255,255,255,0.05)"
+            backgroundColor: isExpanded ? timelineNodeBg : (activeVariant.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)")
           }}
           transition={{ duration: 0.3 }}
-          className="w-3.5 h-3.5 rounded-full border bg-[#060810] z-10 flex-shrink-0 flex items-center justify-center"
+          className="w-3.5 h-3.5 rounded-full border z-10 flex-shrink-0 flex items-center justify-center"
+          style={{ backgroundColor: timelineNodeBg }}
         >
           {isExpanded && (
             <motion.div
@@ -262,13 +197,11 @@ function ReleaseCard({ item, index, isExpanded, activeTheme, onToggle }) {
 
       {/* Release card content */}
       <div 
-        className={`bg-[#0a0d1a] border rounded-2xl p-5 md:p-6 transition-all duration-300 relative ${
-          isExpanded ? "border-white/10 shadow-[0_12px_24px_rgba(0,0,0,0.4)]" : "border-white/5 shadow-[0_4px_10px_rgba(0,0,0,0.2)]"
-        }`}
+        className={`p-5 md:p-6 transition-all duration-300 relative ${activeVariant.cardClass}`}
         style={{
-          boxShadow: isExpanded 
+          boxShadow: isExpanded && activeVariant.id !== "brutal"
             ? `0 15px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04), 0 0 1px rgba(${activeTheme.rgb},0.08)`
-            : "0 4px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.02)"
+            : activeVariant.id !== "brutal" ? "0 4px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.02)" : "none"
         }}
       >
         {/* Top Info row */}
@@ -282,7 +215,7 @@ function ReleaseCard({ item, index, isExpanded, activeTheme, onToggle }) {
             </span>
             
             {/* Mobile Date */}
-            <span className="inline md:hidden text-[9px] font-bold text-white/30 font-mono uppercase">
+            <span className="inline md:hidden text-[9px] font-bold opacity-30 font-mono uppercase">
               {item.date}
             </span>
           </div>
@@ -290,25 +223,25 @@ function ReleaseCard({ item, index, isExpanded, activeTheme, onToggle }) {
           {/* Interactive Tags */}
           <div className="flex items-center gap-1.5">
             {item.tags.map(tag => (
-              <MagneticTag key={tag.label} activeTheme={activeTheme} tag={tag} />
+              <MagneticTag key={tag.label} activeTheme={activeTheme} tag={tag} activeVariant={activeVariant} />
             ))}
           </div>
         </div>
 
         {/* Release Title */}
-        <h3 className="text-sm md:text-base font-black text-white mb-2 leading-tight tracking-wide">
+        <h3 className="text-sm md:text-base font-black mb-2 leading-tight tracking-wide">
           {item.title}
         </h3>
 
         {/* Summary text */}
-        <p className="text-xs text-white/45 leading-relaxed mb-4">
+        <p className="text-xs opacity-45 leading-relaxed mb-4">
           {item.summary}
         </p>
 
         {/* Action Button */}
         <button 
           onClick={onToggle}
-          className="flex items-center gap-1 text-[10px] font-bold font-mono tracking-wider text-white/50 hover:text-white uppercase transition-colors cursor-pointer"
+          className="flex items-center gap-1 text-[10px] font-bold font-mono tracking-wider opacity-50 hover:opacity-100 uppercase transition-colors cursor-pointer"
         >
           <motion.div
             animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -327,7 +260,7 @@ function ReleaseCard({ item, index, isExpanded, activeTheme, onToggle }) {
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ type: "spring", stiffness: 180, damping: 20 }}
-              className="overflow-hidden mt-5 pt-4 border-t border-white/5 flex flex-col gap-4"
+              className="overflow-hidden mt-5 pt-4 border-t border-current/5 flex flex-col gap-4"
             >
               {/* Staggered Item List */}
               <div className="flex flex-col gap-3.5">
@@ -339,12 +272,12 @@ function ReleaseCard({ item, index, isExpanded, activeTheme, onToggle }) {
                     transition={{ delay: idx * 0.08, type: "spring", stiffness: 140, damping: 15 }}
                     className="flex gap-3 items-start"
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-white/20 mt-1.5 flex-shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-current/20 mt-1.5 flex-shrink-0" />
                     <div className="flex flex-col gap-0.5">
-                      <h4 className="text-[11px] font-extrabold text-white leading-tight font-mono">
+                      <h4 className="text-[11px] font-extrabold leading-tight font-mono">
                         {detail.title}
                       </h4>
-                      <p className="text-[11px] text-white/40 leading-relaxed">
+                      <p className="text-[11px] opacity-40 leading-relaxed">
                         {detail.desc}
                       </p>
                     </div>
@@ -358,12 +291,12 @@ function ReleaseCard({ item, index, isExpanded, activeTheme, onToggle }) {
                   initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: item.details.length * 0.08 + 0.05 }}
-                  className="bg-black/35 border border-white/5 rounded-xl p-4 font-mono text-[10px] leading-relaxed text-white/60 relative overflow-hidden"
+                  className="bg-black/25 border border-current/5 rounded-xl p-4 font-mono text-[10px] leading-relaxed opacity-80 relative overflow-hidden"
                 >
                   <pre className="overflow-x-auto select-text">
                     <code>{item.code}</code>
                   </pre>
-                  <div className="absolute top-2 right-2 flex items-center gap-1.5 px-2 py-0.5 rounded bg-white/5 border border-white/5 text-[8px] font-bold text-white/30 uppercase tracking-wider font-mono">
+                  <div className="absolute top-2 right-2 flex items-center gap-1.5 px-2 py-0.5 rounded bg-current/5 border border-current/5 text-[8px] font-bold opacity-40 uppercase tracking-wider font-mono">
                     <Terminal size={8} />
                     Snippet
                   </div>
@@ -378,7 +311,7 @@ function ReleaseCard({ item, index, isExpanded, activeTheme, onToggle }) {
 }
 
 /* Microscopic Magnetic tag component */
-function MagneticTag({ tag, activeTheme }) {
+function MagneticTag({ tag, activeTheme, activeVariant }) {
   const ref = useRef(null);
   const [coords, setCoords] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
@@ -389,7 +322,6 @@ function MagneticTag({ tag, activeTheme }) {
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
 
-    // Magnet drag pull factor
     setCoords({ x: x * 0.35, y: y * 0.35 });
   };
 
@@ -398,14 +330,13 @@ function MagneticTag({ tag, activeTheme }) {
     setCoords({ x: 0, y: 0 });
   };
 
-  // Setup tag custom style colors
   const getTagStyle = (type) => {
     switch (type) {
       case "feat": return "border-blue-500/10 bg-blue-500/5 text-blue-400";
       case "fix": return "border-rose-500/10 bg-rose-500/5 text-rose-400";
       case "perf": return "border-emerald-500/10 bg-emerald-500/5 text-emerald-400";
       case "ref": return "border-purple-500/10 bg-purple-500/5 text-purple-400";
-      default: return "border-white/5 bg-white/[0.03] text-white/50";
+      default: return `border-current/5 bg-current/5 opacity-50`;
     }
   };
 
@@ -418,7 +349,7 @@ function MagneticTag({ tag, activeTheme }) {
       animate={{
         x: coords.x,
         y: coords.y,
-        borderColor: isHovered ? activeTheme.color : "rgba(255,255,255,0.05)"
+        borderColor: isHovered ? activeTheme.color : (activeVariant.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)")
       }}
       transition={{ 
         type: "spring", 

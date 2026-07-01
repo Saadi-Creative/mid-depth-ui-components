@@ -5,64 +5,7 @@ import {
   Percent, Activity, MousePointer, Calendar, ArrowUpRight
 } from "lucide-react";
 
-// Theme configurations
-const THEMES = [
-  {
-    id: "cyan",
-    name: "Neon Teal",
-    color: "#00e5ff",
-    rgb: "0, 229, 255",
-    border: "border-cyan-500/15",
-    glow: "shadow-cyan-500/10",
-    bg: "bg-cyan-500",
-    text: "text-cyan-400",
-    accentBg: "bg-cyan-500/10"
-  },
-  {
-    id: "rose",
-    name: "Cyber Rose",
-    color: "#ff007f",
-    rgb: "255, 0, 127",
-    border: "border-rose-500/15",
-    glow: "shadow-rose-500/10",
-    bg: "bg-rose-500",
-    text: "text-rose-400",
-    accentBg: "bg-rose-500/10"
-  },
-  {
-    id: "toxic",
-    name: "Toxic Lime",
-    color: "#39ff14",
-    rgb: "57, 255, 20",
-    border: "border-lime-500/15",
-    glow: "shadow-lime-500/10",
-    bg: "bg-lime-500",
-    text: "text-lime-400",
-    accentBg: "bg-lime-500/10"
-  },
-  {
-    id: "amber",
-    name: "Amber Glow",
-    color: "#ffb800",
-    rgb: "255, 184, 0",
-    border: "border-amber-500/15",
-    glow: "shadow-amber-500/10",
-    bg: "bg-amber-500",
-    text: "text-amber-400",
-    accentBg: "bg-amber-500/10"
-  },
-  {
-    id: "indigo",
-    name: "Orbit Indigo",
-    color: "#6366f1",
-    rgb: "99, 102, 241",
-    border: "border-indigo-500/15",
-    glow: "shadow-indigo-500/10",
-    bg: "bg-indigo-500",
-    text: "text-indigo-400",
-    accentBg: "bg-indigo-500/10"
-  }
-];
+import { useGlobalTheme } from "../../themes/ThemeContext";
 
 // Interactive data streams
 const DATASETS = {
@@ -156,7 +99,24 @@ const DATASETS = {
 };
 
 export default function LayeredMetricCharts() {
-  const [activeTheme, setActiveTheme] = useState(THEMES[0]);
+  const { activeVariant } = useGlobalTheme();
+  const activeTheme = React.useMemo(() => {
+    const hex = activeVariant.triggerColor || "#00e5ff";
+    let rgb = "0, 229, 255";
+    const match = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+    if (match) {
+      rgb = `${parseInt(match[1], 16)}, ${parseInt(match[2], 16)}, ${parseInt(match[3], 16)}`;
+    }
+    return {
+      id: activeVariant.id,
+      name: activeVariant.name,
+      color: hex,
+      rgb: rgb,
+      accentBg: `rgba(${rgb}, 0.1)`,
+      text: "text-white"
+    };
+  }, [activeVariant]);
+
   const [activeTab, setActiveTab] = useState("revenue"); // revenue, users, conversion
   const [activeTimeline, setActiveTimeline] = useState("7D"); // 7D, 30D, 90D
   
@@ -283,55 +243,25 @@ export default function LayeredMetricCharts() {
 
   return (
     <div 
-      className="min-h-screen flex flex-col justify-start p-4 md:p-8 select-none" 
-      style={{ background: "#060810", fontFamily: "'Inter', sans-serif" }}
+      className={`min-h-screen flex flex-col justify-start p-4 md:p-8 select-none transition-colors duration-500 ${activeVariant.canvasClass}`}
     >
       <div className="w-full max-w-5xl mx-auto flex flex-col gap-6">
         
         {/* Header Controls Bento Block */}
-        <div className="bg-[#0a0d1a] border border-white/5 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
+        <div className={`p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${activeVariant.cardClass}`}>
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-mono tracking-widest text-white/40 uppercase block">
+            <span className="text-[10px] font-mono tracking-widest opacity-40 uppercase block">
               SaaS Analytics Visualizer
             </span>
             <h1 
-              className="text-xl md:text-2xl font-bold text-white tracking-tight"
+              className="text-xl md:text-2xl font-bold tracking-tight"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
               3D Layered Metric Widgets
             </h1>
-            <p className="text-xs text-white/45 max-w-xl">
+            <p className="text-xs opacity-45 max-w-xl">
               Hover and drag over the trend charts to see the fluid 2.5D spring tracking line and glassmorphic tooltip. Click tabs to toggle between metrics.
             </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-shrink-0">
-            {/* Theme switcher */}
-            <div className="flex flex-col gap-1.5">
-              <span className="text-[9px] uppercase tracking-widest text-white/30 font-bold">
-                Neon Highlight Theme
-              </span>
-              <div className="flex items-center gap-2">
-                {THEMES.map(theme => (
-                  <button
-                    key={theme.id}
-                    onClick={() => setActiveTheme(theme)}
-                    className="w-5 h-5 rounded-full cursor-pointer relative flex items-center justify-center transition-transform active:scale-90"
-                    style={{ backgroundColor: theme.color }}
-                    aria-label={`Switch Theme to ${theme.name}`}
-                  >
-                    {activeTheme.id === theme.id && (
-                      <motion.div
-                        layoutId="active-chart-border"
-                        className="absolute -inset-1 rounded-full border border-current opacity-80"
-                        style={{ color: theme.color }}
-                        transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                      />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
 
@@ -349,10 +279,10 @@ export default function LayeredMetricCharts() {
                 }}
                 whileHover={{ y: -3, scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
-                className={`bg-[#0a0d1a] border rounded-2xl p-5 cursor-pointer flex flex-col justify-between h-[130px] transition-all relative overflow-hidden ${
+                className={`p-5 cursor-pointer flex flex-col justify-between h-[130px] transition-all relative overflow-hidden ${activeVariant.cardClass} ${
                   isActive 
-                    ? `border-white/10 shadow-[0_4px_30px_rgba(var(--theme-rgb),0.05)]` 
-                    : "border-white/5 hover:border-white/10"
+                    ? `border-current/30 shadow-[0_4px_30px_rgba(var(--theme-rgb),0.05)]` 
+                    : "opacity-80 hover:opacity-100"
                 }`}
                 style={{
                   "--theme-rgb": activeTheme.rgb,
@@ -369,20 +299,23 @@ export default function LayeredMetricCharts() {
                   />
                 )}
 
-                <div className="flex justify-between items-center text-white/50 text-xs font-bold tracking-wide uppercase">
+                <div className="flex justify-between items-center opacity-60 text-xs font-bold tracking-wide uppercase">
                   <span>{data.label}</span>
                   <div 
                     className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
-                      isActive ? activeTheme.accentBg : "bg-white/5 text-white/40"
+                      isActive ? "" : "bg-current/5 opacity-40"
                     }`}
-                    style={{ color: isActive ? activeTheme.color : undefined }}
+                    style={{ 
+                      color: isActive ? activeTheme.color : undefined,
+                      backgroundColor: isActive ? activeTheme.accentBg : undefined
+                    }}
                   >
                     <TabIcon size={14} />
                   </div>
                 </div>
 
                 <div className="flex flex-col mt-2">
-                  <span className="text-2xl font-extrabold tracking-tight text-white">
+                  <span className="text-2xl font-extrabold tracking-tight">
                     {data.metrics.value}
                   </span>
                   <div className="flex items-center gap-1.5 mt-0.5">
@@ -394,7 +327,7 @@ export default function LayeredMetricCharts() {
                       <ArrowUpRight size={11} className={data.metrics.upward ? "" : "rotate-90"} />
                       {data.metrics.change}
                     </span>
-                    <span className="text-[10px] text-white/35 font-medium">
+                    <span className="text-[10px] opacity-35 font-medium">
                       {data.metrics.period}
                     </span>
                   </div>
@@ -429,7 +362,10 @@ export default function LayeredMetricCharts() {
               transformStyle: "preserve-3d"
             }}
             transition={{ type: "spring", stiffness: 150, damping: 20 }}
-            className="w-full bg-[#0a0d1a] border border-white/5 rounded-2xl p-6 flex flex-col justify-between min-h-[380px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden"
+            className={`w-full p-6 flex flex-col justify-between min-h-[380px] relative overflow-hidden ${activeVariant.cardClass}`}
+            style={{
+              boxShadow: activeVariant.id === "brutal" ? "none" : "0 20px 50px rgba(0,0,0,0.5)"
+            }}
           >
             {/* Background 2.5D glowing light mask */}
             <div 
@@ -443,16 +379,16 @@ export default function LayeredMetricCharts() {
             {/* Header / Config Bar */}
             <div className="flex items-center justify-between z-10" style={{ transform: "translateZ(30px)" }}>
               <div className="flex flex-col">
-                <span className="text-[10px] font-mono tracking-widest text-white/40 uppercase">
+                <span className="text-[10px] font-mono tracking-widest opacity-40 uppercase">
                   Plotting Index
                 </span>
-                <h3 className="text-base font-bold text-white tracking-wide mt-0.5">
+                <h3 className="text-base font-bold tracking-wide mt-0.5">
                   {activeData.label} Trend
                 </h3>
               </div>
 
               {/* Timeline selector */}
-              <div className="flex items-center bg-white/[0.03] p-1 rounded-xl border border-white/5">
+              <div className="flex items-center bg-current/5 p-1 rounded-xl border border-current/10">
                 {["7D", "30D", "90D"].map((timeline) => (
                   <button
                     key={timeline}
@@ -463,7 +399,7 @@ export default function LayeredMetricCharts() {
                     className={`px-3 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition-all duration-150 relative ${
                       activeTimeline === timeline 
                         ? "text-black" 
-                        : "text-white/50 hover:text-white"
+                        : "opacity-50 hover:opacity-100"
                     }`}
                   >
                     {activeTimeline === timeline && (
@@ -508,7 +444,7 @@ export default function LayeredMetricCharts() {
                       <feMergeNode in="SourceGraphic" />
                     </feMerge>
                   </filter>
-
+ 
                   {/* Gradient definition */}
                   <linearGradient id={`area-gradient-${activeTheme.id}`} x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor={activeTheme.color} stopOpacity="0.15" />
@@ -561,7 +497,7 @@ export default function LayeredMetricCharts() {
                     cy={p.y}
                     r={hoverIndex === idx ? 4.5 : 3.5}
                     className="transition-all duration-150"
-                    fill={hoverIndex === idx ? "#ffffff" : "#0a0d1a"}
+                    fill={hoverIndex === idx ? "#ffffff" : (activeVariant.mode === "dark" ? "#0a0d1a" : "#ffffff")}
                     stroke={hoverIndex === idx ? activeTheme.color : "rgba(255,255,255,0.15)"}
                     strokeWidth={hoverIndex === idx ? 2.5 : 1.5}
                   />
@@ -610,19 +546,20 @@ export default function LayeredMetricCharts() {
                     transition={{ type: "spring", stiffness: 280, damping: 24 }}
                     className="absolute pointer-events-none z-[999] border p-3 rounded-xl flex flex-col gap-0.5 shadow-xl -translate-x-1/2 min-w-[120px]"
                     style={{
-                      background: "rgba(10, 13, 26, 0.9)",
+                      background: activeVariant.mode === "dark" ? "rgba(10, 13, 26, 0.9)" : "rgba(255, 255, 255, 0.95)",
                       borderColor: `rgba(${activeTheme.rgb}, 0.2)`,
+                      color: activeVariant.mode === "dark" ? "#ffffff" : "#0f172a",
                       backdropFilter: "blur(12px)",
                       boxShadow: `0 10px 30px rgba(${activeTheme.rgb}, 0.1), inset 0 1px 1px rgba(255,255,255,0.15)`
                     }}
                   >
-                    <span className="text-[9px] uppercase tracking-wider font-extrabold text-white/40">
+                    <span className="text-[9px] uppercase tracking-wider font-extrabold opacity-40">
                       {trackerCoords.label}
                     </span>
-                    <span className="text-xs font-black text-white font-mono mt-0.5">
+                    <span className="text-xs font-black font-mono mt-0.5">
                       {formatVal(trackerCoords.dataVal)}
                     </span>
-                    <span className="text-[9px] text-white/50 leading-tight">
+                    <span className="text-[9px] opacity-60 leading-tight">
                       {trackerCoords.subText}
                     </span>
                   </motion.div>
@@ -632,15 +569,14 @@ export default function LayeredMetricCharts() {
 
             {/* Bottom labels with timeline details */}
             <div 
-              className="flex justify-between items-center text-[10px] text-white/30 font-mono font-bold pt-4 border-t border-white/5"
+              className="flex justify-between items-center text-[10px] opacity-35 font-mono font-bold pt-4 border-t border-current/5"
               style={{ transform: "translateZ(20px)" }}
             >
               {timelineData.map((d, index) => (
                 <div 
                   key={index}
-                  className={`w-12 text-center transition-colors duration-150 ${
-                    hoverIndex === index ? activeTheme.text : "text-white/30"
-                  }`}
+                  className="w-12 text-center transition-colors duration-150 opacity-40"
+                  style={{ color: hoverIndex === index ? activeTheme.color : undefined, opacity: hoverIndex === index ? 1 : undefined }}
                 >
                   {d.label}
                 </div>

@@ -5,14 +5,7 @@ import {
   HelpCircle, ChevronRight, Activity, Cpu, Sparkles 
 } from "lucide-react";
 
-// Theme swatch data
-const THEMES = [
-  { id: "midnight", name: "Midnight Blue", color: "#38bdf8", bg: "bg-sky-500", hoverBg: "hover:bg-sky-600", text: "text-sky-400", border: "border-sky-500/20", lightBg: "bg-sky-500/10", circleBg: "#0f172a", glow: "shadow-sky-500/20" },
-  { id: "rose", name: "Rose Gold", color: "#fda4af", bg: "bg-rose-400", hoverBg: "hover:bg-rose-500", text: "text-rose-400", border: "border-rose-400/20", lightBg: "bg-rose-400/10", circleBg: "#f43f5e", glow: "shadow-rose-400/20" },
-  { id: "platinum", name: "Platinum", color: "#e2e8f0", bg: "bg-slate-400", hoverBg: "hover:bg-slate-500", text: "text-slate-300", border: "border-slate-400/20", lightBg: "bg-slate-400/10", circleBg: "#94a3b8", glow: "shadow-slate-400/20" },
-  { id: "emerald", name: "Emerald", color: "#34d399", bg: "bg-emerald-500", hoverBg: "hover:bg-emerald-600", text: "text-emerald-400", border: "border-emerald-500/20", lightBg: "bg-emerald-500/10", circleBg: "#064e3b", glow: "shadow-emerald-500/20" },
-  { id: "crimson", name: "Crimson", color: "#f87171", bg: "bg-red-500", hoverBg: "hover:bg-red-600", text: "text-red-400", border: "border-red-500/20", lightBg: "bg-red-500/10", circleBg: "#b91c1c", glow: "shadow-red-500/20" },
-];
+import { useGlobalTheme } from "../../themes/ThemeContext";
 
 const CASE_FINISHES = [
   { id: "brushed", name: "Brushed Matte", desc: "Satin grain finish, low reflection", priceOffset: 0 },
@@ -35,11 +28,14 @@ const BEZEL_ACCENTS = [
 // Inline dynamic SVGWatch renderer (avoids large image bundle sizes and operates on GPU-friendly vector paths)
 const WatchSvg = ({ theme, caseFinish, strapMaterial, bezelAccent }) => {
   let faceColor = "#0f172a";
-  if (theme.id === "midnight") faceColor = "#0b132b";
-  if (theme.id === "rose") faceColor = "#221115";
-  if (theme.id === "platinum") faceColor = "#1a202c";
-  if (theme.id === "emerald") faceColor = "#022c22";
-  if (theme.id === "crimson") faceColor = "#2d0b0b";
+  const hex = theme.color || "#38bdf8";
+  const match = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+  if (match) {
+    const r = Math.round(parseInt(match[1], 16) * 0.15);
+    const g = Math.round(parseInt(match[2], 16) * 0.15);
+    const b = Math.round(parseInt(match[3], 16) * 0.15);
+    faceColor = `rgb(${r}, ${g}, ${b})`;
+  }
 
   let caseColor = "#94a3b8";
   if (caseFinish.id === "brushed") caseColor = "#64748b";
@@ -182,7 +178,28 @@ const WatchSvg = ({ theme, caseFinish, strapMaterial, bezelAccent }) => {
 };
 
 export default function ProductVariantConfigurator() {
-  const [activeTheme, setActiveTheme] = useState(THEMES[0]);
+  const { activeVariant } = useGlobalTheme();
+  const activeTheme = React.useMemo(() => {
+    const hex = activeVariant.triggerColor || "#38bdf8";
+    let rgb = "56, 189, 248";
+    const match = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+    if (match) {
+      rgb = `${parseInt(match[1], 16)}, ${parseInt(match[2], 16)}, ${parseInt(match[3], 16)}`;
+    }
+    return {
+      id: activeVariant.id,
+      name: activeVariant.name,
+      color: hex,
+      bg: "bg-[var(--theme-primary)]",
+      hoverBg: "hover:opacity-90",
+      text: "text-[var(--theme-primary)]",
+      border: "border-[var(--theme-primary)]/20",
+      lightBg: `rgba(${rgb}, 0.1)`,
+      circleBg: hex,
+      glow: "shadow-[var(--theme-primary)]/20"
+    };
+  }, [activeVariant]);
+
   const [selectedCase, setSelectedCase] = useState(CASE_FINISHES[0]);
   const [selectedStrap, setSelectedStrap] = useState(STRAP_MATERIALS[0]);
   const [selectedBezel, setSelectedBezel] = useState(BEZEL_ACCENTS[0]);
@@ -193,8 +210,7 @@ export default function ProductVariantConfigurator() {
 
   return (
     <div 
-      className="min-h-screen flex flex-col justify-start p-4 md:p-8" 
-      style={{ background: "#060810", fontFamily: "'Lato', sans-serif" }}
+      className={`min-h-screen flex flex-col justify-start p-4 md:p-8 transition-colors duration-500 ${activeVariant.canvasClass}`}
     >
       <div className="w-full max-w-6xl mx-auto flex flex-col gap-6">
         
@@ -206,14 +222,14 @@ export default function ProductVariantConfigurator() {
             
             {/* Visualizer Card */}
             <div 
-              className="bg-[#0a0d1a] border border-white/5 rounded-2xl p-6 flex flex-col items-center justify-between min-h-[460px] relative overflow-hidden group shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]"
+              className={`p-6 flex flex-col items-center justify-between min-h-[460px] relative overflow-hidden group ${activeVariant.cardClass}`}
             >
               {/* Product Badge */}
               <div className="w-full flex items-center justify-between z-10">
-                <span className="text-[10px] font-mono tracking-widest text-white/40 uppercase">
+                <span className="text-[10px] font-mono tracking-widest opacity-40 uppercase">
                   Aurelia Lab Suite
                 </span>
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-white/5 border border-white/10 text-white/80">
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-current/5 border border-current/10 opacity-80">
                   Model No: 2.5D-CH
                 </span>
               </div>
@@ -239,57 +255,31 @@ export default function ProductVariantConfigurator() {
                 </AnimatePresence>
               </div>
 
-              {/* Floating Theme Palette */}
-              <div className="w-full flex flex-col items-center gap-2.5 z-10 pt-4 border-t border-white/5">
-                <span className="text-[9px] uppercase tracking-widest text-white/30 font-bold">
-                  Material Accent Palette
-                </span>
-                <div className="flex items-center gap-3">
-                  {THEMES.map(theme => (
-                    <button
-                      key={theme.id}
-                      onClick={() => setActiveTheme(theme)}
-                      className="w-6 h-6 rounded-full cursor-pointer relative flex items-center justify-center transition-transform active:scale-90"
-                      style={{ backgroundColor: theme.circleBg }}
-                      aria-label={`Select ${theme.name} Theme`}
-                    >
-                      {activeTheme.id === theme.id && (
-                        <motion.div
-                          layoutId="active-theme-border"
-                          className="absolute -inset-1 rounded-full border border-current opacity-80"
-                          style={{ color: theme.color }}
-                          transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                        />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
 
             {/* Spec Quick-View */}
-            <div className="bg-[#0a0d1a] border border-white/5 rounded-2xl p-5 flex flex-col gap-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
-              <span className="text-xs uppercase tracking-widest text-white/30 font-bold">
+            <div className={`p-5 flex flex-col gap-4 ${activeVariant.cardClass}`}>
+              <span className="text-xs uppercase tracking-widest opacity-35 font-bold">
                 Instrument Specifications
               </span>
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3 flex flex-col">
-                  <span className="text-[10px] text-white/40">Caliber movement</span>
-                  <span className="text-xs font-semibold text-white/80 mt-0.5">Cal. 8925 Automatique</span>
+                <div className="bg-current/5 border border-current/10 rounded-xl p-3 flex flex-col">
+                  <span className="text-[10px] opacity-40">Caliber movement</span>
+                  <span className="text-xs font-semibold opacity-80 mt-0.5">Cal. 8925 Automatique</span>
                 </div>
-                <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3 flex flex-col">
-                  <span className="text-[10px] text-white/40">Water resistance</span>
-                  <span className="text-xs font-semibold text-white/80 mt-0.5" style={{ color: activeTheme.color }}>
+                <div className="bg-current/5 border border-current/10 rounded-xl p-3 flex flex-col">
+                  <span className="text-[10px] opacity-40">Water resistance</span>
+                  <span className="text-xs font-semibold mt-0.5" style={{ color: activeTheme.color }}>
                     100m (10 ATM)
                   </span>
                 </div>
-                <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3 flex flex-col">
-                  <span className="text-[10px] text-white/40">Power reserve</span>
-                  <span className="text-xs font-semibold text-white/80 mt-0.5">72 Hours (Bi-Directional)</span>
+                <div className="bg-current/5 border border-current/10 rounded-xl p-3 flex flex-col">
+                  <span className="text-[10px] opacity-40">Power reserve</span>
+                  <span className="text-xs font-semibold opacity-80 mt-0.5">72 Hours (Bi-Directional)</span>
                 </div>
-                <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3 flex flex-col">
-                  <span className="text-[10px] text-white/40">Jewels count</span>
-                  <span className="text-xs font-semibold text-white/80 mt-0.5" style={{ color: activeTheme.color }}>
+                <div className="bg-current/5 border border-current/10 rounded-xl p-3 flex flex-col">
+                  <span className="text-[10px] opacity-40">Jewels count</span>
+                  <span className="text-xs font-semibold mt-0.5" style={{ color: activeTheme.color }}>
                     39 Synthetic Rubies
                   </span>
                 </div>
@@ -302,10 +292,10 @@ export default function ProductVariantConfigurator() {
           <div className="lg:col-span-7 flex flex-col gap-6">
             
             {/* Header info */}
-            <div className="bg-[#0a0d1a] border border-white/5 rounded-2xl p-6 flex flex-col gap-3 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
+            <div className={`p-6 flex flex-col gap-3 ${activeVariant.cardClass}`}>
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <h1 
-                  className="text-2xl md:text-3xl font-black text-white leading-none tracking-tight"
+                  className="text-2xl md:text-3xl font-black leading-none tracking-tight"
                   style={{ fontFamily: "'Playfair Display', serif" }}
                 >
                   Aurelia Chronograph
@@ -314,21 +304,21 @@ export default function ProductVariantConfigurator() {
                   ${totalPrice.toLocaleString()}
                 </div>
               </div>
-              <p className="text-xs text-white/50 leading-relaxed max-w-2xl">
+              <p className="text-xs opacity-50 leading-relaxed max-w-2xl">
                 An architectural masterclass in 2.5D micro-dimensional horology. Forged with state-of-the-art customizable modular alloys, boasting precision internal synthetic gears, layout-morph mechanics, and a physical bezel configuration interface.
               </p>
             </div>
 
             {/* Config options panels */}
-            <div className="bg-[#0a0d1a] border border-white/5 rounded-2xl p-6 flex flex-col gap-6 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
+            <div className={`p-6 flex flex-col gap-6 ${activeVariant.cardClass}`}>
               
               {/* Option 1: Case Finish */}
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-white/60">
+                  <span className="text-xs font-bold uppercase tracking-wider opacity-60">
                     1. Case Material & Finish
                   </span>
-                  <span className="text-[10px] text-white/40 font-semibold">{selectedCase.name}</span>
+                  <span className="text-[10px] opacity-40 font-semibold">{selectedCase.name}</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {CASE_FINISHES.map(item => {
@@ -338,7 +328,7 @@ export default function ProductVariantConfigurator() {
                       <button
                         key={item.id}
                         onClick={() => setSelectedCase(item)}
-                        className="bg-[#0e1122] border border-white/5 rounded-xl p-3.5 text-left relative cursor-pointer group active:scale-95 transition-all duration-150"
+                        className={`p-3.5 text-left relative cursor-pointer group active:scale-95 transition-all duration-150 ${activeVariant.buttonClass} text-current hover:text-current`}
                       >
                         {isSelected && (
                           <motion.div
@@ -348,9 +338,9 @@ export default function ProductVariantConfigurator() {
                             transition={{ type: "spring", stiffness: 350, damping: 28 }}
                           />
                         )}
-                        <span className="text-xs font-bold text-white block">{item.name}</span>
-                        <span className="text-[10px] text-white/40 block mt-0.5 leading-snug">{item.desc}</span>
-                        <span className="text-[10px] font-bold block mt-2" style={{ color: isSelected ? activeTheme.color : "rgba(255,255,255,0.4)" }}>
+                        <span className="text-xs font-bold block">{item.name}</span>
+                        <span className="text-[10px] opacity-40 block mt-0.5 leading-snug">{item.desc}</span>
+                        <span className="text-[10px] font-bold block mt-2" style={{ color: isSelected ? activeTheme.color : "currentColor" }}>
                           {priceDiff === 0 ? "Standard" : priceDiff > 0 ? `+$${priceDiff}` : `-$${Math.abs(priceDiff)}`}
                         </span>
                       </button>
@@ -362,10 +352,10 @@ export default function ProductVariantConfigurator() {
               {/* Option 2: Strap Material */}
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-white/60">
+                  <span className="text-xs font-bold uppercase tracking-wider opacity-60">
                     2. Oyster Strap Band
                   </span>
-                  <span className="text-[10px] text-white/40 font-semibold">{selectedStrap.name}</span>
+                  <span className="text-[10px] opacity-40 font-semibold">{selectedStrap.name}</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {STRAP_MATERIALS.map(item => {
@@ -375,7 +365,7 @@ export default function ProductVariantConfigurator() {
                       <button
                         key={item.id}
                         onClick={() => setSelectedStrap(item)}
-                        className="bg-[#0e1122] border border-white/5 rounded-xl p-3.5 text-left relative cursor-pointer active:scale-95 transition-all duration-150"
+                        className={`p-3.5 text-left relative cursor-pointer active:scale-95 transition-all duration-150 ${activeVariant.buttonClass} text-current hover:text-current`}
                       >
                         {isSelected && (
                           <motion.div
@@ -385,9 +375,9 @@ export default function ProductVariantConfigurator() {
                             transition={{ type: "spring", stiffness: 350, damping: 28 }}
                           />
                         )}
-                        <span className="text-xs font-bold text-white block">{item.name}</span>
-                        <span className="text-[10px] text-white/40 block mt-0.5 leading-snug">{item.desc}</span>
-                        <span className="text-[10px] font-bold block mt-2" style={{ color: isSelected ? activeTheme.color : "rgba(255,255,255,0.4)" }}>
+                        <span className="text-xs font-bold block">{item.name}</span>
+                        <span className="text-[10px] opacity-40 block mt-0.5 leading-snug">{item.desc}</span>
+                        <span className="text-[10px] font-bold block mt-2" style={{ color: isSelected ? activeTheme.color : "currentColor" }}>
                           {priceDiff === 0 ? "Standard" : priceDiff > 0 ? `+$${priceDiff}` : `-$${Math.abs(priceDiff)}`}
                         </span>
                       </button>
@@ -399,10 +389,10 @@ export default function ProductVariantConfigurator() {
               {/* Option 3: Bezel Accent */}
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-white/60">
+                  <span className="text-xs font-bold uppercase tracking-wider opacity-60">
                     3. Bezel Profile Accent
                   </span>
-                  <span className="text-[10px] text-white/40 font-semibold">{selectedBezel.name}</span>
+                  <span className="text-[10px] opacity-40 font-semibold">{selectedBezel.name}</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {BEZEL_ACCENTS.map(item => {
@@ -412,7 +402,7 @@ export default function ProductVariantConfigurator() {
                       <button
                         key={item.id}
                         onClick={() => setSelectedBezel(item)}
-                        className="bg-[#0e1122] border border-white/5 rounded-xl p-3.5 text-left relative cursor-pointer active:scale-95 transition-all duration-150"
+                        className={`p-3.5 text-left relative cursor-pointer active:scale-95 transition-all duration-150 ${activeVariant.buttonClass} text-current hover:text-current`}
                       >
                         {isSelected && (
                           <motion.div
@@ -422,9 +412,9 @@ export default function ProductVariantConfigurator() {
                             transition={{ type: "spring", stiffness: 350, damping: 28 }}
                           />
                         )}
-                        <span className="text-xs font-bold text-white block">{item.name}</span>
-                        <span className="text-[10px] text-white/40 block mt-0.5 leading-snug">{item.desc}</span>
-                        <span className="text-[10px] font-bold block mt-2" style={{ color: isSelected ? activeTheme.color : "rgba(255,255,255,0.4)" }}>
+                        <span className="text-xs font-bold block">{item.name}</span>
+                        <span className="text-[10px] opacity-40 block mt-0.5 leading-snug">{item.desc}</span>
+                        <span className="text-[10px] font-bold block mt-2" style={{ color: isSelected ? activeTheme.color : "currentColor" }}>
                           {priceDiff === 0 ? "Standard" : priceDiff > 0 ? `+$${priceDiff}` : `-$${Math.abs(priceDiff)}`}
                         </span>
                       </button>
@@ -436,8 +426,8 @@ export default function ProductVariantConfigurator() {
             </div>
 
             {/* TAB SECTION: Detailed Story/Specs/Shipping Accordion */}
-            <div className="bg-[#0a0d1a] border border-white/5 rounded-2xl p-5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
-              <div className="flex items-center gap-1 border-b border-white/5 pb-2">
+            <div className={`p-5 ${activeVariant.cardClass}`}>
+              <div className="flex items-center gap-1 border-b border-current/10 pb-2">
                 {[
                   { id: "specs", label: "Specs Sheet" },
                   { id: "story", label: "Horology Story" },
@@ -447,9 +437,9 @@ export default function ProductVariantConfigurator() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className="px-3.5 py-1.5 rounded-lg text-xs font-bold tracking-wide uppercase cursor-pointer transition-colors relative"
-                    style={{ color: activeTab === tab.id ? "#ffffff" : "rgba(255,255,255,0.4)" }}
+                    style={{ color: activeTab === tab.id ? "currentColor" : undefined }}
                   >
-                    {tab.label}
+                    <span className={activeTab === tab.id ? "opacity-100" : "opacity-40"}>{tab.label}</span>
                     {activeTab === tab.id && (
                       <motion.div
                         layoutId="active-tab-indicator"
@@ -461,24 +451,24 @@ export default function ProductVariantConfigurator() {
                 ))}
               </div>
 
-              <div className="pt-4 text-xs leading-relaxed text-white/60 min-h-[80px]">
+              <div className="pt-4 text-xs leading-relaxed opacity-60 min-h-[80px]">
                 {activeTab === "specs" && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
-                    <div className="flex justify-between py-1 border-b border-white/[0.03]">
-                      <span className="text-white/40">Reference Model</span>
-                      <span className="text-white/80 font-mono">AUR-2.5D-CH89</span>
+                    <div className="flex justify-between py-1 border-b border-current/5">
+                      <span className="opacity-60">Reference Model</span>
+                      <span className="font-mono">AUR-2.5D-CH89</span>
                     </div>
-                    <div className="flex justify-between py-1 border-b border-white/[0.03]">
-                      <span className="text-white/40">Case Dimensions</span>
-                      <span className="text-white/80 font-mono">41.5mm x 12.8mm</span>
+                    <div className="flex justify-between py-1 border-b border-current/5">
+                      <span className="opacity-60">Case Dimensions</span>
+                      <span className="font-mono">41.5mm x 12.8mm</span>
                     </div>
-                    <div className="flex justify-between py-1 border-b border-white/[0.03]">
-                      <span className="text-white/40">Lug Width</span>
-                      <span className="text-white/80 font-mono">20mm standard</span>
+                    <div className="flex justify-between py-1 border-b border-current/5">
+                      <span className="opacity-60">Lug Width</span>
+                      <span className="font-mono">20mm standard</span>
                     </div>
-                    <div className="flex justify-between py-1 border-b border-white/[0.03]">
-                      <span className="text-white/40">Gasket seals</span>
-                      <span className="text-white/80 font-mono">Viton Dual-Core</span>
+                    <div className="flex justify-between py-1 border-b border-current/5">
+                      <span className="opacity-60">Gasket seals</span>
+                      <span className="font-mono">Viton Dual-Core</span>
                     </div>
                   </div>
                 )}
@@ -496,14 +486,14 @@ export default function ProductVariantConfigurator() {
             </div>
 
             {/* Bottom Actions Panel */}
-            <div className="bg-[#0a0d1a] border border-white/5 rounded-2xl p-5 flex flex-col md:flex-row gap-4 items-center justify-between shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
+            <div className={`p-5 flex flex-col md:flex-row gap-4 items-center justify-between ${activeVariant.cardClass}`}>
               <div className="flex items-center gap-3 w-full md:w-auto">
-                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/60">
+                <div className="w-10 h-10 rounded-xl bg-current/5 border border-current/10 flex items-center justify-center opacity-80">
                   <Shield size={18} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xs font-bold text-white">5-Year Global SLA Warranty</span>
-                  <span className="text-[10px] text-white/40">Lifetime movement repair package</span>
+                  <span className="text-xs font-bold">5-Year Global SLA Warranty</span>
+                  <span className="text-[10px] opacity-40">Lifetime movement repair package</span>
                 </div>
               </div>
               
@@ -511,9 +501,9 @@ export default function ProductVariantConfigurator() {
               <motion.button
                 whileHover={{ y: -3 }}
                 whileTap={{ scale: 0.97 }}
-                className={`w-full md:w-auto px-8 py-3.5 rounded-xl font-bold uppercase tracking-widest text-xs text-black cursor-pointer relative overflow-hidden transition-all duration-200 ${activeTheme.bg} ${activeTheme.hoverBg} ${activeTheme.glow} shadow-lg`}
+                className={`w-full md:w-auto px-8 py-3.5 rounded-xl font-bold uppercase tracking-widest text-xs cursor-pointer relative overflow-hidden transition-all duration-200 ${activeVariant.buttonClass} text-current hover:text-current`}
                 style={{
-                  boxShadow: `0 8px 16px ${activeTheme.color}25`
+                  boxShadow: activeVariant.id === "brutal" ? "none" : `0 8px 16px ${activeTheme.color}25`
                 }}
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
@@ -535,7 +525,7 @@ export default function ProductVariantConfigurator() {
         </div>
 
         {/* Global info text */}
-        <div className="text-center text-[10px] text-white/30 tracking-wide uppercase py-4">
+        <div className="text-center text-[10px] opacity-30 tracking-wide uppercase py-4">
           Aurelia premium e-commerce variant interface · optimized for zero-GPU layout rendering
         </div>
 

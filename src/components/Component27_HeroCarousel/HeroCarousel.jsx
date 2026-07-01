@@ -1,75 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ShoppingCart, Activity, ShieldCheck, Heart } from "lucide-react";
-
-// Themes definition
-const THEMES = [
-  {
-    id: "midnightBlue",
-    name: "Midnight Blue",
-    color: "#2563eb",
-    rgb: "37, 99, 235",
-    text: "text-blue-400",
-    bg: "bg-blue-500",
-    hoverBg: "hover:bg-blue-600",
-    accentBg: "bg-blue-500/10",
-    border: "border-blue-500/20",
-    gradient: "from-blue-500/5 via-transparent to-transparent",
-    glow: "shadow-[0_0_15px_rgba(37,99,235,0.3)]"
-  },
-  {
-    id: "roseGold",
-    name: "Rose Gold",
-    color: "#e0a9a5",
-    rgb: "224, 169, 165",
-    text: "text-rose-300",
-    bg: "bg-[#e0a9a5]",
-    hoverBg: "hover:bg-[#d49995]",
-    accentBg: "bg-[#e0a9a5]/10",
-    border: "border-[#e0a9a5]/20",
-    gradient: "from-[#e0a9a5]/5 via-transparent to-transparent",
-    glow: "shadow-[0_0_15px_rgba(224,169,165,0.3)]"
-  },
-  {
-    id: "platinum",
-    name: "Platinum",
-    color: "#cbd5e1",
-    rgb: "203, 213, 225",
-    text: "text-slate-300",
-    bg: "bg-slate-300",
-    hoverBg: "hover:bg-slate-400",
-    accentBg: "bg-slate-300/10",
-    border: "border-slate-300/20",
-    gradient: "from-slate-300/5 via-transparent to-transparent",
-    glow: "shadow-[0_0_15px_rgba(203,213,225,0.25)]"
-  },
-  {
-    id: "emerald",
-    name: "Emerald",
-    color: "#10b981",
-    rgb: "16, 185, 129",
-    text: "text-emerald-400",
-    bg: "bg-emerald-500",
-    hoverBg: "hover:bg-emerald-600",
-    accentBg: "bg-emerald-500/10",
-    border: "border-emerald-500/20",
-    gradient: "from-emerald-500/5 via-transparent to-transparent",
-    glow: "shadow-[0_0_15px_rgba(16,185,129,0.3)]"
-  },
-  {
-    id: "crimson",
-    name: "Crimson",
-    color: "#ff1744",
-    rgb: "255, 23, 68",
-    text: "text-rose-400",
-    bg: "bg-rose-500",
-    hoverBg: "hover:bg-rose-600",
-    accentBg: "bg-rose-500/10",
-    border: "border-rose-500/20",
-    gradient: "from-rose-500/5 via-transparent to-transparent",
-    glow: "shadow-[0_0_15px_rgba(255,23,68,0.3)]"
-  }
-];
+import { ArrowRight, ShoppingCart, Activity, Heart } from "lucide-react";
+import { useGlobalTheme } from "../../themes/ThemeContext";
 
 // Product Datasets
 const PRODUCTS = [
@@ -108,11 +40,34 @@ const PRODUCTS = [
 ];
 
 export default function HeroCarousel() {
-  const [activeTheme, setActiveTheme] = useState(THEMES[0]);
+  const { activeVariant } = useGlobalTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [progress, setProgress] = useState(0);
   const [direction, setDirection] = useState(1); // 1 = right, -1 = left
+
+  // Helper to convert hex to rgb string for inline rgba values
+  const hexToRgb = (hex) => {
+    if (!hex) return "0, 229, 255";
+    const cleanHex = hex.replace("#", "");
+    const r = parseInt(cleanHex.substring(0, 2), 16);
+    const g = parseInt(cleanHex.substring(2, 4), 16);
+    const b = parseInt(cleanHex.substring(4, 6), 16);
+    return isNaN(r) || isNaN(g) || isNaN(b) ? "0, 229, 255" : `${r}, ${g}, ${b}`;
+  };
+
+  const rgbStr = hexToRgb(activeVariant.triggerColor);
+  const activeTheme = {
+    color: activeVariant.triggerColor,
+    rgb: rgbStr,
+    text: activeVariant.textClass,
+    bg: "",
+    hoverBg: "",
+    accentBg: `rgba(${rgbStr}, 0.1)`,
+    border: `rgba(${rgbStr}, 0.2)`,
+    gradient: `from-[rgba(${rgbStr},0.05)] via-transparent to-transparent`,
+    glow: `shadow-[0_0_15px_rgba(${rgbStr},0.3)]`
+  };
 
   // Auto-advance logic with pause on hover
   useEffect(() => {
@@ -165,41 +120,15 @@ export default function HeroCarousel() {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-8 select-none bg-[#060810]"
-      style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className={`min-h-screen p-4 md:p-8 select-none transition-colors duration-500 ${activeVariant.canvasClass}`}>
       
       <div className="w-full max-w-5xl mx-auto flex flex-col gap-6">
         
-        {/* Navigation bar with Swatches */}
-        <div className="bg-[#0a0d1a] border border-white/5 rounded-2xl px-6 py-4 flex items-center justify-between shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+        {/* Navigation bar without Swatches */}
+        <div className={`px-6 py-4 flex items-center justify-between transition-all duration-300 ${activeVariant.cardClass}`}>
           <div className="flex items-center gap-2">
             <Activity size={14} style={{ color: activeTheme.color }} />
             <span className="text-[10px] font-mono font-black text-white/50 tracking-wider">HERO_CORE_ENGINE</span>
-          </div>
-
-          {/* Swatches Controller */}
-          <div className="flex items-center gap-2 bg-black/45 px-3 py-2 rounded-xl border border-white/5">
-            {THEMES.map(theme => (
-              <button
-                key={theme.id}
-                onClick={() => {
-                  setActiveTheme(theme);
-                  setProgress(0);
-                }}
-                className="w-3.5 h-3.5 rounded-full cursor-pointer relative flex items-center justify-center transition-transform active:scale-75"
-                style={{ backgroundColor: theme.color }}
-                aria-label={`Swatch ${theme.name}`}
-              >
-                {activeTheme.id === theme.id && (
-                  <motion.div
-                    layoutId="active-hero-swatch-ring"
-                    className="absolute -inset-1 rounded-full border border-current opacity-80"
-                    style={{ color: theme.color }}
-                    transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                  />
-                )}
-              </button>
-            ))}
           </div>
         </div>
 
@@ -207,7 +136,7 @@ export default function HeroCarousel() {
         <div
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          className={`bg-[#0a0d1a] border border-white/5 rounded-3xl min-h-[480px] relative overflow-hidden flex flex-col md:flex-row shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-300`}
+          className={`min-h-[480px] relative overflow-hidden flex flex-col md:flex-row transition-all duration-300 ${activeVariant.cardClass}`}
         >
           {/* Accent Ambient Gradient Background */}
           <div 
@@ -290,9 +219,12 @@ export default function HeroCarousel() {
 
             {/* Shop now button with gloss reflection sweep */}
             <div className="flex items-center gap-4">
-              <ShopNowButton activeTheme={activeTheme} />
+              <ShopNowButton activeVariant={activeVariant} />
               
-              <button className="p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 text-white/60 hover:text-white cursor-pointer transition-colors">
+              <button 
+                className="p-3.5 bg-white/5 hover:bg-white/10 border border-white/5 text-white/60 hover:text-white cursor-pointer transition-colors"
+                style={{ borderRadius: "var(--theme-border-radius-action)" }}
+              >
                 <Heart size={14} />
               </button>
             </div>
@@ -310,8 +242,9 @@ export default function HeroCarousel() {
                   initial="enter"
                   animate="center"
                   exit="exit"
-                  className="absolute w-[220px] md:w-[280px] aspect-square rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/40"
+                  className="absolute w-[220px] md:w-[280px] aspect-square overflow-hidden border border-white/10 shadow-2xl bg-black/40"
                   style={{
+                    borderRadius: "var(--theme-border-radius-action)",
                     boxShadow: `0 15px 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 1px rgba(${activeTheme.rgb},0.1)`
                   }}
                 >
@@ -359,7 +292,7 @@ export default function HeroCarousel() {
 }
 
 /* Shop Now Button with dynamic gloss sweep */
-function ShopNowButton({ activeTheme }) {
+function ShopNowButton({ activeVariant }) {
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -367,7 +300,10 @@ function ShopNowButton({ activeTheme }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       whileTap={{ scale: 0.98 }}
-      className={`px-5 py-3.5 rounded-2xl font-bold font-mono text-xs uppercase tracking-wider text-black transition-all duration-300 cursor-pointer flex items-center gap-2 relative overflow-hidden ${activeTheme.bg} ${activeTheme.hoverBg} ${activeTheme.shadow}`}
+      className={`px-5 py-3.5 rounded-2xl font-bold font-mono text-xs uppercase tracking-wider transition-all duration-300 cursor-pointer flex items-center gap-2 relative overflow-hidden ${activeVariant.buttonClass}`}
+      style={{
+        borderRadius: "var(--theme-border-radius-action)"
+      }}
     >
       {/* Absolute Diagonal Gloss Reflection Sweep */}
       <AnimatePresence>

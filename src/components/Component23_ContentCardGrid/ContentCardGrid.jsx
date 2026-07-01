@@ -1,70 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Grid, Calendar, Clock, BookOpen, Layers } from "lucide-react";
-
-// Themes definition
-const THEMES = [
-  {
-    id: "oceanBlue",
-    name: "Ocean Blue",
-    color: "#3b82f6",
-    rgb: "59, 130, 246",
-    border: "border-blue-500/15",
-    text: "text-blue-400",
-    bg: "bg-blue-500",
-    accentBg: "bg-blue-500/10",
-    hoverBg: "hover:bg-blue-500/15",
-    glow: "shadow-[0_0_12px_rgba(59,130,246,0.25)]"
-  },
-  {
-    id: "sunsetGold",
-    name: "Sunset Gold",
-    color: "#ffb800",
-    rgb: "255, 184, 0",
-    border: "border-amber-500/15",
-    text: "text-amber-400",
-    bg: "bg-amber-500",
-    accentBg: "bg-amber-500/10",
-    hoverBg: "hover:bg-amber-500/15",
-    glow: "shadow-[0_0_12px_rgba(255,184,0,0.25)]"
-  },
-  {
-    id: "forestGreen",
-    name: "Forest Green",
-    color: "#10b981",
-    rgb: "16, 185, 129",
-    border: "border-emerald-500/15",
-    text: "text-emerald-400",
-    bg: "bg-emerald-500",
-    accentBg: "bg-emerald-500/10",
-    hoverBg: "hover:bg-emerald-500/15",
-    glow: "shadow-[0_0_12px_rgba(16,185,129,0.25)]"
-  },
-  {
-    id: "deepPlum",
-    name: "Deep Plum",
-    color: "#8b5cf6",
-    rgb: "139, 92, 246",
-    border: "border-purple-500/15",
-    text: "text-purple-400",
-    bg: "bg-purple-500",
-    accentBg: "bg-purple-500/10",
-    hoverBg: "hover:bg-purple-500/15",
-    glow: "shadow-[0_0_12px_rgba(139,92,246,0.25)]"
-  },
-  {
-    id: "copper",
-    name: "Copper",
-    color: "#f97316",
-    rgb: "249, 115, 22",
-    border: "border-orange-500/15",
-    text: "text-orange-400",
-    bg: "bg-orange-500",
-    accentBg: "bg-orange-500/10",
-    hoverBg: "hover:bg-orange-500/15",
-    glow: "shadow-[0_0_12px_rgba(249,115,22,0.25)]"
-  }
-];
+import { ArrowRight, Grid, Calendar, Clock, BookOpen } from "lucide-react";
+import { useGlobalTheme } from "../../themes/ThemeContext";
 
 // Mock card items
 const CARDS = [
@@ -125,12 +62,34 @@ const CARDS = [
 ];
 
 export default function ContentCardGrid() {
-  const [activeTheme, setActiveTheme] = useState(THEMES[0]);
+  const { activeVariant } = useGlobalTheme();
   const [filter, setFilter] = useState("all");
 
   const filteredCards = filter === "all" 
     ? CARDS 
     : CARDS.filter(c => c.category === filter);
+
+  // Helper to convert hex to rgb string for inline rgba values
+  const hexToRgb = (hex) => {
+    if (!hex) return "0, 229, 255";
+    const cleanHex = hex.replace("#", "");
+    const r = parseInt(cleanHex.substring(0, 2), 16);
+    const g = parseInt(cleanHex.substring(2, 4), 16);
+    const b = parseInt(cleanHex.substring(4, 6), 16);
+    return isNaN(r) || isNaN(g) || isNaN(b) ? "0, 229, 255" : `${r}, ${g}, ${b}`;
+  };
+
+  const rgbStr = hexToRgb(activeVariant.triggerColor);
+  const activeTheme = {
+    color: activeVariant.triggerColor,
+    rgb: rgbStr,
+    border: `border-current/15`,
+    text: activeVariant.textClass,
+    bg: "",
+    accentBg: `rgba(${rgbStr}, 0.1)`,
+    hoverBg: `rgba(${rgbStr}, 0.15)`,
+    glow: `shadow-[0_0_12px_rgba(${rgbStr},0.25)]`
+  };
 
   // Stagger entry configurations
   const gridVariants = {
@@ -153,56 +112,28 @@ export default function ContentCardGrid() {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-8 select-none bg-[#060810]"
-      style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className={`min-h-screen p-4 md:p-8 select-none transition-colors duration-500 ${activeVariant.canvasClass}`}>
       
       <div className="w-full max-w-6xl mx-auto flex flex-col gap-6">
         
         {/* Header Board */}
-        <div className="bg-[#0a0d1a] border border-white/5 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
+        <div className={`p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${activeVariant.cardClass}`}>
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-mono tracking-widest text-white/40 uppercase block">
+            <span className="text-[10px] font-mono tracking-widest opacity-40 uppercase block">
               COMPONENT ARCHIVE
             </span>
-            <h1 className="text-xl md:text-2xl font-black text-white tracking-tight"
+            <h1 className="text-xl md:text-2xl font-black tracking-tight"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               Dynamic Content Card Grid
             </h1>
-            <p className="text-xs text-white/45 max-w-lg">
+            <p className="text-xs opacity-45 max-w-lg">
               A responsive catalog using a flat-layered aesthetic. Hovering triggers micro-shadow extensions, image expansions, and magnetic arrow glides.
             </p>
-          </div>
-
-          {/* Theme Selector Accent */}
-          <div className="flex flex-col gap-1.5 self-end md:self-auto">
-            <span className="text-[9px] uppercase tracking-widest text-white/30 font-bold font-mono">
-              Card Theme Swatch
-            </span>
-            <div className="flex items-center gap-2 bg-black/35 px-3 py-2 rounded-xl border border-white/5">
-              {THEMES.map(theme => (
-                <button
-                  key={theme.id}
-                  onClick={() => setActiveTheme(theme)}
-                  className="w-4 h-4 rounded-full cursor-pointer relative flex items-center justify-center transition-transform active:scale-90"
-                  style={{ backgroundColor: theme.color }}
-                  aria-label={`Theme ${theme.name}`}
-                >
-                  {activeTheme.id === theme.id && (
-                    <motion.div
-                      layoutId="active-grid-card-theme-ring"
-                      className="absolute -inset-1 rounded-full border border-current opacity-80"
-                      style={{ color: theme.color }}
-                      transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                    />
-                  )}
-                </button>
-              ))}
-            </div>
           </div>
         </div>
 
         {/* Category Filters Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 bg-[#0a0d1a] border border-white/5 px-4 py-3 rounded-2xl shadow-[inset_0_1px_1px_rgba(0,0,0,0.4)]">
+        <div className={`flex flex-wrap items-center justify-between gap-4 px-4 py-3 ${activeVariant.cardClass}`}>
           <div className="flex flex-wrap items-center gap-1.5">
             {["all", "engineering", "design", "tutorials", "insights"].map(cat => {
               const isActive = filter === cat;
@@ -213,7 +144,7 @@ export default function ContentCardGrid() {
                   className={`px-3.5 py-1.5 rounded-xl text-[10px] uppercase font-bold font-mono tracking-wider transition-all duration-200 cursor-pointer relative ${
                     isActive 
                       ? "text-black" 
-                      : "text-white/40 hover:text-white hover:bg-white/5"
+                      : "opacity-40 hover:opacity-100 hover:bg-current/5"
                   }`}
                 >
                   {isActive && (
@@ -230,7 +161,7 @@ export default function ContentCardGrid() {
             })}
           </div>
 
-          <div className="hidden sm:flex items-center gap-1.5 text-white/30 text-[10px] font-mono">
+          <div className="hidden sm:flex items-center gap-1.5 opacity-30 text-[10px] font-mono">
             <Grid size={11} />
             <span>Grid Display ({filteredCards.length} matches)</span>
           </div>
@@ -254,7 +185,7 @@ export default function ContentCardGrid() {
                 exit={{ opacity: 0, scale: 0.9, y: 15 }}
                 transition={{ type: "spring", stiffness: 200, damping: 22 }}
               >
-                <GridCard card={card} activeTheme={activeTheme} />
+                <GridCard card={card} activeTheme={activeTheme} activeVariant={activeVariant} />
               </motion.div>
             ))}
           </AnimatePresence>
@@ -266,17 +197,8 @@ export default function ContentCardGrid() {
 }
 
 /* Card Component with interactive hovers */
-function GridCard({ card, activeTheme }) {
+function GridCard({ card, activeTheme, activeVariant }) {
   const [isHovered, setIsHovered] = useState(false);
-
-  const getCatStyle = (cat) => {
-    switch (cat) {
-      case "engineering": return "text-cyan-400";
-      case "design": return "text-rose-400";
-      case "tutorials": return "text-amber-400";
-      default: return "text-indigo-400";
-    }
-  };
 
   return (
     <motion.div
@@ -286,7 +208,7 @@ function GridCard({ card, activeTheme }) {
       }}
       whileHover={{ y: -3 }}
       transition={{ type: "spring", stiffness: 260, damping: 20 }}
-      className="bg-[#0a0d1a] border border-white/5 rounded-2xl overflow-hidden relative flex flex-col h-[380px] transition-all duration-300"
+      className={`overflow-hidden relative flex flex-col h-[380px] transition-all duration-300 ${activeVariant.cardClass}`}
       style={{
         boxShadow: isHovered 
           ? `0 15px 30px rgba(0,0,0,0.45), 0 0 10px rgba(${activeTheme.rgb},0.03), inset 0 1px 0 rgba(255,255,255,0.03)`
@@ -305,7 +227,7 @@ function GridCard({ card, activeTheme }) {
         />
 
         {/* Overlay Dark Vignette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0d1a] to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
 
         {/* Featured Image Zooming */}
         <motion.img
@@ -318,8 +240,10 @@ function GridCard({ card, activeTheme }) {
 
         {/* Floating Category Tag */}
         <span 
-          className={`absolute top-4 left-4 z-20 px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase font-mono tracking-wider border transition-all duration-300 ${activeTheme.border} ${activeTheme.text} ${activeTheme.accentBg}`}
+          className={`absolute top-4 left-4 z-20 px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase font-mono tracking-wider border transition-all duration-300 ${activeTheme.border} ${activeTheme.text}`}
           style={{
+            backgroundColor: activeTheme.accentBg,
+            borderColor: activeTheme.color,
             boxShadow: isHovered ? `0 0 8px rgba(${activeTheme.rgb},0.2)` : "none"
           }}
         >
@@ -331,7 +255,7 @@ function GridCard({ card, activeTheme }) {
       <div className="flex-1 p-5 flex flex-col justify-between">
         <div className="flex flex-col gap-2">
           {/* Metadata row */}
-          <div className="flex items-center gap-3 text-[9px] font-semibold text-white/30 font-mono">
+          <div className="flex items-center gap-3 text-[9px] font-semibold opacity-30 font-mono">
             <span className="flex items-center gap-1">
               <Calendar size={10} />
               {card.date}
@@ -343,19 +267,19 @@ function GridCard({ card, activeTheme }) {
           </div>
 
           {/* Title */}
-          <h3 className="text-xs md:text-sm font-black text-white leading-snug group-hover:text-white transition-colors duration-200 mt-1 line-clamp-2">
+          <h3 className="text-xs md:text-sm font-black leading-snug transition-colors duration-200 mt-1 line-clamp-2">
             {card.title}
           </h3>
 
           {/* Description */}
-          <p className="text-[10px] text-white/40 leading-relaxed line-clamp-2">
+          <p className="text-[10px] opacity-40 leading-relaxed line-clamp-2">
             {card.desc}
           </p>
         </div>
 
         {/* Footer Actions: Read More Indicator */}
-        <div className="flex items-center justify-between pt-3 border-t border-white/5 mt-4">
-          <div className="flex items-center gap-1 text-[9px] font-mono text-white/30">
+        <div className="flex items-center justify-between pt-3 border-t border-current/5 mt-4">
+          <div className="flex items-center gap-1 text-[9px] font-mono opacity-30">
             <BookOpen size={10} />
             <span>ARTICLE</span>
           </div>

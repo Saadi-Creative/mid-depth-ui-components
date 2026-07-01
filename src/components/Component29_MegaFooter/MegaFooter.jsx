@@ -29,7 +29,7 @@ const SlackIcon = ({ size }) => (
 );
 
 export default function MegaFooter() {
-  const { activeVariant, setActiveVariant, variants } = useGlobalTheme();
+  const { activeVariant } = useGlobalTheme();
   const [email, setEmail] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
@@ -75,31 +75,10 @@ export default function MegaFooter() {
           
           {/* Top Panel: Swatches & Brand Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-8 border-b border-current/10">
+            {/* Brand Header Only */}
             <div className="flex items-center gap-2">
               <Globe size={18} style={{ color: activeVariant.triggerColor }} className="transition-colors duration-500" />
               <span className="text-sm font-black tracking-wider font-primary text-current">VESSEL.STUDIO</span>
-            </div>
-
-            {/* Accent Theme Swatches */}
-            <div className="flex items-center gap-3 bg-black/40 px-3.5 py-2 rounded-2xl border border-white/5 shadow-inner">
-              <span className="text-[9px] uppercase tracking-wider font-mono-theme font-bold text-white/30 mr-1.5">Aesthetic</span>
-              {variants.map(variant => (
-                <button
-                  key={variant.id}
-                  onClick={() => setActiveVariant(variant)}
-                  className="w-3.5 h-3.5 rounded-full cursor-pointer relative flex items-center justify-center transition-transform hover:scale-110"
-                  style={{ backgroundColor: variant.triggerColor }}
-                  title={variant.name}
-                >
-                  {activeVariant.id === variant.id && (
-                    <motion.div
-                      layoutId="active-footer-ring-global"
-                      className="absolute -inset-0.5 rounded-full border border-white"
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    />
-                  )}
-                </button>
-              ))}
             </div>
           </div>
 
@@ -159,7 +138,7 @@ export default function MegaFooter() {
 
                     {/* Subscription Form */}
                     <form onSubmit={handleSubscribe} className="flex gap-2 items-center relative">
-                      <div className="flex-1 relative flex items-center rounded-xl overflow-hidden">
+                      <div className="flex-1 relative flex items-center overflow-hidden" style={{ borderRadius: "var(--theme-border-radius-action)" }}>
                         <input
                           type="email"
                           required
@@ -173,7 +152,7 @@ export default function MegaFooter() {
 
                         {/* Orbiting Tracer SVG Overlay on Focus */}
                         {isFocused && activeVariant.id !== "brutal" && activeVariant.id !== "mono" && (
-                          <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible rounded-xl">
+                          <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" style={{ borderRadius: "var(--theme-border-radius-action)" }}>
                             <rect
                               x="0"
                               y="0"

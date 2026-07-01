@@ -1,6 +1,5 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useMotionTemplate } from "framer-motion";
-import { WAITLIST_THEMES } from "../../themes/themeConfig";
 import { useGlobalTheme } from "../../themes/ThemeContext";
 
 /* ═══════════════════════════════════════════════════════════  ICONS  */
@@ -113,14 +112,36 @@ const QueueCounter = ({ value }) => {
 
 export default function WaitlistTeaser() {
   const { activeVariant } = useGlobalTheme();
-  const themeMap = {
-    cyber: WAITLIST_THEMES.mint,
-    glass: WAITLIST_THEMES.indigo,
-    neomorphic: WAITLIST_THEMES.slateBlue,
-    brutal: WAITLIST_THEMES.coral,
-    luxury: WAITLIST_THEMES.roseGold
-  };
-  const currentTheme = themeMap[activeVariant.id] || WAITLIST_THEMES.mint;
+  const isLight = activeVariant.mode === "light";
+  const txtPrimary = isLight ? "text-slate-900 font-bold" : "text-white";
+  const txtMuted = isLight ? "text-slate-600 font-semibold" : "text-white/50";
+  const txtDim = isLight ? "text-slate-500" : "text-white/40";
+  const txtSuperDim = isLight ? "text-slate-400" : "text-white/30";
+
+  const currentTheme = useMemo(() => {
+    const hex = activeVariant.triggerColor || "#00F5D4";
+    let r = 0, g = 245, b = 212;
+    const match = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+    if (match) {
+      r = parseInt(match[1], 16);
+      g = parseInt(match[2], 16);
+      b = parseInt(match[3], 16);
+    } else {
+      const shortMatch = hex.match(/^#?([a-f\d])([a-f\d])([a-f\d])$/i);
+      if (shortMatch) {
+        r = parseInt(shortMatch[1] + shortMatch[1], 16);
+        g = parseInt(shortMatch[2] + shortMatch[2], 16);
+        b = parseInt(shortMatch[3] + shortMatch[3], 16);
+      }
+    }
+    return {
+      id: activeVariant.id || "global",
+      primary: hex,
+      primaryMuted: `rgba(${r}, ${g}, ${b}, 0.12)`,
+      glow: `rgba(${r}, ${g}, ${b}, 0.5)`,
+      border: `rgba(${r}, ${g}, ${b}, 0.3)`,
+    };
+  }, [activeVariant]);
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle"); // idle, loading, success
   const [errorMsg, setErrorMsg] = useState("");
@@ -173,87 +194,88 @@ export default function WaitlistTeaser() {
   return (
     <div
       id="component-03-waitlist-teaser"
-      className="relative w-full min-h-screen overflow-hidden flex flex-col justify-between items-center px-4 py-8 select-none transition-colors duration-1000"
-      style={{
-        background: "radial-gradient(circle at 50% 50%, #0d0f1d 0%, #06070e 100%)",
-      }}
+      className={`relative w-full min-h-screen overflow-hidden flex flex-col justify-between items-center px-4 py-8 select-none transition-colors duration-1000 ${activeVariant.canvasClass}`}
     >
       {/* ── DRIFTING 2D COLOR ORBS (CSS BLUR) ── */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <motion.div
-          animate={{
-            x: [0, 80, -40, 0],
-            y: [0, -60, 80, 0],
-            scale: [1, 1.1, 0.9, 1],
-          }}
-          transition={{
-            duration: 18,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute w-[350px] h-[350px] rounded-full opacity-[0.16] transition-colors duration-1000"
-          style={{
-            background: currentTheme.primary,
-            filter: "blur(100px)",
-            top: "10%",
-            left: "15%",
-          }}
-        />
-        <motion.div
-          animate={{
-            x: [0, -100, 60, 0],
-            y: [0, 80, -90, 0],
-            scale: [1.1, 0.95, 1.05, 1.1],
-          }}
-          transition={{
-            duration: 22,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute w-[400px] h-[400px] rounded-full opacity-[0.14] transition-colors duration-1000"
-          style={{
-            background: currentTheme.id === "mint" ? "#6366F1" : "#00F5D4",
-            filter: "blur(110px)",
-            bottom: "15%",
-            right: "10%",
-          }}
-        />
-        <motion.div
-          animate={{
-            x: [0, 50, -50, 0],
-            y: [0, 90, -40, 0],
-          }}
-          transition={{
-            duration: 15,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute w-[280px] h-[280px] rounded-full opacity-[0.12] transition-colors duration-1000"
-          style={{
-            background: currentTheme.primary,
-            filter: "blur(80px)",
-            top: "50%",
-            left: "45%",
-          }}
-        />
-      </div>
+      {activeVariant.id !== 'brutal' && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+          <motion.div
+            animate={{
+              x: [0, 80, -40, 0],
+              y: [0, -60, 80, 0],
+              scale: [1, 1.1, 0.9, 1],
+            }}
+            transition={{
+              duration: 18,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute w-[350px] h-[350px] rounded-full opacity-[0.16] transition-colors duration-1000"
+            style={{
+              background: currentTheme.primary,
+              filter: "blur(100px)",
+              top: "10%",
+              left: "15%",
+            }}
+          />
+          <motion.div
+            animate={{
+              x: [0, -100, 60, 0],
+              y: [0, 80, -90, 0],
+              scale: [1.1, 0.95, 1.05, 1.1],
+            }}
+            transition={{
+              duration: 22,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute w-[400px] h-[400px] rounded-full opacity-[0.14] transition-colors duration-1000"
+            style={{
+              background: currentTheme.id === "mint" ? "#6366F1" : "#00F5D4",
+              filter: "blur(110px)",
+              bottom: "15%",
+              right: "10%",
+            }}
+          />
+          <motion.div
+            animate={{
+              x: [0, 50, -50, 0],
+              y: [0, 90, -40, 0],
+            }}
+            transition={{
+              duration: 15,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute w-[280px] h-[280px] rounded-full opacity-[0.12] transition-colors duration-1000"
+            style={{
+              background: currentTheme.primary,
+              filter: "blur(80px)",
+              top: "50%",
+              left: "45%",
+            }}
+          />
+        </div>
+      )}
 
       {/* ── AMBIENT MAIN GLOW ── */}
-      <div
-        className="absolute pointer-events-none transition-all duration-1000 z-0"
-        style={{
-          width: "70vw",
-          height: "70vw",
-          maxWidth: 700,
-          maxHeight: 700,
-          borderRadius: "50%",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          filter: "blur(120px)",
-          background: `radial-gradient(circle, ${currentTheme.primaryMuted} 0%, transparent 60%)`,
-        }}
-      />
+      {activeVariant.id !== 'brutal' && (
+        <div
+          className="absolute pointer-events-none transition-all duration-1000 z-0"
+          style={{
+            width: "70vw",
+            height: "70vw",
+            maxWidth: 700,
+            maxHeight: 700,
+            borderRadius: "50%",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            filter: "blur(120px)",
+            background: `radial-gradient(circle, ${currentTheme.primaryMuted} 0%, transparent 60%)`,
+          }}
+        />
+      )}
 
       {/* Grid Pattern overlay */}
       <div
@@ -275,16 +297,16 @@ export default function WaitlistTeaser() {
               background: currentTheme.primaryMuted,
               border: `1px solid ${currentTheme.border}`,
               color: currentTheme.primary,
-              boxShadow: `0 0 12px ${currentTheme.glow}33`,
+              boxShadow: activeVariant.id === 'brutal' ? 'none' : `0 0 12px ${currentTheme.glow}33`,
             }}
           >
             N
           </div>
-          <span className="text-xs font-black tracking-widest text-white uppercase font-mono">
+          <span className={`text-xs font-black tracking-widest uppercase font-mono ${txtPrimary}`}>
             NEXUS Labs
           </span>
         </div>
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/5 bg-white/5 backdrop-blur text-[10px] text-white/60 font-semibold uppercase tracking-wider font-mono">
+        <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full border border-black/10 dark:border-white/5 bg-black/5 dark:bg-white/5 backdrop-blur text-[10px] font-semibold uppercase tracking-wider font-mono ${txtMuted}`}>
           <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: currentTheme.primary }} />
           Status: Stealth Mode
         </div>
@@ -303,53 +325,56 @@ export default function WaitlistTeaser() {
         style={{ perspective: 1000, transformStyle: "preserve-3d" }}
       >
         {/* Layer 2: Flat visual background plate (offset slightly downwards and back in Z space) */}
-        <motion.div
-          className="absolute inset-0 rounded-2xl pointer-events-none transition-all duration-700"
-          style={{
-            rotateX: rotX,
-            rotateY: rotY,
-            transformStyle: "preserve-3d",
-            z: -20,
-            y: 12,
-            scale: 0.98,
-            background: "rgba(255,255,255,0.02)",
-            border: `1px solid ${currentTheme.border}`,
-            boxShadow: `0 15px 35px rgba(0,0,0,0.6)`,
-            opacity: 0.65,
-          }}
-        />
+        {activeVariant.id !== 'brutal' && (
+          <motion.div
+            className="absolute inset-0 rounded-2xl pointer-events-none transition-all duration-700"
+            style={{
+              rotateX: rotX,
+              rotateY: rotY,
+              transformStyle: "preserve-3d",
+              z: -20,
+              y: 12,
+              scale: 0.98,
+              background: "rgba(255,255,255,0.02)",
+              border: `1px solid ${currentTheme.border}`,
+              boxShadow: `0 15px 35px rgba(0,0,0,0.6)`,
+              opacity: 0.65,
+            }}
+          />
+        )}
 
         {/* Layer 1: Core Form Card */}
         <motion.div
-          className="relative w-full rounded-2xl p-8 sm:p-10 overflow-hidden transition-all duration-500"
+          className={`relative w-full p-8 sm:p-10 overflow-hidden transition-all duration-500 ${activeVariant.cardClass}`}
           style={{
             rotateX: rotX,
             rotateY: rotY,
             transformStyle: "preserve-3d",
-            background: "linear-gradient(160deg, rgba(20, 24, 48, 0.95) 0%, rgba(9, 11, 23, 0.98) 100%)",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
-            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.07)",
           }}
         >
           {/* Top Line accent */}
-          <div
-            className="absolute top-0 inset-x-0 h-[1.5px] transition-all duration-700"
-            style={{
-              background: `linear-gradient(90deg, transparent, ${currentTheme.primary}, transparent)`,
-            }}
-          />
+          {activeVariant.id !== 'brutal' && (
+            <div
+              className="absolute top-0 inset-x-0 h-[1.5px] transition-all duration-700"
+              style={{
+                background: `linear-gradient(90deg, transparent, ${currentTheme.primary}, transparent)`,
+              }}
+            />
+          )}
 
           {/* Magnetic cursor-follow glow */}
-          <motion.div
-            className="absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-500 rounded-2xl"
-            style={{
-              opacity: cardHovered ? 0.12 : 0,
-              background: glowBg,
-            }}
-          />
+          {activeVariant.id !== 'brutal' && activeVariant.id !== 'luxury' && (
+            <motion.div
+              className="absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-500 rounded-[inherit]"
+              style={{
+                opacity: cardHovered ? 0.12 : 0,
+                background: glowBg,
+              }}
+            />
+          )}
 
           {/* Floating particles on hover */}
-          <FloatingParticles theme={currentTheme} active={cardHovered} />
+          {activeVariant.id !== 'brutal' && <FloatingParticles theme={currentTheme} active={cardHovered} />}
 
           <AnimatePresence mode="wait">
             {status !== "success" ? (
@@ -375,10 +400,10 @@ export default function WaitlistTeaser() {
                   </div>
                 </div>
 
-                <h1 className="text-3xl sm:text-4xl font-black text-white text-center leading-tight tracking-tight mb-3" style={{ transform: "translateZ(40px)" }}>
-                  Unlocking a New <span className="text-white/90">Dimension</span>
+                <h1 className={`text-3xl sm:text-4xl font-black text-center leading-tight tracking-tight mb-3 ${txtPrimary}`} style={{ transform: "translateZ(40px)" }}>
+                  Unlocking a New Dimension
                 </h1>
-                <p className="text-xs text-center text-white/50 leading-relaxed mb-8 max-w-[340px] mx-auto" style={{ transform: "translateZ(25px)" }}>
+                <p className={`text-xs text-center leading-relaxed mb-8 max-w-[340px] mx-auto ${txtMuted}`} style={{ transform: "translateZ(25px)" }}>
                   A high-converting 2.5D interface platform designed for modern creators. Enter your email below to request early beta access.
                 </p>
 
@@ -405,24 +430,7 @@ export default function WaitlistTeaser() {
                         if (errorMsg) setErrorMsg("");
                       }}
                       placeholder="Enter your email address..."
-                      className="w-full text-xs py-3.5 pl-11 pr-4 rounded-xl text-white outline-none bg-white/4 border transition-all duration-300 font-semibold"
-                      style={{
-                        background: inputFocused ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.03)",
-                        borderColor: errorMsg
-                          ? "#FF6B6B"
-                          : inputFocused
-                            ? currentTheme.primary
-                            : inputHovered
-                              ? "rgba(255,255,255,0.18)"
-                              : "rgba(255, 255, 255, 0.08)",
-                        boxShadow: errorMsg
-                          ? "0 0 0 3px rgba(255,107,107,0.15)"
-                          : inputFocused
-                            ? `0 0 0 3.5px ${currentTheme.primaryMuted}, 0 0 16px ${currentTheme.glow}33`
-                            : inputHovered
-                              ? `0 0 0 1px rgba(255,255,255,0.05)`
-                              : "none",
-                      }}
+                      className={`w-full text-xs py-3.5 pl-11 pr-4 outline-none transition-all duration-300 font-semibold ${activeVariant.inputClass}`}
                     />
                   </div>
 
@@ -436,27 +444,24 @@ export default function WaitlistTeaser() {
                     type="submit"
                     disabled={status === "loading"}
                     onClick={addRipple}
-                    whileHover={{ scale: 1.015, y: -0.5, boxShadow: `0 8px 24px ${currentTheme.glow}55` }}
+                    whileHover={activeVariant.id === 'brutal' ? { translate: "-2px -2px" } : { scale: 1.015, y: -0.5 }}
                     whileTap={{ scale: 0.96 }}
-                    className="relative w-full py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest cursor-pointer overflow-hidden select-none transition-all duration-500 shadow-lg flex items-center justify-center gap-2"
-                    style={{
-                      background: currentTheme.primary,
-                      color: "#080C14",
-                      boxShadow: `0 6px 20px ${currentTheme.glow}44`,
-                    }}
+                    className={`relative w-full py-3.5 font-black text-[11px] uppercase tracking-widest cursor-pointer overflow-hidden select-none transition-all duration-500 flex items-center justify-center gap-2 ${activeVariant.buttonClass}`}
                   >
                     <RippleLayer ripples={ripples} color="rgba(0,0,0,0.15)" />
                     {status === "loading" ? (
                       <>
                         <IconSpinner />
                         Securing Spot...
-                        <motion.div
-                          initial={{ left: "-100%" }}
-                          animate={{ left: "0%" }}
-                          transition={{ duration: 1.8, ease: "easeInOut" }}
-                          className="absolute bottom-0 left-0 h-1 bg-white/40"
-                          style={{ width: "100%" }}
-                        />
+                        {activeVariant.id !== 'brutal' && (
+                          <motion.div
+                            initial={{ left: "-100%" }}
+                            animate={{ left: "0%" }}
+                            transition={{ duration: 1.8, ease: "easeInOut" }}
+                            className="absolute bottom-0 left-0 h-1 bg-white/40"
+                            style={{ width: "100%" }}
+                          />
+                        )}
                       </>
                     ) : (
                       "Join Waitlist →"
@@ -480,12 +485,12 @@ export default function WaitlistTeaser() {
                         transition={{ delay: 0.35 + i * 0.08, type: "spring", stiffness: 200 }}
                         src={src}
                         alt="User Avatar"
-                        className="w-6.5 h-6.5 rounded-full border-2 border-[#12162E] object-cover"
+                        className="w-6.5 h-6.5 rounded-full border-2 border-slate-100 dark:border-[#12162E] object-cover"
                       />
                     ))}
                   </div>
-                  <span className="text-[10px] text-white/40 font-bold uppercase tracking-wider font-mono">
-                    Joined by <span className="text-white/80">14,204</span> designers
+                  <span className={`text-[10px] font-bold uppercase tracking-wider font-mono ${txtSuperDim}`}>
+                    Joined by <span className={txtPrimary}>14,204</span> designers
                   </span>
                 </div>
               </motion.div>
@@ -514,16 +519,16 @@ export default function WaitlistTeaser() {
                   <IconCheck />
                 </motion.div>
 
-                <h2 className="text-2xl font-black text-white text-center leading-tight tracking-tight mb-2" style={{ transform: "translateZ(30px)" }}>
+                <h2 className={`text-2xl font-black text-center leading-tight tracking-tight mb-2 ${txtPrimary}`} style={{ transform: "translateZ(30px)" }}>
                   You're On The List!
                 </h2>
-                <p className="text-xs text-center text-white/50 leading-relaxed mb-6 max-w-[280px]" style={{ transform: "translateZ(25px)" }}>
-                  Spot confirmed for <span className="text-white font-bold">{email}</span>. We'll send an invite link to your inbox soon.
+                <p className={`text-xs text-center leading-relaxed mb-6 max-w-[280px] ${txtMuted}`} style={{ transform: "translateZ(25px)" }}>
+                  Spot confirmed for <span className={`font-bold ${txtPrimary}`}>{email}</span>. We'll send an invite link to your inbox soon.
                 </p>
 
-                <div className="w-full h-px bg-white/5 mb-6" style={{ transform: "translateZ(20px)" }} />
+                <div className="w-full h-px bg-black/10 dark:bg-white/5 mb-6" style={{ transform: "translateZ(20px)" }} />
 
-                <div className="flex flex-col gap-2 items-center text-[10px] font-bold text-white/30 uppercase tracking-widest font-mono" style={{ transform: "translateZ(35px)", transformStyle: "preserve-3d" }}>
+                <div className={`flex flex-col gap-2 items-center text-[10px] font-bold uppercase tracking-widest font-mono ${txtSuperDim}`} style={{ transform: "translateZ(35px)", transformStyle: "preserve-3d" }}>
                   <QueueCounter value={14205} />
                   <motion.button
                     onClick={() => {
@@ -532,7 +537,7 @@ export default function WaitlistTeaser() {
                     }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="mt-4 px-4 py-2 rounded-lg border border-white/10 hover:border-white/20 text-white/60 hover:text-white transition-all text-[9px] cursor-pointer"
+                    className={`mt-4 px-4 py-2 text-[9px] cursor-pointer transition-all duration-300 ${activeVariant.buttonClass}`}
                   >
                     ← Back to Sign Up
                   </motion.button>

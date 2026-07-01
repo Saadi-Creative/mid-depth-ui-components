@@ -1,83 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, RefreshCw, AlertCircle, CheckCircle, ArrowRight, HelpCircle } from "lucide-react";
-
-// Themes definition
-const THEMES = [
-  {
-    id: "emerald",
-    name: "Emerald",
-    color: "#10b981",
-    rgb: "16, 185, 129",
-    border: "border-emerald-500/25",
-    focusBorder: "focus:border-emerald-500",
-    bg: "bg-emerald-500",
-    hoverBg: "hover:bg-emerald-600",
-    text: "text-emerald-400",
-    accentBg: "bg-emerald-500/10",
-    shadow: "shadow-[0_0_15px_rgba(16,185,129,0.3)]",
-    glowRing: "focus:ring-2 focus:ring-emerald-500/20"
-  },
-  {
-    id: "sapphire",
-    name: "Sapphire Blue",
-    color: "#2979ff",
-    rgb: "41, 121, 255",
-    border: "border-blue-500/25",
-    focusBorder: "focus:border-blue-500",
-    bg: "bg-blue-500",
-    hoverBg: "hover:bg-blue-600",
-    text: "text-blue-400",
-    accentBg: "bg-blue-500/10",
-    shadow: "shadow-[0_0_15px_rgba(41,121,255,0.3)]",
-    glowRing: "focus:ring-2 focus:ring-blue-500/20"
-  },
-  {
-    id: "amethyst",
-    name: "Amethyst",
-    color: "#aa00ff",
-    rgb: "170, 0, 255",
-    border: "border-purple-500/25",
-    focusBorder: "focus:border-purple-500",
-    bg: "bg-purple-500",
-    hoverBg: "hover:bg-purple-600",
-    text: "text-purple-400",
-    accentBg: "bg-purple-500/10",
-    shadow: "shadow-[0_0_15px_rgba(170,0,255,0.3)]",
-    glowRing: "focus:ring-2 focus:ring-purple-500/20"
-  },
-  {
-    id: "amber",
-    name: "Amber",
-    color: "#ffd600",
-    rgb: "255, 214, 0",
-    border: "border-amber-500/25",
-    focusBorder: "focus:border-amber-500",
-    bg: "bg-amber-500",
-    hoverBg: "hover:bg-amber-600",
-    text: "text-amber-400",
-    accentBg: "bg-amber-500/10",
-    shadow: "shadow-[0_0_15px_rgba(255,214,0,0.3)]",
-    glowRing: "focus:ring-2 focus:ring-amber-500/20"
-  },
-  {
-    id: "ruby",
-    name: "Ruby",
-    color: "#ff1744",
-    rgb: "255, 23, 68",
-    border: "border-rose-500/25",
-    focusBorder: "focus:border-rose-500",
-    bg: "bg-rose-500",
-    hoverBg: "hover:bg-rose-600",
-    text: "text-rose-400",
-    accentBg: "bg-rose-500/10",
-    shadow: "shadow-[0_0_15px_rgba(255,23,68,0.3)]",
-    glowRing: "focus:ring-2 focus:ring-rose-500/20"
-  }
-];
+import { useGlobalTheme } from "../../themes/ThemeContext";
 
 export default function OTPVerification() {
-  const [activeTheme, setActiveTheme] = useState(THEMES[0]);
+  const { activeVariant } = useGlobalTheme();
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(59);
   const [status, setStatus] = useState("idle"); // idle, verifying, success, error
@@ -96,6 +23,30 @@ export default function OTPVerification() {
     }, 1000);
     return () => clearInterval(interval);
   }, [timer]);
+
+  // Helper to convert hex to rgb string for inline rgba values
+  const hexToRgb = (hex) => {
+    if (!hex) return "0, 229, 255";
+    const cleanHex = hex.replace("#", "");
+    const r = parseInt(cleanHex.substring(0, 2), 16);
+    const g = parseInt(cleanHex.substring(2, 4), 16);
+    const b = parseInt(cleanHex.substring(4, 6), 16);
+    return isNaN(r) || isNaN(g) || isNaN(b) ? "0, 229, 255" : `${r}, ${g}, ${b}`;
+  };
+
+  const rgbStr = hexToRgb(activeVariant.triggerColor);
+  const activeTheme = {
+    color: activeVariant.triggerColor,
+    rgb: rgbStr,
+    border: `border-current/25`,
+    focusBorder: "focus:border-current",
+    bg: "",
+    hoverBg: "",
+    text: activeVariant.textClass,
+    accentBg: `rgba(${rgbStr}, 0.1)`,
+    shadow: `shadow-[0_0_15px_rgba(${rgbStr},0.3)]`,
+    glowRing: "focus:ring-2 focus:ring-current/20"
+  };
 
   // Sync state and forward focus
   const handleChange = (e, index) => {
@@ -157,7 +108,7 @@ export default function OTPVerification() {
       } else {
         setStatus("error");
         setErrorCount(prev => prev + 1);
-        setTimeout(() => setStatus("idle"), 1200); // return to idle after shake
+        setTimeout(() => setStatus("idle"), 1200); // return to idle after haptic shake
       }
     }, 1000);
   };
@@ -176,26 +127,26 @@ export default function OTPVerification() {
   const isError = status === "error";
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 select-none bg-[#060810]"
+    <div className={`min-h-screen flex items-center justify-center p-4 select-none transition-colors duration-500 ${activeVariant.canvasClass}`}
       style={{ fontFamily: "'Inter', sans-serif" }}>
       
       <div className="w-full max-w-md flex flex-col gap-6 relative">
         
         {/* Layered Flat OTP Card */}
         <div 
-          className={`bg-[#0a0d1a] border rounded-3xl p-8 relative overflow-hidden transition-all duration-300 ${
+          className={`p-8 relative overflow-hidden transition-all duration-300 ${activeVariant.cardClass} ${
             isSuccess 
               ? "border-emerald-500/30" 
               : isError 
                 ? "border-rose-500/30" 
-                : "border-white/5"
+                : ""
           }`}
           style={{
             boxShadow: isSuccess
               ? "0 20px 40px rgba(0,0,0,0.5), 0 0 30px rgba(16,185,129,0.08), inset 0 1px 0 rgba(255,255,255,0.04)"
               : isError
                 ? "0 20px 40px rgba(0,0,0,0.5), 0 0 30px rgba(239,68,68,0.08), inset 0 1px 0 rgba(255,255,255,0.04)"
-                : "0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.02)"
+                : activeVariant.id === "brutal" ? "none" : "0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.02)"
           }}
         >
           {/* Card Accent Color Header */}
@@ -211,48 +162,23 @@ export default function OTPVerification() {
               >
                 <ShieldCheck size={16} />
               </div>
-              <span className="text-[10px] font-mono font-black text-white/40 uppercase tracking-widest">
+              <span className="text-[10px] font-mono font-black opacity-45 uppercase tracking-widest">
                 VERIFICATION HUB
               </span>
-            </div>
-
-            {/* Dynamic Swatch Panel */}
-            <div className="flex items-center gap-1.5 bg-black/40 px-2.5 py-1.5 rounded-lg border border-white/5">
-              {THEMES.map(theme => (
-                <button
-                  key={theme.id}
-                  onClick={() => {
-                    setActiveTheme(theme);
-                    setStatus("idle");
-                  }}
-                  className="w-3 h-3 rounded-full cursor-pointer relative flex items-center justify-center transition-transform active:scale-75"
-                  style={{ backgroundColor: theme.color }}
-                  aria-label={`Swatch ${theme.name}`}
-                >
-                  {activeTheme.id === theme.id && (
-                    <motion.div
-                      layoutId="active-otp-theme-ring"
-                      className="absolute -inset-1 rounded-full border border-current opacity-80"
-                      style={{ color: theme.color }}
-                      transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                    />
-                  )}
-                </button>
-              ))}
             </div>
           </div>
 
           {/* Heading */}
           <div className="flex flex-col gap-1 mb-8">
-            <h2 className="text-lg font-black text-white leading-tight font-mono uppercase tracking-wide">
+            <h2 className="text-lg font-black leading-tight font-mono uppercase tracking-wide">
               Two-Factor Authentication
             </h2>
-            <p className="text-xs text-white/45 leading-relaxed">
+            <p className="text-xs opacity-45 leading-relaxed">
               We have sent a verification code to your device. Please insert the 6-digit security token below.
             </p>
-            <div className="flex items-center gap-1.5 text-[9px] font-mono text-white/30 font-bold bg-white/5 border border-white/5 px-2 py-1 rounded-lg w-fit mt-1">
+            <div className="flex items-center gap-1.5 text-[9px] font-mono opacity-40 font-bold bg-current/5 border border-current/5 px-2 py-1 rounded-lg w-fit mt-1">
               <HelpCircle size={10} />
-              Hint code: <code className="text-white/60">123456</code>
+              Hint code: <code className="opacity-80">123456</code>
             </div>
           </div>
 
@@ -266,7 +192,6 @@ export default function OTPVerification() {
           >
             {otp.map((digit, index) => {
               const hasVal = digit !== "";
-              const isActive = index === otp.findIndex(val => val === "") || (otp.every(v => v !== "") && index === 5);
 
               return (
                 <motion.div
@@ -275,8 +200,8 @@ export default function OTPVerification() {
                     isSuccess
                       ? {
                           scale: [1, 1.12, 1],
-                          borderColor: ["rgba(255,255,255,0.05)", activeTheme.color, "rgba(16,185,129,0.4)"],
-                          backgroundColor: ["rgba(255,255,255,0.02)", activeTheme.accentBg, "rgba(16,185,129,0.03)"]
+                          borderColor: [activeVariant.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", activeTheme.color, "rgba(16,185,129,0.4)"],
+                          backgroundColor: [activeVariant.mode === "dark" ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)", activeTheme.accentBg, "rgba(16,185,129,0.03)"]
                         }
                       : hasVal && !isError
                         ? { scale: 1.05 }
@@ -297,15 +222,15 @@ export default function OTPVerification() {
                     onKeyDown={(e) => handleKeyDown(e, index)}
                     onPaste={handlePaste}
                     disabled={isVerifying || isSuccess}
-                    className={`w-full h-full text-center text-xl font-bold bg-white/[0.02] border focus:outline-none rounded-2xl transition-all duration-300 font-mono ${
+                    className={`w-full h-full text-center text-xl font-bold transition-all duration-300 font-mono focus:outline-none ${activeVariant.inputClass} ${
                       isSuccess
-                        ? "border-emerald-500/25 text-emerald-400"
+                        ? "border-emerald-500/25 text-emerald-400 focus:ring-0"
                         : isError
                           ? "border-rose-500/35 text-rose-400 focus:ring-2 focus:ring-rose-500/10"
                           : hasVal
-                            ? `text-white ${activeTheme.border}`
-                            : "border-white/5 text-white/80"
-                    } ${activeTheme.focusBorder} ${activeTheme.glowRing}`}
+                            ? `${activeTheme.border}`
+                            : "opacity-80"
+                    }`}
                     style={{
                       boxShadow: isSuccess 
                         ? `0 0 15px rgba(16,185,129, 0.15)` 
@@ -330,7 +255,7 @@ export default function OTPVerification() {
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -5 }}
-                  className="text-white/40 flex items-center gap-1.5"
+                  className="opacity-40 flex items-center gap-1.5"
                 >
                   <RefreshCw size={11} className="animate-spin" />
                   AUTHENTICATING TOKEN...
@@ -365,7 +290,7 @@ export default function OTPVerification() {
                   key="idle"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-white/30"
+                  className="opacity-30"
                 >
                   ENTER SECURITY KEY TO UNLOCK
                 </motion.span>
@@ -381,8 +306,8 @@ export default function OTPVerification() {
             whileTap={{ scale: 0.98 }}
             className={`w-full py-3.5 rounded-2xl font-bold font-mono text-xs uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1.5 cursor-pointer ${
               otp.some(v => v === "") || isVerifying || isSuccess
-                ? "bg-white/5 border border-white/5 text-white/20 cursor-not-allowed"
-                : `text-black shadow-lg ${activeTheme.bg} ${activeTheme.hoverBg} ${activeTheme.shadow}`
+                ? "bg-current/5 border border-current/5 opacity-30 cursor-not-allowed"
+                : `${activeVariant.buttonClass} ${activeTheme.shadow}`
             }`}
           >
             <span>Verify Token</span>
@@ -390,8 +315,8 @@ export default function OTPVerification() {
           </motion.button>
 
           {/* Resend details */}
-          <div className="mt-8 text-center flex flex-col gap-1 border-t border-white/5 pt-6">
-            <span className="text-[10px] text-white/35">
+          <div className="mt-8 text-center flex flex-col gap-1 border-t border-current/5 pt-6">
+            <span className="text-[10px] opacity-35">
               Didn't receive the authentication token?
             </span>
             
@@ -400,7 +325,7 @@ export default function OTPVerification() {
               disabled={timer > 0}
               className={`text-[10px] font-bold font-mono uppercase tracking-wider mt-1 transition-colors w-fit mx-auto cursor-pointer ${
                 timer > 0 
-                  ? "text-white/20 cursor-default" 
+                  ? "opacity-20 cursor-default" 
                   : `${activeTheme.text} hover:underline`
               }`}
             >

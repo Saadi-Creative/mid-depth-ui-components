@@ -8,23 +8,16 @@ function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
 
-// 5 Color Swatches
-const THEMES = [
-  { id: "emerald", name: "Emerald", color: "#10b981", bg: "bg-emerald-500", text: "text-emerald-400", border: "border-emerald-500/30", focusRing: "focus:border-emerald-500", glow: "rgba(16,185,129,0.2)" },
-  { id: "sapphire", name: "Sapphire Blue", color: "#3b82f6", bg: "bg-blue-500", text: "text-blue-400", border: "border-blue-500/30", focusRing: "focus:border-blue-500", glow: "rgba(59,130,246,0.2)" },
-  { id: "amethyst", name: "Amethyst", color: "#a855f7", bg: "bg-purple-500", text: "text-purple-400", border: "border-purple-500/30", focusRing: "focus:border-purple-500", glow: "rgba(168,85,247,0.2)" },
-  { id: "ruby", name: "Ruby", color: "#f43f5e", bg: "bg-rose-500", text: "text-rose-400", border: "border-rose-500/30", focusRing: "focus:border-rose-500", glow: "rgba(244,63,94,0.2)" },
-  { id: "amber", name: "Amber", color: "#f59e0b", bg: "bg-amber-500", text: "text-amber-400", border: "border-amber-500/30", focusRing: "focus:border-amber-500", glow: "rgba(245,158,11,0.2)" },
-];
+import { useGlobalTheme } from "../../themes/ThemeContext";
 
 // Custom Input with Neon Tracer
-const WizardInput = ({ label, type = "text", placeholder, name, value, onChange, theme, error }) => {
+const WizardInput = ({ label, type = "text", placeholder, name, value, onChange, theme, activeVariant }) => {
   const [isFocused, setIsFocused] = useState(false);
 
   return (
     <motion.div className="flex flex-col gap-1.5 w-full">
-      <label className="text-[10px] text-white/40 font-bold uppercase tracking-wider">{label}</label>
-      <div className="relative rounded-xl bg-white/[0.02] border border-white/5 transition-colors duration-200">
+      <label className="text-[10px] opacity-40 font-bold uppercase tracking-wider">{label}</label>
+      <div className={`relative transition-colors duration-200 ${activeVariant.inputClass}`}>
         
         {/* SVG Neon Boundary Tracer */}
         <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible rounded-xl">
@@ -50,7 +43,7 @@ const WizardInput = ({ label, type = "text", placeholder, name, value, onChange,
           placeholder={placeholder}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          className="w-full bg-transparent px-4 py-3 text-sm text-white placeholder-white/20 outline-none rounded-xl"
+          className="w-full bg-transparent px-4 py-3 text-sm text-current placeholder-current/25 outline-none rounded-xl"
         />
       </div>
     </motion.div>
@@ -58,7 +51,26 @@ const WizardInput = ({ label, type = "text", placeholder, name, value, onChange,
 };
 
 export default function OnboardingWizard() {
-  const [theme, setTheme] = useState(THEMES[1]); // Sapphire default
+  const { activeVariant } = useGlobalTheme();
+  const theme = React.useMemo(() => {
+    const hex = activeVariant.triggerColor || "#3b82f6";
+    let rgb = "59, 130, 246";
+    const match = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+    if (match) {
+      rgb = `${parseInt(match[1], 16)}, ${parseInt(match[2], 16)}, ${parseInt(match[3], 16)}`;
+    }
+    return {
+      id: activeVariant.id,
+      name: activeVariant.name,
+      color: hex,
+      bg: "bg-[var(--theme-primary)]",
+      text: "text-[var(--theme-primary)]",
+      border: "border-[var(--theme-primary)]/30",
+      focusRing: "focus:border-[var(--theme-primary)]",
+      glow: `rgba(${rgb}, 0.2)`
+    };
+  }, [activeVariant]);
+
   const [step, setStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState([]);
 
@@ -126,48 +138,26 @@ export default function OnboardingWizard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8" style={{ background: "#060810" }}>
+    <div className={`min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 transition-colors duration-500 ${activeVariant.canvasClass}`}>
       
       {/* Header Controller */}
-      <header className="w-full max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-6 rounded-2xl bg-white/[0.02] border border-white/5 mb-8">
+      <header className={`w-full max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-6 mb-8 ${activeVariant.cardClass}`}>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-white/5 border border-white/10">
-            <User className="text-white/80" size={16} />
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-current/5 border border-current/10">
+            <User className="opacity-80" size={16} />
           </div>
           <div>
-            <span className="text-xs text-white/40 block leading-none font-bold uppercase tracking-wider">Onboarding Suite</span>
-            <span className="text-sm font-black text-white">Component 10</span>
+            <span className="text-[10px] opacity-40 block leading-none font-bold uppercase tracking-wider">Onboarding Suite</span>
+            <span className="text-sm font-black">Component 10</span>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2.5">
-          {THEMES.map(t => (
-            <button
-              key={t.id}
-              onClick={() => setTheme(t)}
-              className={cn(
-                "w-6 h-6 rounded-full transition-all duration-300 relative cursor-pointer",
-                theme.id === t.id ? "scale-125" : "hover:scale-110 opacity-60 hover:opacity-100"
-              )}
-              style={{ backgroundColor: t.color, boxShadow: theme.id === t.id ? `0 0 12px ${t.color}` : "none" }}
-            >
-              {theme.id === t.id && (
-                <motion.div 
-                  layoutId="onboarding-swatch-outline" 
-                  className="absolute -inset-1 rounded-full border border-current opacity-50"
-                  style={{ color: t.color }}
-                />
-              )}
-            </button>
-          ))}
         </div>
       </header>
 
       {/* Wizard Main Card */}
-      <div className="w-full max-w-2xl bg-[#0a0d1a] border border-white/5 rounded-3xl shadow-2xl relative overflow-hidden flex flex-col min-h-[480px]">
+      <div className={`w-full max-w-2xl shadow-2xl relative overflow-hidden flex flex-col min-h-[480px] ${activeVariant.cardClass}`}>
         
         {/* Step Manager Header */}
-        <div className="flex justify-between items-center px-8 py-6 border-b border-white/5 bg-white/[0.01]">
+        <div className="flex justify-between items-center px-8 py-6 border-b border-current/10 bg-current/[0.01]">
           {[
             { num: 1, label: "Account" },
             { num: 2, label: "Profile" },
@@ -182,10 +172,10 @@ export default function OnboardingWizard() {
                 <div 
                   className={cn(
                     "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 relative",
-                    isCompleted || isActive ? cn("text-white", theme.bg) : "bg-white/5 border border-white/10 text-white/40"
+                    isCompleted || isActive ? cn("text-white", theme.bg) : "bg-current/5 border border-current/10 opacity-40"
                   )}
                   style={{
-                    boxShadow: isActive || isCompleted ? `0 0 12px ${theme.color}40` : "none"
+                    boxShadow: (isActive || isCompleted) && activeVariant.id !== "brutal" ? `0 0 12px ${theme.color}40` : "none"
                   }}
                 >
                   <AnimatePresence mode="wait">
@@ -214,13 +204,13 @@ export default function OnboardingWizard() {
 
                 <span className={cn(
                   "text-xs font-extrabold uppercase tracking-wider transition-colors duration-300",
-                  isActive ? "text-white" : isCompleted ? theme.text : "text-white/20"
+                  isActive ? "opacity-100" : isCompleted ? theme.text : "opacity-20"
                 )}>
                   {s.label}
                 </span>
 
                 {idx < 2 && (
-                  <div className="w-12 h-[2px] bg-white/5 absolute -right-16 top-1/2 -translate-y-1/2 hidden sm:block">
+                  <div className="w-12 h-[2px] bg-current/5 absolute -right-16 top-1/2 -translate-y-1/2 hidden sm:block">
                     <motion.div 
                       className={cn("h-full origin-left", theme.bg)}
                       initial={{ scaleX: 0 }}
@@ -247,26 +237,26 @@ export default function OnboardingWizard() {
                 className="flex flex-col gap-6"
               >
                 <motion.div variants={itemVariants}>
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <h3 className="text-lg font-bold flex items-center gap-2">
                     <Mail size={18} className={theme.text} />
                     Account Authentication
                   </h3>
-                  <p className="text-white/40 text-xs mt-1">Configure security credentials and primary profile handle.</p>
+                  <p className="opacity-40 text-xs mt-1">Configure security credentials and primary profile handle.</p>
                 </motion.div>
 
                 <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <WizardInput 
                     label="Username" name="username" value={form.username} 
-                    onChange={handleInputChange} theme={theme} placeholder="johndoe"
+                    onChange={handleInputChange} theme={theme} activeVariant={activeVariant} placeholder="johndoe"
                   />
                   <WizardInput 
                     label="Email Address" name="email" value={form.email} 
-                    onChange={handleInputChange} theme={theme} placeholder="john@example.com"
+                    onChange={handleInputChange} theme={theme} activeVariant={activeVariant} placeholder="john@example.com"
                   />
                   <div className="sm:col-span-2">
                     <WizardInput 
                       label="Security Password" type="password" name="password" value={form.password} 
-                      onChange={handleInputChange} theme={theme} placeholder="••••••••••••"
+                      onChange={handleInputChange} theme={theme} activeVariant={activeVariant} placeholder="••••••••••••"
                     />
                   </div>
                 </motion.div>
@@ -283,47 +273,47 @@ export default function OnboardingWizard() {
                 className="flex flex-col gap-6"
               >
                 <motion.div variants={itemVariants}>
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <h3 className="text-lg font-bold flex items-center gap-2">
                     <Briefcase size={18} className={theme.text} />
                     Personalized Workspace Profile
                   </h3>
-                  <p className="text-white/40 text-xs mt-1">Help team leads calibrate invitations matching your active department.</p>
+                  <p className="opacity-40 text-xs mt-1">Help team leads calibrate invitations matching your active department.</p>
                 </motion.div>
 
                 <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="sm:col-span-2">
                     <WizardInput 
                       label="Full Legal Name" name="fullName" value={form.fullName} 
-                      onChange={handleInputChange} theme={theme} placeholder="John Alexander Doe"
+                      onChange={handleInputChange} theme={theme} activeVariant={activeVariant} placeholder="John Alexander Doe"
                     />
                   </div>
                   
                   {/* Select Options */}
                   <div className="flex flex-col gap-1.5 w-full">
-                    <label className="text-[10px] text-white/40 font-bold uppercase tracking-wider">Role Specialty</label>
+                    <label className="text-[10px] opacity-40 font-bold uppercase tracking-wider">Role Specialty</label>
                     <select
                       name="role"
                       value={form.role}
                       onChange={handleInputChange}
                       className={cn(
-                        "w-full bg-[#0e1122] border border-white/10 px-4 py-3 text-sm text-white rounded-xl outline-none transition-colors",
+                        "w-full px-4 py-3 text-sm rounded-xl outline-none transition-colors border border-current/10 bg-transparent text-current",
                         theme.focusRing
                       )}
                     >
-                      <option value="developer">Frontend Engineer</option>
-                      <option value="designer">UI/UX Designer</option>
-                      <option value="manager">Product Manager</option>
+                      <option className="bg-slate-900 text-white" value="developer">Frontend Engineer</option>
+                      <option className="bg-slate-900 text-white" value="designer">UI/UX Designer</option>
+                      <option className="bg-slate-900 text-white" value="manager">Product Manager</option>
                     </select>
                   </div>
 
                   <div className="flex flex-col gap-1.5 w-full">
-                    <label className="text-[10px] text-white/40 font-bold uppercase tracking-wider">Avatar Identity</label>
+                    <label className="text-[10px] opacity-40 font-bold uppercase tracking-wider">Avatar Identity</label>
                     <div className="grid grid-cols-4 gap-2">
                       {[1, 2, 3, 4].map(idx => (
                         <button
                           key={idx}
                           type="button"
-                          className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white cursor-pointer hover:border-white/20 transition-colors"
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer transition-colors ${activeVariant.buttonClass} text-current hover:text-current`}
                         >
                           {idx === 1 ? <Star size={14} className={theme.text} /> : idx}
                         </button>
@@ -344,32 +334,32 @@ export default function OnboardingWizard() {
                 className="flex flex-col gap-6"
               >
                 <motion.div variants={itemVariants}>
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <h3 className="text-lg font-bold flex items-center gap-2">
                     <Users size={18} className={theme.text} />
                     Assemble Shared Workspace
                   </h3>
-                  <p className="text-white/40 text-xs mt-1">Initiate invitations to colleagues allowing real-time collaborative syncs.</p>
+                  <p className="opacity-40 text-xs mt-1">Initiate invitations to colleagues allowing real-time collaborative syncs.</p>
                 </motion.div>
 
                 <motion.div variants={itemVariants} className="grid grid-cols-1 gap-4">
                   <WizardInput 
                     label="Workspace Team Name" name="teamName" value={form.teamName} 
-                    onChange={handleInputChange} theme={theme} placeholder="Acme Engineering Lab"
+                    onChange={handleInputChange} theme={theme} activeVariant={activeVariant} placeholder="Acme Engineering Lab"
                   />
                   
                   <div className="flex flex-col gap-3">
-                    <label className="text-[10px] text-white/40 font-bold uppercase tracking-wider">Team Member invites (Emails)</label>
+                    <label className="text-[10px] opacity-40 font-bold uppercase tracking-wider">Team Member invites (Emails)</label>
                     {form.invites.map((invite, index) => (
                       <WizardInput 
                         key={index}
                         label={`Colleague #${index + 1}`} name={`invite-${index}`} value={invite} 
-                        onChange={(e) => handleInviteChange(index, e.target.value)} theme={theme} placeholder="colleague@domain.com"
+                        onChange={(e) => handleInviteChange(index, e.target.value)} theme={theme} activeVariant={activeVariant} placeholder="colleague@domain.com"
                       />
                     ))}
                     <button 
                       type="button"
                       onClick={addInviteField}
-                      className="text-left text-xs font-bold text-white/40 hover:text-white transition-colors cursor-pointer mt-1 self-start"
+                      className="text-left text-xs font-bold opacity-40 hover:opacity-100 transition-colors cursor-pointer mt-1 self-start"
                     >
                       + Add another team member invite
                     </button>
@@ -386,15 +376,15 @@ export default function OnboardingWizard() {
                 exit={{ opacity: 0, scale: 0.95 }}
                 className="flex flex-col items-center text-center justify-center py-8 gap-6"
               >
-                <div className={cn("w-16 h-16 rounded-full flex items-center justify-center bg-white/5 relative", theme.text)}>
+                <div className={cn("w-16 h-16 rounded-full flex items-center justify-center bg-current/5 relative", theme.text)}>
                   <Check size={32} strokeWidth={3.5} />
                   <div className="absolute inset-0 rounded-full border border-current opacity-20 animate-ping" />
                 </div>
 
                 <div>
-                  <h3 className="text-2xl font-black text-white">Setup Fully Initialized!</h3>
-                  <p className="text-white/40 text-xs mt-2 max-w-sm mx-auto">
-                    Account configured and invitations sent for <span className="text-white font-bold">{form.teamName || "your workspace"}</span>.
+                  <h3 className="text-2xl font-black">Setup Fully Initialized!</h3>
+                  <p className="opacity-40 text-xs mt-2 max-w-sm mx-auto">
+                    Account configured and invitations sent for <span className="font-bold opacity-80">{form.teamName || "your workspace"}</span>.
                   </p>
                 </div>
 
@@ -405,7 +395,7 @@ export default function OnboardingWizard() {
                     setCompletedSteps([]);
                     setForm({ username: "", email: "", password: "", fullName: "", role: "developer", teamName: "", invites: ["", ""] });
                   }}
-                  className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white flex items-center gap-2 cursor-pointer transition-colors"
+                  className={`px-6 py-3 rounded-xl flex items-center gap-2 cursor-pointer transition-colors ${activeVariant.buttonClass} text-current hover:text-current`}
                 >
                   <RefreshCw size={14} />
                   Restart Wizard
@@ -416,12 +406,12 @@ export default function OnboardingWizard() {
 
           {/* Navigation Controls */}
           {step <= 3 && (
-            <div className="flex gap-4 border-t border-white/5 pt-6 mt-8">
+            <div className="flex gap-4 border-t border-current/10 pt-6 mt-8">
               {step > 1 && (
                 <button
                   type="button"
                   onClick={prevStep}
-                  className="flex-1 py-3.5 rounded-xl font-bold bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 transition-all cursor-pointer"
+                  className={`flex-1 py-3.5 rounded-xl font-bold cursor-pointer transition-all ${activeVariant.buttonClass} text-current hover:text-current`}
                 >
                   Back
                 </button>
@@ -430,7 +420,7 @@ export default function OnboardingWizard() {
                 type="button"
                 onClick={nextStep}
                 className={cn("flex-1 py-3.5 rounded-xl font-bold text-white transition-all cursor-pointer shadow-lg", theme.bg)}
-                style={{ boxShadow: `0 6px 15px ${theme.color}30` }}
+                style={{ boxShadow: activeVariant.id === "brutal" ? "none" : `0 6px 15px ${theme.color}30` }}
               >
                 {step === 3 ? "Complete Registration" : "Next Step"}
               </button>

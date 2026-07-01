@@ -10,7 +10,7 @@ const TABS = [
 ];
 
 export default function AccountSettingsHub() {
-  const { activeVariant, setActiveVariant, variants } = useGlobalTheme();
+  const { activeVariant } = useGlobalTheme();
   const [activeTab, setActiveTab] = useState("profile");
   
   // Settings Form States
@@ -52,19 +52,6 @@ export default function AccountSettingsHub() {
               <h1 className="text-xs font-black tracking-widest font-primary uppercase">Account Hub</h1>
               <span className="text-[9px] opacity-40 uppercase tracking-widest font-mono-theme">Control Center</span>
             </div>
-            {/* Color Swatches */}
-            <div className="flex gap-1">
-              {variants.map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => setActiveVariant(t)}
-                  className="w-2.5 h-2.5 rounded-full cursor-pointer relative"
-                  style={{ backgroundColor: t.triggerColor }}
-                  title={t.name}
-                  aria-label={`Switch to ${t.name}`}
-                />
-              ))}
-            </div>
           </div>
 
           {/* Navigation */}
@@ -76,9 +63,12 @@ export default function AccountSettingsHub() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`w-full py-3 px-4 rounded-xl flex items-center gap-3 text-xs font-black tracking-wider uppercase cursor-pointer transition-all duration-300 relative text-left ${
+                  className={`w-full py-3 px-4 flex items-center gap-3 text-xs font-black tracking-wider uppercase cursor-pointer transition-all duration-300 relative text-left ${
                     isActive ? "text-white" : "opacity-50 hover:opacity-85 text-current"
                   }`}
+                  style={{
+                    borderRadius: "var(--theme-border-radius-action)"
+                  }}
                   aria-current={isActive ? "page" : undefined}
                 >
                   {isActive && (
@@ -102,7 +92,7 @@ export default function AccountSettingsHub() {
         </aside>
 
         {/* Main Content Area Panel */}
-        <main className={`flex-1 p-6 md:p-8 rounded-2xl min-h-[460px] flex flex-col justify-between transition-all duration-300 ${activeVariant.cardClass}`}>
+        <main className={`flex-1 p-6 md:p-8 min-h-[460px] flex flex-col justify-between transition-all duration-300 ${activeVariant.cardClass}`}>
           
           <div className="flex-1">
             <AnimatePresence mode="wait">
@@ -225,7 +215,7 @@ export default function AccountSettingsHub() {
                             </div>
 
                             <div className="flex-1 flex flex-col gap-2.5 w-full">
-                              <span className="text-[8px] opacity-45 uppercase tracking-widest font-mono-theme block">Setup Guide Step 1/2</span>
+                              <span className="text-[8px] opacity-45 uppercase tracking-widest font-mono-theme block block">Setup Guide Step 1/2</span>
                               <p className="text-[10px] opacity-50 leading-relaxed font-secondary">
                                 Scan the QR code with your authenticator node and input the sequencing key below.
                               </p>

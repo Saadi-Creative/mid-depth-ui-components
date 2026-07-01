@@ -4,7 +4,7 @@ import { Home, Search, RefreshCw, AlertTriangle, ArrowRight } from "lucide-react
 import { useGlobalTheme } from "../../themes/ThemeContext";
 
 export default function EmptyStateRecovery() {
-  const { activeVariant, setActiveVariant, variants } = useGlobalTheme();
+  const { activeVariant } = useGlobalTheme();
   const [searchQuery, setSearchQuery] = useState("");
 
   // Magnetic Button setup reacting to dynamic spring configs
@@ -49,23 +49,11 @@ export default function EmptyStateRecovery() {
       {/* Main card */}
       <div className={`max-w-md w-full p-8 relative overflow-hidden flex flex-col items-center text-center transition-all duration-500 ${activeVariant.cardClass}`}>
         
-        {/* Swatch controller overlay */}
+        {/* Aesthetic label */}
         <div className="w-full flex justify-between items-center pb-5 border-b border-current/10 mb-8 font-mono-theme text-[9px] uppercase tracking-widest opacity-80">
           <div className="flex items-center gap-1.5 font-bold">
             <AlertTriangle size={12} />
             <span>AESTHETIC: {activeVariant.name}</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 bg-black/40 px-2 py-1 rounded-lg border border-white/5">
-            {variants.map((theme) => (
-              <button
-                key={theme.id}
-                onClick={() => setActiveVariant(theme)}
-                className="w-2.5 h-2.5 rounded-full cursor-pointer relative"
-                style={{ backgroundColor: theme.triggerColor }}
-                title={theme.name}
-              />
-            ))}
           </div>
         </div>
 

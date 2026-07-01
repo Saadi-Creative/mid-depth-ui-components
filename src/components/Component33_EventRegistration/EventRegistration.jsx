@@ -19,7 +19,7 @@ const SPEAKERS = [
 ];
 
 export default function EventRegistration() {
-  const { activeVariant, setActiveVariant, variants } = useGlobalTheme();
+  const { activeVariant } = useGlobalTheme();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [status, setStatus] = useState("idle"); // idle, submitting, success
@@ -74,19 +74,6 @@ export default function EventRegistration() {
           <div className="flex items-center gap-2 text-xs font-mono-theme font-bold font-primary">
             <Sparkles size={14} style={{ color: activeVariant.triggerColor }} />
             <span>BROADCAST_RESERVE</span>
-          </div>
-
-          {/* Color Switcher */}
-          <div className="flex gap-1.5 bg-black/40 px-2 py-1.5 rounded-xl border border-white/5">
-            {variants.map((theme) => (
-              <button
-                key={theme.id}
-                onClick={() => setActiveVariant(theme)}
-                className="w-2.5 h-2.5 rounded-full cursor-pointer relative"
-                style={{ backgroundColor: theme.triggerColor }}
-                title={theme.name}
-              />
-            ))}
           </div>
         </div>
 

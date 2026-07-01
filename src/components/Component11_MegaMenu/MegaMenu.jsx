@@ -12,14 +12,7 @@ function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
 
-// 5 Themes: Cyan, Purple, Orange, Magenta, Lime
-const THEMES = [
-  { id: "cyan", name: "Cyan", color: "#06b6d4", bg: "bg-cyan-500", text: "text-cyan-400", border: "border-cyan-500/20", hoverBg: "hover:bg-cyan-500/10", rawHoverBg: "rgba(6,182,212,0.06)" },
-  { id: "purple", name: "Purple", color: "#a855f7", bg: "bg-purple-500", text: "text-purple-400", border: "border-purple-500/20", hoverBg: "hover:bg-purple-500/10", rawHoverBg: "rgba(168,85,247,0.06)" },
-  { id: "orange", name: "Orange", color: "#f97316", bg: "bg-orange-500", text: "text-orange-400", border: "border-orange-500/20", hoverBg: "hover:bg-orange-500/10", rawHoverBg: "rgba(249,115,22,0.06)" },
-  { id: "magenta", name: "Magenta", color: "#d946ef", bg: "bg-fuchsia-500", text: "text-fuchsia-400", border: "border-fuchsia-500/20", hoverBg: "hover:bg-fuchsia-500/10", rawHoverBg: "rgba(217,70,239,0.06)" },
-  { id: "lime", name: "Lime", color: "#84cc16", bg: "bg-lime-500", text: "text-lime-400", border: "border-lime-500/20", hoverBg: "hover:bg-lime-500/10", rawHoverBg: "rgba(132,204,22,0.06)" },
-];
+import { useGlobalTheme } from "../../themes/ThemeContext";
 
 const SubMenuItem = ({ title, desc, icon, theme }) => {
   const [hovered, setHovered] = useState(false);
@@ -39,12 +32,12 @@ const SubMenuItem = ({ title, desc, icon, theme }) => {
           transition={{ type: "spring", stiffness: 380, damping: 28 }}
         />
       )}
-      <div className={cn("p-2 rounded-lg bg-white/5 text-white/70 transition-colors", hovered ? theme.text : "")}>
+      <div className={cn("p-2 rounded-lg bg-current/5 text-current/70 transition-colors", hovered ? theme.text : "")}>
         {icon}
       </div>
       <div>
-        <span className={cn("text-xs font-bold block text-white transition-colors", hovered ? theme.text : "")}>{title}</span>
-        <span className="text-[10px] text-white/40 block mt-0.5">{desc}</span>
+        <span className={cn("text-xs font-bold block transition-colors", hovered ? theme.text : "")}>{title}</span>
+        <span className="text-[10px] opacity-40 block mt-0.5">{desc}</span>
       </div>
     </div>
   );
@@ -76,8 +69,25 @@ const CompanyDropdown = ({ theme }) => (
 );
 
 export default function MegaMenu() {
-  const [theme, setTheme] = useState(THEMES[0]); // Cyan default
-  const [showSwatches, setShowSwatches] = useState(false);
+  const { activeVariant } = useGlobalTheme();
+  const theme = React.useMemo(() => {
+    const hex = activeVariant.triggerColor || "#06b6d4";
+    let rgb = "6, 182, 212";
+    const match = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+    if (match) {
+      rgb = `${parseInt(match[1], 16)}, ${parseInt(match[2], 16)}, ${parseInt(match[3], 16)}`;
+    }
+    return {
+      id: activeVariant.id,
+      name: activeVariant.name,
+      color: hex,
+      bg: "bg-[var(--theme-primary)]",
+      text: "text-[var(--theme-primary)]",
+      border: "border-[var(--theme-primary)]/20",
+      hoverBg: "hover:bg-[var(--theme-primary)]/10",
+      rawHoverBg: `rgba(${rgb}, 0.06)`
+    };
+  }, [activeVariant]);
   const [hoveredTab, setHoveredTab] = useState(null);
   const [tabCoords, setTabCoords] = useState({ left: 0, width: 0 });
   const navContainerRef = useRef(null);
@@ -106,23 +116,23 @@ export default function MegaMenu() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-start pt-16 p-4 md:p-8" style={{ background: "#060810" }}>
+    <div className={`min-h-screen flex flex-col justify-start pt-16 p-4 md:p-8 transition-colors duration-500 ${activeVariant.canvasClass}`}>
       
       {/* Mega-Menu Navigation Container */}
       <div 
         ref={navContainerRef}
         onMouseLeave={handleMouseLeave}
-        className="w-full max-w-5xl mx-auto bg-[#0a0d1a] border border-white/5 rounded-2xl p-4 flex items-center justify-between relative"
+        className={`w-full max-w-5xl mx-auto p-4 flex items-center justify-between relative ${activeVariant.cardClass}`}
       >
         
         {/* Logo */}
         <div className="flex items-center gap-2 relative z-50">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-white/5 border border-white/10">
-            <Menu className="text-white/80" size={16} />
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-current/5 border border-current/10">
+            <Menu className="opacity-80" size={16} />
           </div>
           <div>
-            <span className="text-xs text-white/40 block leading-none font-bold uppercase tracking-wider">Mega-Menu</span>
-            <span className="text-sm font-black text-white">Component 11</span>
+            <span className="text-[10px] opacity-40 block leading-none font-bold uppercase tracking-wider">Mega-Menu</span>
+            <span className="text-sm font-black">Component 11</span>
           </div>
         </div>
 
@@ -134,7 +144,7 @@ export default function MegaMenu() {
               <button
                 key={tab.id}
                 onMouseEnter={(e) => handleTabHover(e, tab.id)}
-                className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-white/60 hover:text-white cursor-pointer transition-colors relative"
+                className="px-4 py-2 text-xs font-bold uppercase tracking-wider opacity-60 hover:opacity-100 cursor-pointer transition-colors relative"
               >
                 {tab.label}
                 {isActive && (
@@ -151,50 +161,9 @@ export default function MegaMenu() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-4 relative z-50">
-          
-          {/* Swatches Trigger Icon */}
-          <div className="relative">
-            <button
-              onClick={() => setShowSwatches(prev => !prev)}
-              className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:border-white/20 cursor-pointer transition-colors"
-            >
-              <Settings size={15} />
-            </button>
-
-            <AnimatePresence>
-              {showSwatches && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className="absolute right-0 top-10 p-3 rounded-xl bg-[#0e1122] border border-white/10 shadow-2xl flex items-center gap-2 z-50"
-                >
-                  {THEMES.map(t => (
-                    <button
-                      key={t.id}
-                      onClick={() => { setTheme(t); setShowSwatches(false); }}
-                      className={cn(
-                        "w-5 h-5 rounded-full cursor-pointer relative transition-transform hover:scale-110",
-                      )}
-                      style={{ backgroundColor: t.color }}
-                    >
-                      {theme.id === t.id && (
-                        <motion.div
-                          layoutId="menu-theme-outline"
-                          className="absolute -inset-1 rounded-full border border-current opacity-60"
-                          style={{ color: t.color }}
-                        />
-                      )}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
           <button 
-            className={cn("px-4 py-2 rounded-xl text-xs font-bold text-white transition-all shadow-md cursor-pointer", theme.bg)}
-            style={{ boxShadow: `0 4px 12px ${theme.color}30` }}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer text-white ${theme.bg}`}
+            style={{ boxShadow: activeVariant.id === "brutal" ? "none" : `0 4px 12px ${theme.color}30` }}
           >
             Access Console
           </button>
@@ -209,10 +178,10 @@ export default function MegaMenu() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.98, y: 5 }}
               transition={{ type: "spring", stiffness: 350, damping: 28 }}
-              className="absolute top-[72px] bg-[#0c0e1e] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-40 p-5 origin-top"
+              className={`absolute top-[72px] border border-current/10 shadow-2xl overflow-hidden z-40 p-5 origin-top ${activeVariant.cardClass}`}
               style={{ 
                 left: tabCoords.left - 40,
-                boxShadow: `0 20px 40px rgba(0,0,0,0.5), 0 0 1px ${theme.color}20` 
+                boxShadow: activeVariant.id === "brutal" ? "none" : `0 20px 40px rgba(0,0,0,0.15), 0 0 1px ${theme.color}20` 
               }}
             >
               <motion.div layout="position" className="w-full h-full">
@@ -224,7 +193,7 @@ export default function MegaMenu() {
 
       </div>
 
-      <div className="w-full max-w-5xl mx-auto mt-16 text-center text-white/30 text-xs px-8 leading-relaxed">
+      <div className="w-full max-w-5xl mx-auto mt-16 text-center opacity-30 text-xs px-8 leading-relaxed">
         Hover over the "Products", "Resources", or "Company" header items in the navigation bar to watch the dropdown panel dynamically morph its dimensions using layout transitions. You can toggle colors in the settings cog.
       </div>
 

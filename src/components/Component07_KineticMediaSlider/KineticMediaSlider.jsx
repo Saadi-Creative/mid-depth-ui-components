@@ -8,14 +8,7 @@ function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
 
-// Themes: Cyan, Purple, Orange, Magenta, Lime
-const THEMES = [
-  { id: "cyan", color: "#06b6d4", name: "Cyan", bg: "bg-cyan-500", text: "text-cyan-500", border: "border-cyan-500" },
-  { id: "purple", color: "#a855f7", name: "Purple", bg: "bg-purple-500", text: "text-purple-500", border: "border-purple-500" },
-  { id: "orange", color: "#f97316", name: "Orange", bg: "bg-orange-500", text: "text-orange-500", border: "border-orange-500" },
-  { id: "magenta", color: "#d946ef", name: "Magenta", bg: "bg-fuchsia-500", text: "text-fuchsia-500", border: "border-fuchsia-500" },
-  { id: "lime", color: "#84cc16", name: "Lime", bg: "bg-lime-500", text: "text-lime-500", border: "border-lime-500" },
-];
+import { useGlobalTheme } from "../../themes/ThemeContext";
 
 const SLIDES = [
   {
@@ -133,7 +126,19 @@ const MagneticButton = ({ children, onClick, theme, direction }) => {
 };
 
 export default function KineticMediaSlider() {
-  const [activeTheme, setActiveTheme] = useState(THEMES[0]); // Cyan
+  const { activeVariant } = useGlobalTheme();
+  const activeTheme = React.useMemo(() => {
+    const hex = activeVariant.triggerColor || "#06b6d4";
+    return {
+      id: activeVariant.id,
+      name: activeVariant.name,
+      color: hex,
+      bg: "bg-[var(--theme-primary)]",
+      text: "text-[var(--theme-primary)]",
+      border: "border-[var(--theme-primary)]",
+    };
+  }, [activeVariant]);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(1); // 1 = right, -1 = left
 
@@ -171,20 +176,20 @@ export default function KineticMediaSlider() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 sm:p-8" style={{ background: "#060810" }}>
+    <div className={`min-h-screen flex items-center justify-center p-4 sm:p-8 transition-colors duration-500 ${activeVariant.canvasClass}`}>
       <div className="w-full max-w-6xl relative h-[600px] flex items-center justify-center">
         
         {/* Background inactive slides (2.5D effect) */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40 blur-[2px] scale-[0.85] -translate-y-8">
-          <div className="w-3/4 h-[400px] rounded-3xl bg-white/5 border border-white/10" />
+          <div className="w-3/4 h-[400px] rounded-3xl bg-current/5 border border-current/10" />
         </div>
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-60 blur-[1px] scale-[0.92] -translate-y-4">
-          <div className="w-5/6 h-[450px] rounded-3xl bg-white/5 border border-white/10" />
+          <div className="w-5/6 h-[450px] rounded-3xl bg-current/5 border border-current/10" />
         </div>
 
         {/* Main Active Slide Container */}
-        <div className={cn("relative w-full h-full max-h-[500px] rounded-3xl overflow-hidden border bg-[#0a0d1a] shadow-2xl transition-colors duration-500", activeTheme.border)}
-          style={{ boxShadow: `0 20px 50px rgba(0,0,0,0.5), 0 0 20px ${activeTheme.color}20` }}
+        <div className={cn("relative w-full h-full max-h-[500px] rounded-3xl overflow-hidden border bg-black shadow-2xl transition-colors duration-500", activeTheme.border)}
+          style={{ boxShadow: activeVariant.id === "brutal" ? "none" : `0 20px 50px rgba(0,0,0,0.5), 0 0 20px ${activeTheme.color}20` }}
         >
           
           <AnimatePresence initial={false} custom={direction}>
@@ -207,31 +212,8 @@ export default function KineticMediaSlider() {
           {/* Foreground Content */}
           <div className="absolute inset-0 z-20 flex flex-col justify-between p-8 sm:p-12">
             
-            {/* Top Bar: Theme Switcher */}
-            <div className="flex justify-end items-center gap-3">
-              {THEMES.map(theme => (
-                <button
-                  key={theme.id}
-                  onClick={() => setActiveTheme(theme)}
-                  className={cn(
-                    "w-4 h-4 rounded-full cursor-pointer transition-all duration-300 relative",
-                    activeTheme.id === theme.id ? "scale-125" : "hover:scale-110 opacity-50"
-                  )}
-                  style={{ backgroundColor: theme.color }}
-                >
-                  {activeTheme.id === theme.id && (
-                    <motion.div 
-                      layoutId="slider-theme-ring"
-                      className="absolute -inset-1 rounded-full border border-current opacity-60"
-                      style={{ color: theme.color }}
-                    />
-                  )}
-                </button>
-              ))}
-            </div>
-
             {/* Bottom Bar: Content & Controls */}
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-8">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-8 mt-auto">
               <div className="max-w-xl">
                 <motion.div 
                   key={`badge-${currentIndex}`}

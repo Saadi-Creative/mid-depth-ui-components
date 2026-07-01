@@ -10,7 +10,7 @@ const DEPARTMENTS = [
 ];
 
 export default function SupportTicketing() {
-  const { activeVariant, setActiveVariant, variants } = useGlobalTheme();
+  const { activeVariant } = useGlobalTheme();
   const [selectedDept, setSelectedDept] = useState("tech");
   
   // Form states
@@ -66,26 +66,13 @@ export default function SupportTicketing() {
       {/* Main card */}
       <div className={`max-w-xl mx-auto p-6 md:p-8 relative overflow-hidden transition-all duration-300 ${activeVariant.cardClass}`}>
         
-        {/* Floating Theme Switcher Inside Header */}
+        {/* Header Title only */}
         <div className="flex justify-between items-center pb-6 border-b border-current/10 mb-6">
           <div>
             <h1 className="text-base font-black tracking-wider uppercase font-primary">
               Support Dispatch
             </h1>
             <p className="text-[9px] opacity-40 mt-1 uppercase tracking-widest font-mono-theme">Create an active ticketing stream</p>
-          </div>
-
-          {/* Mini swatches */}
-          <div className="flex items-center gap-1.5 bg-black/40 px-2.5 py-1.5 rounded-xl border border-white/5">
-            {variants.map((variant) => (
-              <button
-                key={variant.id}
-                onClick={() => setActiveVariant(variant)}
-                className="w-2.5 h-2.5 rounded-full cursor-pointer relative"
-                style={{ backgroundColor: variant.triggerColor }}
-                title={variant.name}
-              />
-            ))}
           </div>
         </div>
 
@@ -306,7 +293,7 @@ export default function SupportTicketing() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0 }}
-                  className="w-full h-11 bg-white/5 border border-white/5 rounded-xl overflow-hidden relative flex items-center px-4"
+                  className="w-full h-11 bg-white/5 border border-white/5 overflow-hidden relative flex items-center px-4"
                   style={{
                     borderRadius: "var(--theme-border-radius-action)"
                   }}

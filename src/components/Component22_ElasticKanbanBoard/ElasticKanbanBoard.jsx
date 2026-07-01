@@ -1,71 +1,12 @@
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Plus, Trash2, CheckCircle2, MessageSquare, 
-  Paperclip, Calendar, ArrowRight, ClipboardList,
-  Sparkles, Check, AlertCircle, Clock
+  Plus, Trash2, MessageSquare, 
+  Paperclip, ClipboardList, Check
 } from "lucide-react";
+import { useGlobalTheme } from "../../themes/ThemeContext";
 
-// Themes definition
-const THEMES = [
-  {
-    id: "indigo",
-    name: "Orbit Indigo",
-    color: "#6366f1",
-    rgb: "99, 102, 241",
-    border: "border-indigo-500/20",
-    glow: "shadow-indigo-500/10",
-    bg: "bg-indigo-500",
-    text: "text-indigo-400",
-    accentBg: "bg-indigo-500/10"
-  },
-  {
-    id: "cyan",
-    name: "Neon Teal",
-    color: "#00e5ff",
-    rgb: "0, 229, 255",
-    border: "border-cyan-500/20",
-    glow: "shadow-cyan-500/10",
-    bg: "bg-cyan-500",
-    text: "text-cyan-400",
-    accentBg: "bg-cyan-500/10"
-  },
-  {
-    id: "rose",
-    name: "Cyber Rose",
-    color: "#ff007f",
-    rgb: "255, 0, 127",
-    border: "border-rose-500/20",
-    glow: "shadow-rose-500/10",
-    bg: "bg-rose-500",
-    text: "text-rose-400",
-    accentBg: "bg-rose-500/10"
-  },
-  {
-    id: "toxic",
-    name: "Toxic Lime",
-    color: "#39ff14",
-    rgb: "57, 255, 20",
-    border: "border-lime-500/20",
-    glow: "shadow-lime-500/10",
-    bg: "bg-lime-500",
-    text: "text-lime-400",
-    accentBg: "bg-lime-500/10"
-  },
-  {
-    id: "amber",
-    name: "Amber Glow",
-    color: "#ffb800",
-    rgb: "255, 184, 0",
-    border: "border-amber-500/20",
-    glow: "shadow-amber-500/10",
-    bg: "bg-amber-500",
-    text: "text-amber-400",
-    accentBg: "bg-amber-500/10"
-  }
-];
-
-// Initial Columns & Tasks
+// Initial Tasks
 const INITIAL_TASKS = [
   { id: "task-1", title: "Refactor dynamic 2.5D shadow system", desc: "Optimize CSS filter draw times for complex overlapping card elements.", column: "backlog", priority: "high", category: "engineering", comments: 4, attachments: 2, completed: false },
   { id: "task-2", title: "Create watch face configurator", desc: "Design SVG dial layouts for watch customization component.", column: "backlog", priority: "medium", category: "design", comments: 2, attachments: 5, completed: false },
@@ -83,7 +24,7 @@ const COLUMNS = [
 ];
 
 export default function ElasticKanbanBoard() {
-  const [activeTheme, setActiveTheme] = useState(THEMES[0]);
+  const { activeVariant } = useGlobalTheme();
   const [tasks, setTasks] = useState(INITIAL_TASKS);
   const [draggedId, setDraggedId] = useState(null);
   const [activeOverColumn, setActiveOverColumn] = useState(null);
@@ -93,11 +34,31 @@ export default function ElasticKanbanBoard() {
   const [newPriority, setNewPriority] = useState("medium");
   const [newCategory, setNewCategory] = useState("engineering");
 
+  // Helper to convert hex to rgb string for inline rgba values
+  const hexToRgb = (hex) => {
+    if (!hex) return "0, 229, 255";
+    const cleanHex = hex.replace("#", "");
+    const r = parseInt(cleanHex.substring(0, 2), 16);
+    const g = parseInt(cleanHex.substring(2, 4), 16);
+    const b = parseInt(cleanHex.substring(4, 6), 16);
+    return isNaN(r) || isNaN(g) || isNaN(b) ? "0, 229, 255" : `${r}, ${g}, ${b}`;
+  };
+
+  const rgbStr = hexToRgb(activeVariant.triggerColor);
+  const activeTheme = {
+    color: activeVariant.triggerColor,
+    rgb: rgbStr,
+    border: `border-current/20`,
+    glow: `shadow-[0_0_15px_rgba(${rgbStr},0.1)]`,
+    bg: "",
+    text: activeVariant.textClass,
+    accentBg: `rgba(${rgbStr}, 0.1)`
+  };
+
   // Drag & drop handlers
   const handleDragStart = (e, id) => {
     setDraggedId(id);
     e.dataTransfer.setData("text/plain", id);
-    // Style ghost drag image if needed, or let browser handle default
   };
 
   const handleDragEnd = () => {
@@ -169,46 +130,23 @@ export default function ElasticKanbanBoard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-start p-4 md:p-8 select-none bg-[#060810]"
-      style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className={`min-h-screen flex flex-col justify-start p-4 md:p-8 select-none transition-colors duration-500 ${activeVariant.canvasClass}`}>
       
       <div className="w-full max-w-6xl mx-auto flex flex-col gap-6">
         
         {/* Header Board Panel */}
-        <div className="bg-[#0a0d1a] border border-white/5 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
+        <div className={`p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${activeVariant.cardClass}`}>
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-mono tracking-widest text-white/40 uppercase block">
+            <span className="text-[10px] font-mono tracking-widest opacity-40 uppercase block">
               COOPERATIVE WORKSPACE
             </span>
-            <h1 className="text-xl md:text-2xl font-black text-white tracking-tight"
+            <h1 className="text-xl md:text-2xl font-black tracking-tight"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               Elastic 2.5D Kanban Board
             </h1>
-            <p className="text-xs text-white/45 max-w-xl">
+            <p className="text-xs opacity-45 max-w-xl">
               A fluid task management board. Cards feature Z-axis lifting on hover, dynamic cursor-tilt rotations, and smooth layout swaps.
             </p>
-          </div>
-
-          {/* Color Switcher */}
-          <div className="flex items-center gap-1.5 bg-black/35 px-3 py-2 rounded-xl border border-white/5">
-            {THEMES.map(theme => (
-              <button
-                key={theme.id}
-                onClick={() => setActiveTheme(theme)}
-                className="w-4 h-4 rounded-full cursor-pointer relative flex items-center justify-center transition-transform active:scale-90"
-                style={{ backgroundColor: theme.color }}
-                aria-label={`Theme ${theme.name}`}
-              >
-                {activeTheme.id === theme.id && (
-                  <motion.div
-                    layoutId="active-kanban-theme-ring"
-                    className="absolute -inset-1 rounded-full border border-current opacity-80"
-                    style={{ color: theme.color }}
-                    transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                  />
-                )}
-              </button>
-            ))}
           </div>
         </div>
 
@@ -224,11 +162,7 @@ export default function ElasticKanbanBoard() {
                 onDragOver={(e) => handleDragOver(e, column.id)}
                 onDragLeave={() => setActiveOverColumn(null)}
                 onDrop={(e) => handleDrop(e, column.id)}
-                className={`bg-[#0a0d1a] border rounded-2xl p-4 min-h-[500px] flex flex-col transition-all relative overflow-visible ${
-                  isOver 
-                    ? `border-white/10 shadow-[0_8px_30px_rgba(var(--theme-rgb),0.04)]` 
-                    : "border-white/5"
-                }`}
+                className={`p-4 min-h-[500px] flex flex-col transition-all relative overflow-visible ${activeVariant.cardClass}`}
                 style={{
                   "--theme-rgb": activeTheme.rgb,
                 }}
@@ -243,15 +177,15 @@ export default function ElasticKanbanBoard() {
                 )}
 
                 {/* Column Header */}
-                <div className="flex justify-between items-center mb-4 pb-2 border-b border-white/5">
+                <div className="flex justify-between items-center mb-4 pb-2 border-b border-current/5">
                   <div className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: column.id === "done" ? "#39ff14" : activeTheme.color }} />
-                    <h3 className="text-xs font-extrabold text-white uppercase tracking-wider font-mono">
+                    <h3 className="text-xs font-extrabold uppercase tracking-wider font-mono">
                       {column.name}
                     </h3>
                   </div>
                   
-                  <span className="text-[10px] font-mono font-bold bg-white/5 border border-white/5 text-white/40 px-2 py-0.5 rounded-md">
+                  <span className="text-[10px] font-mono font-bold bg-current/5 border border-current/5 opacity-40 px-2 py-0.5 rounded-md">
                     {columnTasks.length}
                   </span>
                 </div>
@@ -264,6 +198,7 @@ export default function ElasticKanbanBoard() {
                         key={task.id}
                         task={task}
                         activeTheme={activeTheme}
+                        activeVariant={activeVariant}
                         isDraggingNow={draggedId === task.id}
                         onDragStart={(e) => handleDragStart(e, task.id)}
                         onDragEnd={handleDragEnd}
@@ -275,51 +210,51 @@ export default function ElasticKanbanBoard() {
 
                   {/* Empty state visual */}
                   {columnTasks.length === 0 && !showAddForm && (
-                    <div className="flex-1 border border-dashed border-white/5 rounded-xl flex flex-col items-center justify-center p-6 text-center opacity-30">
-                      <ClipboardList size={22} className="text-white mb-2" />
+                    <div className="flex-1 border border-dashed border-current/5 rounded-xl flex flex-col items-center justify-center p-6 text-center opacity-30">
+                      <ClipboardList size={22} className="mb-2" />
                       <span className="text-[9px] uppercase tracking-wider font-mono">Column Empty</span>
                     </div>
                   )}
                 </div>
 
                 {/* Add task widget */}
-                <div className="mt-4 pt-2 border-t border-white/5">
+                <div className="mt-4 pt-2 border-t border-current/5">
                   {showAddForm === column.id ? (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="bg-black/40 border border-white/5 p-3 rounded-xl flex flex-col gap-2.5"
+                      className={`p-3 flex flex-col gap-2.5 ${activeVariant.cardClass}`}
                     >
                       <input
                         type="text"
                         placeholder="Task Title..."
                         value={newTitle}
                         onChange={(e) => setNewTitle(e.target.value)}
-                        className="bg-white/5 border border-white/5 px-2.5 py-1.5 rounded-lg text-xs text-white placeholder-white/20 focus:outline-none font-mono"
+                        className={`px-2.5 py-1.5 focus:outline-none text-xs placeholder-current/20 ${activeVariant.inputClass}`}
                       />
                       <textarea
                         placeholder="Task Description..."
                         value={newDesc}
                         onChange={(e) => setNewDesc(e.target.value)}
-                        className="bg-white/5 border border-white/5 px-2.5 py-1.5 rounded-lg text-[10px] text-white placeholder-white/20 focus:outline-none min-h-[50px] resize-none"
+                        className={`focus:outline-none px-2.5 py-1.5 text-[10px] placeholder-current/20 min-h-[50px] resize-none ${activeVariant.inputClass}`}
                       />
 
                       <div className="flex justify-between items-center mt-1">
                         <select 
                           value={newCategory} 
                           onChange={(e) => setNewCategory(e.target.value)}
-                          className="bg-[#0a0d1a] border border-white/5 text-[9px] uppercase font-bold text-white/50 p-1 rounded-md"
+                          className={`text-[9px] uppercase font-bold opacity-50 p-1 focus:outline-none ${activeVariant.inputClass}`}
                         >
-                          <option value="engineering">Engineering</option>
-                          <option value="design">Design</option>
-                          <option value="bug">Bug</option>
-                          <option value="docs">Docs</option>
+                          <option value="engineering" className="bg-black text-white">Engineering</option>
+                          <option value="design" className="bg-black text-white">Design</option>
+                          <option value="bug" className="bg-black text-white">Bug</option>
+                          <option value="docs" className="bg-black text-white">Docs</option>
                         </select>
 
                         <div className="flex gap-1.5">
                           <button
                             onClick={() => setShowAddForm(null)}
-                            className="px-2 py-1 bg-white/5 rounded-md text-[9px] uppercase font-bold text-white/40 cursor-pointer"
+                            className="px-2 py-1 bg-current/5 rounded-md text-[9px] uppercase font-bold opacity-40 cursor-pointer"
                           >
                             Cancel
                           </button>
@@ -340,7 +275,7 @@ export default function ElasticKanbanBoard() {
                         setNewTitle("");
                         setNewDesc("");
                       }}
-                      className="w-full py-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 text-[10px] uppercase font-bold font-mono tracking-wider text-white/40 hover:text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                      className="w-full py-2 bg-current/5 hover:bg-current/10 rounded-xl border border-current/5 text-[10px] uppercase font-bold font-mono tracking-wider opacity-40 hover:opacity-100 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                     >
                       <Plus size={11} />
                       Add Task Card
@@ -359,7 +294,7 @@ export default function ElasticKanbanBoard() {
 }
 
 /* Kanban Card with 2.5D depth, hover tilt, and custom drag */
-function KanbanCard({ task, activeTheme, isDraggingNow, onDragStart, onDragEnd, onToggleComplete, onDelete }) {
+function KanbanCard({ task, activeTheme, activeVariant, isDraggingNow, onDragStart, onDragEnd, onToggleComplete, onDelete }) {
   const cardRef = useRef(null);
   const [tiltX, setTiltX] = useState(0);
   const [tiltY, setTiltY] = useState(0);
@@ -372,7 +307,6 @@ function KanbanCard({ task, activeTheme, isDraggingNow, onDragStart, onDragEnd, 
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
 
-    // Subtle 3D perspective rotation
     setTiltX(-(y / rect.height) * 8);
     setTiltY((x / rect.width) * 8);
   };
@@ -391,16 +325,6 @@ function KanbanCard({ task, activeTheme, isDraggingNow, onDragStart, onDragEnd, 
         return "bg-amber-500/10 border-amber-500/20 text-amber-400";
       default:
         return "bg-indigo-500/10 border-indigo-500/20 text-indigo-400";
-    }
-  };
-
-  const getCategoryColor = (category) => {
-    switch (category) {
-      case "engineering": return "text-[#00e5ff]";
-      case "design": return "text-[#ff007f]";
-      case "bug": return "text-[#ff1744]";
-      case "docs": return "text-[#ffd600]";
-      default: return "text-[#6366f1]";
     }
   };
 
@@ -430,10 +354,10 @@ function KanbanCard({ task, activeTheme, isDraggingNow, onDragStart, onDragEnd, 
         rotateX: { type: "spring", stiffness: 120, damping: 15 },
         rotateY: { type: "spring", stiffness: 120, damping: 15 }
       }}
-      className={`bg-white/[0.02] border rounded-xl p-3.5 cursor-grab active:cursor-grabbing select-none relative transition-colors ${
+      className={`p-3.5 cursor-grab active:cursor-grabbing select-none relative transition-colors ${activeVariant.cardClass} ${
         task.completed 
-          ? "border-emerald-500/10 bg-emerald-950/5" 
-          : "border-white/5 hover:border-white/10"
+          ? "border-emerald-500/20 bg-emerald-500/5" 
+          : ""
       }`}
       style={{
         transformStyle: "preserve-3d",
@@ -454,7 +378,7 @@ function KanbanCard({ task, activeTheme, isDraggingNow, onDragStart, onDragEnd, 
 
       {/* Card Header: Category & Priority */}
       <div className="flex justify-between items-center mb-2.5" style={{ transform: "translateZ(10px)" }}>
-        <span className={`text-[9px] font-black uppercase font-mono tracking-wider ${getCategoryColor(task.category)}`}>
+        <span className={`text-[9px] font-black uppercase font-mono tracking-wider ${activeTheme.text}`}>
           {task.category}
         </span>
         
@@ -466,19 +390,19 @@ function KanbanCard({ task, activeTheme, isDraggingNow, onDragStart, onDragEnd, 
       {/* Card Title & Desc */}
       <div className="flex flex-col gap-1 mb-3" style={{ transform: "translateZ(15px)" }}>
         <h4 className={`text-xs font-black leading-snug transition-all ${
-          task.completed ? "text-white/30 line-through" : "text-white"
+          task.completed ? "opacity-30 line-through" : ""
         }`}>
           {task.title}
         </h4>
         <p className={`text-[10px] leading-snug ${
-          task.completed ? "text-white/20" : "text-white/40"
+          task.completed ? "opacity-20" : "opacity-40"
         }`}>
           {task.desc}
         </p>
       </div>
 
       {/* Card Footer: Checkbox, Metadata & Trash */}
-      <div className="flex justify-between items-center pt-2.5 border-t border-white/5" style={{ transform: "translateZ(10px)" }}>
+      <div className="flex justify-between items-center pt-2.5 border-t border-current/5" style={{ transform: "translateZ(10px)" }}>
         
         {/* Toggle complete */}
         <div className="flex items-center gap-2">
@@ -487,13 +411,13 @@ function KanbanCard({ task, activeTheme, isDraggingNow, onDragStart, onDragEnd, 
             className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
               task.completed 
                 ? "bg-emerald-500 border-emerald-400 text-black shadow-[0_0_8px_rgba(16,185,129,0.4)]" 
-                : "border-white/20 bg-black/40 text-transparent hover:border-white/40"
+                : "border-current/20 bg-current/5 text-transparent hover:border-current/40"
             }`}
           >
             {task.completed ? <Check size={10} strokeWidth={4} /> : null}
           </button>
           
-          <div className="flex items-center gap-2 text-[9px] text-white/30 font-semibold font-mono">
+          <div className="flex items-center gap-2 text-[9px] opacity-30 font-semibold font-mono">
             {task.comments > 0 && (
               <span className="flex items-center gap-0.5">
                 <MessageSquare size={10} />
@@ -512,7 +436,7 @@ function KanbanCard({ task, activeTheme, isDraggingNow, onDragStart, onDragEnd, 
         {/* Delete */}
         <button
           onClick={onDelete}
-          className="text-white/20 hover:text-rose-400 p-1 rounded transition-colors cursor-pointer"
+          className="opacity-20 hover:opacity-100 hover:text-rose-400 p-1 rounded transition-colors cursor-pointer"
         >
           <Trash2 size={11} />
         </button>
