@@ -857,14 +857,17 @@ function ShowcasePage() {
    ROOT APP — ROUTING TABLE
 ═══════════════════════════════════════════════════════════ */
 export default function App() {
+  const location = useLocation();
   return (
-    <AnimatePresence mode="wait">
+    <>
       <GlobalThemeSwitcher />
-      <Routes>
-        <Route path="/" element={<ShowcasePage />} />
-        <Route path="/preview/:slug" element={<PreviewPage />} />
-      </Routes>
-    </AnimatePresence>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<ShowcasePage />} />
+          <Route path="/preview/:slug" element={<PreviewPage />} />
+        </Routes>
+      </AnimatePresence>
+    </>
   );
 }
 

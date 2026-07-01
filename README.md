@@ -20,7 +20,7 @@ A curated catalog of premium, hyper-interactive **2.5D & mid-depth user interfac
 *   **Completely Modular:** Clean JSX components that you can drop directly into your project.
 *   **Vite Powered HMR:** Ultra-fast development previewer and code copy tools built directly into the showcase app
 
-## 🎨 Component Showcase (`29 / 50` Completed)
+## 🎨 Component Showcase (`33 / 50` Completed)
 
 Below is the directory of all interactive components built so far. Each is designed for production use, accessibility, and high performance.
 
@@ -54,7 +54,11 @@ Below is the directory of all interactive components built so far. Each is desig
 | **26** | [Step-by-Step Interactive Product Tour](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component26_ProductTour) | Contextual overlay walkthrough. | Elastic outlines morphing x/y/w/h, snappy spring tooltip positioning, skip tour horizontal slide indicators | `Onboarding`, `Tour`, `Interactive` |
 | **27** | [Kinetic Hero Product Carousel](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component27_HeroCarousel) | Auto-advancing hero catalog. | Horizontal slides, cylinder roll text overlays, pause-on-hover filling progress dots, diagonal gloss sweep button | `Carousel`, `Landing Page`, `Interactive` |
 | **28** | [Sticky E-commerce Action Bar](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component28_StickyPurchaseBar) | Scroll-activated shopping bar. | Slide-in threshold triggers, color variant thumbnail flips, morphing loading and checkmark button states | `E-commerce`, `Sticky`, `Form` |
-| **29** | [Dynamic Mega Footer & Newsletter](file:///d:/50%202.5D%20WEB%20ELEMENTS/src/components/Component29_MegaFooter) | Detailed flat-layered site footer. | Path animated link underlines, social icon hover bounces, SVG boundary input tracers, success ripples | `Footer`, `Layout`, `Interactive` |
+| **29** | [Dynamic Mega Footer & Newsletter](./src/components/Component29_MegaFooter) | Detailed flat-layered site footer. | Path animated link underlines, social icon hover bounces, SVG boundary input tracers, success ripples | `Footer`, `Layout`, `Interactive` |
+| **30** | [Support Ticketing System](./src/components/Component30_SupportTicketing) | Fluid interface for managing customer support tickets. | Interactive status morphing, reply sliding drawers | `Support`, `Dashboard`, `Interactive` |
+| **31** | [Empty State Recovery](./src/components/Component31_EmptyStateRecovery) | Engaging zero-data states to guide user actions. | Ghost element floating, bouncy call-to-actions | `Layout`, `Empty State`, `UX` |
+| **32** | [Account Settings Hub](./src/components/Component32_AccountSettingsHub) | Unified profile and security preference panel. | Vertical smooth tabbing, inline toggle snaps | `Settings`, `Profile`, `Form` |
+| **33** | [Event Registration Form](./src/components/Component33_EventRegistration) | Visually striking multi-step event sign-up. | Ticket tear animations, floating confetti physics | `Forms`, `Events`, `Interactive` |
 
 ---
 
@@ -85,23 +89,16 @@ Below is the directory of all interactive components built so far. Each is desig
 
 We are building towards **50 fully interactive elements**. Our planned next additions focus on standard web layout structures that are historically rigid or flat, reinventing them with beautiful 2.5D physics and high real-world utility:
 
-### 🚀 Planned Components (16-19)
+### 🚀 Planned Components (34-36)
 
-#### 16. Elevated 2.5D Kinetic Data Grid
-*   **The Problem:** Tables are crucial for dashboards but are notoriously dry, static, and hard to read.
-*   **Our Solution:** A dynamic data grid with physical elevation layering. Sorting actions cause rows to visually slide and swap using spring layout animations. Hovering a row lifts it slightly on a 2.5D plane, and clicking expands it into an inline card showing comprehensive nested metrics using dynamic heights.
+#### 34. Immersive Checkout Flow
+*   A fully dynamic shopping cart checkout with interactive credit card physics and smooth transition states for payment success.
 
-#### 17. 3D Layered Metric Widgets & Trend Charts
-*   **The Problem:** SaaS metric tiles (KPIs) are usually flat boxes with static lines.
-*   **Our Solution:** Depth-layered analytical widgets. The chart line floats as an SVG above a grid with dynamic shadows. Users can drag a vertical tracking slider that projects a laser-like tooltip onto the line, morphing the underlying stats dynamically with smooth counter roll-ups.
+#### 35. 3D Analytics Globe
+*   A data visualization globe to show regional metrics with glowing map nodes and draggable rotations.
 
-#### 18. Tactile Elastic FAQ Accordion Stack
-*   **The Problem:** FAQ sections are standard, flat text blocks that expand with jarring layout changes.
-*   **Our Solution:** Accordion items styled as physical overlapping cards. Expanding a question pushes down adjacent cards with a subtle jelly-like bounce. Includes micro-interaction buttons (helpful/not helpful) that trigger particle feedback.
-
-#### 19. Parallax Stacked Testimonial Showcase
-*   **The Problem:** Customer testimonials are often presented in boring grids or static carousels.
-*   **Our Solution:** A stacked deck of 2.5D feedback cards. Cards are piled on top of each other with simulated depth scaling and rotation. Swiping or clicking a card "flings" it off the deck with a smooth physics-based arc, revealing the next review while dynamically morphing background client logos.
+#### 36. Parallax Testimonial Cards
+*   Customer testimonials that fan out when scrolled, applying physics-based hover states.
 
 ---
 
